@@ -1,3 +1,4 @@
+import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useFollows, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Composer } from '../components/Composer';
@@ -6,6 +7,7 @@ import { LS } from '../nostr/config';
 import { EngagementScope } from '../nostr/engagement';
 import { KIND } from '../nostr/kinds';
 import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
+import { useIndexFeed, useIndexStatus } from '../nostr/useIndex';
 import { useWebOfTrust } from '../nostr/useWebOfTrust';
 
 type Tab = 'following' | 'discover';
@@ -14,6 +16,7 @@ export function FeedPage() {
   const me = useNDKCurrentUser();
   const follows = useFollows();
   const wot = useWebOfTrust();
+  const indexUp = useIndexStatus();
   const [tab, setTab] = useState<Tab>(
     (localStorage.getItem(LS.feedTab) as Tab) || 'following',
   );
@@ -23,31 +26,38 @@ export function FeedPage() {
     localStorage.setItem(LS.feedTab, t);
   }
 
+  // --- index feed (fast path) ---
+  const idx = useIndexFeed({ scope: tab, pubkey: me?.pubkey, limit: 80 });
+
+  // --- relay feed (fallback / used until the index answers) ---
+  const useRelay = !idx.fromIndex;
   const followAuthors = useMemo(() => [...follows].slice(0, 800), [follows]);
 
   const { events: followingEvents } = useSubscribe(
-    tab === 'following' && followAuthors.length
+    useRelay && tab === 'following' && followAuthors.length
       ? [{ kinds: [KIND.Text, KIND.Repost], authors: followAuthors, limit: 100 }]
       : false,
     { closeOnEose: false },
-    [tab, followAuthors.length],
+    [useRelay, tab, followAuthors.length],
+  );
+  const { events: discoverEvents } = useSubscribe(
+    useRelay && tab === 'discover' ? [{ kinds: [KIND.Text, KIND.Repost], limit: 200 }] : false,
+    { closeOnEose: false },
+    [useRelay, tab],
   );
 
-  const { events: discoverEvents } = useSubscribe(
-    tab === 'discover' ? [{ kinds: [KIND.Text, KIND.Repost], limit: 200 }] : false,
-    { closeOnEose: false },
-    [tab],
-  );
+  const relayNotes = useMemo(() => {
+    const raw = tab === 'following' ? followingEvents : discoverEvents;
+    let list = raw.filter((e: NDKEvent) => !isReplyNote(e) && !isJunkNote(e));
+    if (tab === 'discover' && wot.size > 0) list = list.filter((e) => wot.isTrusted(e.pubkey));
+    return list;
+  }, [tab, followingEvents, discoverEvents, wot]);
 
   const notes = useMemo(() => {
-    const raw = tab === 'following' ? followingEvents : discoverEvents;
-    let list = raw.filter((e) => !isReplyNote(e) && !isJunkNote(e));
-    if (tab === 'discover' && wot.size > 0) {
-      list = list.filter((e) => wot.isTrusted(e.pubkey));
-    }
-    // de-dupe by subject so a note and its reposts don't both show
+    const source = idx.fromIndex && idx.data ? idx.data : relayNotes;
     const seen = new Set<string>();
-    return list
+    return source
+      .filter((e) => !isJunkNote(e))
       .slice()
       .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
       .filter((e) => {
@@ -57,7 +67,7 @@ export function FeedPage() {
         return true;
       })
       .slice(0, 120);
-  }, [tab, followingEvents, discoverEvents, wot]);
+  }, [idx.fromIndex, idx.data, relayNotes]);
 
   const engagementIds = useMemo(() => notes.map(subjectId), [notes]);
 
@@ -81,19 +91,21 @@ export function FeedPage() {
 
       {me && <Composer />}
 
-      {tab === 'following' && followAuthors.length === 0 && (
+      <p className="px-4 py-2 text-center font-mono text-[11px] text-ink-faint">
+        {tab === 'discover' && idx.fromIndex
+          ? '1btc index · ranked by web of trust'
+          : tab === 'discover' && wot.size > 0
+            ? `web-of-trust filter · ${wot.size.toLocaleString()} accounts`
+            : tab === 'following' && idx.fromIndex
+              ? '1btc index'
+              : indexUp
+                ? 'connecting to 1btc index…'
+                : 'direct from relays'}
+      </p>
+
+      {tab === 'following' && followAuthors.length === 0 && !idx.fromIndex && (
         <p className="px-4 py-10 text-center text-sm text-ink-soft">
           You don&apos;t follow anyone yet. Open <strong>Discover</strong> to find builders.
-        </p>
-      )}
-
-      {tab === 'discover' && (
-        <p className="px-4 py-2 text-center font-mono text-[11px] text-ink-faint">
-          {wot.size > 0
-            ? `filtered to ${wot.size.toLocaleString()} accounts in your web of trust`
-            : follows.size === 0
-              ? 'follow a few builders to sharpen this feed'
-              : 'building your web of trust…'}
         </p>
       )}
 
@@ -103,7 +115,7 @@ export function FeedPage() {
         ))}
       </EngagementScope>
 
-      {notes.length === 0 && (followAuthors.length > 0 || tab === 'discover') && (
+      {notes.length === 0 && !idx.loading && (
         <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">listening…</p>
       )}
     </div>

@@ -1,6 +1,5 @@
 /**
- * Nostr event kinds used across 1btc.
- * Grouped by the product surface they power.
+ * Nostr event kinds used across 1btc (client + index service).
  */
 export const KIND = {
   // NIP-01 core
@@ -70,3 +69,17 @@ export const KIND = {
 } as const;
 
 export type Kind = (typeof KIND)[keyof typeof KIND];
+
+/** Kinds the index service ingests from the relay firehose. */
+export const INGEST_KINDS: number[] = [
+  KIND.Metadata,
+  KIND.Text,
+  KIND.Contacts,
+  KIND.Repost,
+  KIND.Reaction,
+  KIND.GenericRepost,
+  KIND.Article,
+  KIND.ZapReceipt,
+  KIND.Report,
+  KIND.RelayList,
+];

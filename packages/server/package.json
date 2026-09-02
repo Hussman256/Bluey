@@ -1,0 +1,23 @@
+{
+  "name": "@1btc/server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "node --experimental-sqlite --disable-warning=ExperimentalWarning --import tsx --watch src/index.ts",
+    "start": "node --experimental-sqlite --disable-warning=ExperimentalWarning --import tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@1btc/shared": "*",
+    "nostr-tools": "^2.25.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "~6.0.2"
+  }
+}

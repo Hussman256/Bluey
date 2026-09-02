@@ -3,32 +3,22 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/web"
+  ],
+  "overrides": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "@testing-library/react": "16.3.3"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@nostr-dev-kit/blossom": "^8.0.0",
-    "@nostr-dev-kit/cache-sqlite-wasm": "^1.0.0",
-    "@nostr-dev-kit/ndk": "^3.0.3",
-    "@nostr-dev-kit/react": "^1.3.13",
-    "@nostr-dev-kit/sync": "^1.0.0",
-    "@nostr-dev-kit/wallet": "^1.0.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "@vitejs/plugin-react": "^6.1.0",
-    "oxlint": "^1.79.0",
-    "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "dev": "npm run dev --workspace @1btc/web",
+    "dev:server": "npm run dev --workspace @1btc/server",
+    "build": "npm run typecheck --workspaces --if-present && npm run build --workspace @1btc/web",
+    "lint": "npm run lint --workspace @1btc/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "check": "npm run typecheck && npm run lint"
   }
 }

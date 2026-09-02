@@ -9,6 +9,12 @@ import { LoginScreen } from './session/LoginScreen';
 const FeedPage = lazy(() => import('./routes/FeedPage').then((m) => ({ default: m.FeedPage })));
 const ReadsPage = lazy(() => import('./routes/ReadsPage').then((m) => ({ default: m.ReadsPage })));
 const ThreadPage = lazy(() => import('./routes/ThreadPage').then((m) => ({ default: m.ThreadPage })));
+const NotificationsPage = lazy(() =>
+  import('./routes/NotificationsPage').then((m) => ({ default: m.NotificationsPage })),
+);
+const SearchPage = lazy(() =>
+  import('./routes/SearchPage').then((m) => ({ default: m.SearchPage })),
+);
 const ProfilePage = lazy(() =>
   import('./routes/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
@@ -69,6 +75,8 @@ export function App() {
           <Routes>
             <Route path="/" element={<FeedPage />} />
             <Route path="/reads" element={<ReadsPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/e/:id" element={<ThreadPage />} />
             <Route path="/p/:npub" element={<ProfilePage />} />
             <Route path="/me" element={<MyProfileRedirect />} />
