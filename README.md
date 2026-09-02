@@ -1,32 +1,53 @@
-# React + TypeScript + Vite
+# 1btc
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A builder network on **Nostr** + **Lightning**. Learn in public, ship provable work,
+get zapped. Concept modelled on Zero Club; execution modelled on Primal.
 
-Currently, two official plugins are available:
+> **Phase 1** — a fast, standalone Nostr client running entirely on public relays.
+> No 1btc-operated infrastructure yet. See `docs` for the architecture brief.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+| | |
+|---|---|
+| UI | React 19 + Vite + TypeScript + Tailwind v4 |
+| Nostr | `@nostr-dev-kit/ndk` 3.x + `@nostr-dev-kit/react` |
+| Wallet | `@nostr-dev-kit/wallet` — **NWC only, 1btc custodies nothing** |
+| Routing | react-router 7 |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # typecheck + production build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## What works in Phase 1
+
+- **Login** — NIP-07 extension, `nsec` / `bunker://` paste, or generate a new key
+- **Feed** — Following + Discover tabs; Discover is filtered by a 2-hop
+  web-of-trust closure of your follow graph (empty until you follow people)
+- **Compose / reply / repost / react** (kinds 1, 6, 7)
+- **Zaps** (NIP-57) via a connected NWC wallet, with quick-amount buttons
+- **Threads** — `/e/:id`
+- **Profiles** — `/p/:npub`, follow/unfollow, zaps-received count, profile zap
+- **Reads** — NIP-23 long-form list
+- **Settings** — connect/disconnect NWC wallet, generate receive invoice,
+  reveal + back up your key, view relay set
+
+## Layout
+
+```
+src/
+  nostr/       kinds, relay config, useWebOfTrust
+  session/     LoginScreen (NIP-07 / nsec / NIP-46 / keygen)
+  wallet/      Wallet interface + NWC-backed WalletProvider
+  components/  Layout, NoteCard, Composer, ZapButton, primitives
+  routes/      Feed, Thread, Profile, Reads, Settings
+```
+
+## Not yet (later phases)
+
+Caching/index service · NIP-29 group relay for paid Clubs · bootcamps &
+live classes · badges & builder score · editable relays · Cashu wallet option.
