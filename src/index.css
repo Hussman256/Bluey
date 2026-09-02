@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+
+/*
+ * 1btc — dark-first theme.
+ * gold  = lightning / value flow
+ * violet = nostr / protocol
+ */
+@theme {
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --color-bg: #14121b;
+  --color-surface: #1c1a25;
+  --color-sunk: #211f2c;
+  --color-line: #2c2839;
+  --color-line-strong: #403a53;
+  --color-ink: #ece9f2;
+  --color-ink-soft: #a8a3ba;
+  --color-ink-faint: #756f88;
+
+  --color-zap: #f7b500;
+  --color-zap-soft: #35280a;
+  --color-proto: #a78bfa;
+  --color-proto-soft: #241a3d;
+  --color-good: #4ec58f;
+  --color-danger: #f2748a;
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  * {
+    border-color: var(--color-line);
+  }
+  a {
+    color: inherit;
+  }
+  ::selection {
+    background: var(--color-proto);
+    color: #14121b;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-zap);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+}
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-display: swap;
+  src: local('Bricolage Grotesque');
+}

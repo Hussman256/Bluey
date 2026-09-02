@@ -1,0 +1,72 @@
+/**
+ * Nostr event kinds used across 1btc.
+ * Grouped by the product surface they power.
+ */
+export const KIND = {
+  // NIP-01 core
+  Metadata: 0,
+  Text: 1,
+  RecommendRelay: 2,
+  Contacts: 3, // NIP-02 follow list
+
+  // engagement
+  Repost: 6, // NIP-18
+  Reaction: 7, // NIP-25
+  GenericRepost: 16, // NIP-18
+  Comment: 1111, // NIP-22 threaded comments
+
+  // messaging
+  SealedDM: 13, // NIP-17
+  PrivateDM: 14, // NIP-17
+  GiftWrap: 1059, // NIP-59
+
+  // long-form (ZeroNotes)
+  Article: 30023, // NIP-23
+  ArticleDraft: 30024, // NIP-23
+  Highlight: 9802, // NIP-84
+
+  // lists / curation
+  MuteList: 10000, // NIP-51
+  PinList: 10001,
+  BookmarkList: 10003,
+  RelayList: 10002, // NIP-65
+  BlossomServerList: 10063, // BUD-03
+  CurationSet: 30004, // NIP-51 — a bootcamp curriculum
+  CurationSetArticles: 30005,
+  FollowSet: 30000,
+
+  // groups / clubs — NIP-29
+  GroupMetadata: 39000,
+  GroupAdmins: 39001,
+  GroupMembers: 39002,
+  GroupRoles: 39003,
+  GroupChatMessage: 9,
+  GroupJoinRequest: 9021,
+  GroupLeaveRequest: 9022,
+
+  // live — NIP-53
+  LiveEvent: 30311,
+  LiveChatMessage: 1311,
+
+  // badges — NIP-58
+  BadgeDefinition: 30009,
+  BadgeAward: 8,
+  ProfileBadges: 30008,
+
+  // marketplace / opportunities — NIP-99
+  ClassifiedListing: 30402,
+  ClassifiedListingDraft: 30403,
+
+  // value — NIP-57 zaps, NIP-75 goals
+  ZapRequest: 9734,
+  ZapReceipt: 9735,
+  ZapGoal: 9041,
+
+  // reporting — NIP-56
+  Report: 1984,
+
+  // app data
+  AppSpecificData: 30078, // NIP-78
+} as const;
+
+export type Kind = (typeof KIND)[keyof typeof KIND];
