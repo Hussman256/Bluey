@@ -26,6 +26,10 @@ export const READS_RELAYS = [
 /** Fallback zap/relay hints for NWC pairing discovery. */
 export const NWC_RELAY_HINTS = ['wss://relay.getalby.com/v1', 'wss://relay.primal.net'];
 
+/** Blossom media servers — first is primary, second is upload fallback. */
+export const BLOSSOM_PRIMARY = 'https://blossom.primal.net';
+export const BLOSSOM_FALLBACK = 'https://blossom.band';
+
 export const APP_NAME = '1btc';
 export const APP_TAGLINE = 'Build in public. Get zapped.';
 

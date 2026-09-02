@@ -1,28 +1,17 @@
-import { nip19 } from '@nostr-dev-kit/ndk';
 import { useEvent, useSubscribe } from '@nostr-dev-kit/react';
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Composer } from '../components/Composer';
 import { NoteCard } from '../components/NoteCard';
-import { NoteContent, Avatar, DisplayName, Handle, RelativeTime } from '../components/primitives';
+import { Avatar, DisplayName, Handle, RelativeTime } from '../components/primitives';
+import { NoteContent } from '../nostr/content';
+import { EngagementScope } from '../nostr/engagement';
+import { eventIdFrom } from '../nostr/ids';
 import { KIND } from '../nostr/kinds';
-
-function decodeId(raw?: string): string | null {
-  if (!raw) return null;
-  if (/^[0-9a-f]{64}$/i.test(raw)) return raw;
-  try {
-    const d = nip19.decode(raw);
-    if (d.type === 'note') return d.data;
-    if (d.type === 'nevent') return d.data.id;
-  } catch {
-    /* ignore */
-  }
-  return null;
-}
 
 export function ThreadPage() {
   const { id } = useParams();
-  const eventId = decodeId(id);
+  const eventId = eventIdFrom(id);
   const root = useEvent(eventId ? { ids: [eventId] } : false, undefined, [eventId]);
 
   const { events: replies } = useSubscribe(
@@ -40,10 +29,12 @@ export function ThreadPage() {
     [replies, eventId],
   );
 
+  const engagementIds = useMemo(() => sortedReplies.map((r) => r.id), [sortedReplies]);
+
   return (
     <div>
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-bg/90 px-4 py-3 backdrop-blur">
-        <Link to="/" className="text-ink-faint hover:text-ink">
+        <Link to="/" className="text-ink-faint hover:text-ink" aria-label="Back">
           ←
         </Link>
         <span className="font-display font-semibold">Thread</span>
@@ -57,7 +48,7 @@ export function ThreadPage() {
         <article className="border-b border-line px-4 py-4">
           <div className="flex items-center gap-3">
             <Avatar pubkey={root.pubkey} />
-            <div className="text-sm">
+            <div className="min-w-0 text-sm">
               <DisplayName pubkey={root.pubkey} />
               <div>
                 <Handle pubkey={root.pubkey} />
@@ -75,9 +66,11 @@ export function ThreadPage() {
 
       {root && <Composer replyTo={root} placeholder="Reply with your take…" />}
 
-      {sortedReplies.map((r) => (
-        <NoteCard key={r.id} event={r} />
-      ))}
+      <EngagementScope ids={engagementIds}>
+        {sortedReplies.map((r) => (
+          <NoteCard key={r.id} event={r} />
+        ))}
+      </EngagementScope>
     </div>
   );
 }

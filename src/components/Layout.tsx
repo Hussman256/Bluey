@@ -3,7 +3,8 @@ import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { APP_NAME } from '../nostr/config';
 import { useWallet } from '../wallet/WalletProvider';
-import { Avatar, npubOf } from './primitives';
+import { npubOf } from '../nostr/ids';
+import { Avatar } from './primitives';
 
 const nav = [
   { to: '/', label: 'Feed', end: true, icon: 'M3 12l9-9 9 9M5 10v10h14V10' },

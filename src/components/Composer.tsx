@@ -1,12 +1,13 @@
 import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useMediaUpload } from '../nostr/useMediaUpload';
 import { KIND } from '../nostr/kinds';
 import { Avatar } from './primitives';
 
 export function Composer({
   replyTo,
-  placeholder = "What are you building?",
+  placeholder = 'What are you building?',
   onPublished,
 }: {
   replyTo?: NDKEvent;
@@ -15,11 +16,18 @@ export function Composer({
 }) {
   const { ndk } = useNDK();
   const me = useNDKCurrentUser();
+  const { upload, busy: uploading, error: uploadError } = useMediaUpload();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   if (!me) return null;
+
+  async function addImage(file: File) {
+    const url = await upload(file);
+    if (url) setText((t) => (t ? `${t}\n${url}` : url));
+  }
 
   async function publish() {
     if (!ndk || !text.trim() || busy) return;
@@ -29,8 +37,8 @@ export function Composer({
     ev.kind = KIND.Text;
     ev.content = text.trim();
     if (replyTo) {
-      const root =
-        replyTo.tags.find((t) => t[0] === 'e' && t[3] === 'root')?.[1] ?? replyTo.id;
+      const rootTag = replyTo.tags.find((t) => t[0] === 'e' && t[3] === 'root');
+      const root = rootTag?.[1] ?? replyTo.id;
       ev.tags.push(['e', root, '', 'root']);
       if (root !== replyTo.id) ev.tags.push(['e', replyTo.id, '', 'reply']);
       ev.tags.push(['p', replyTo.pubkey]);
@@ -61,13 +69,44 @@ export function Composer({
           className="w-full resize-none bg-transparent text-[0.95rem] outline-none placeholder:text-ink-faint"
         />
         <div className="mt-1 flex items-center justify-between">
-          {err ? (
-            <span className="text-xs text-danger">{err}</span>
-          ) : (
-            <span className="font-mono text-xs text-ink-faint">
-              {text.length > 0 ? `${text.length}` : '⌘↵ to post'}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="text-ink-faint transition hover:text-proto disabled:opacity-40"
+              aria-label="Add image"
+            >
+              {uploading ? (
+                <span className="font-mono text-xs">uploading…</span>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,video/*"
+              hidden
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void addImage(f);
+                e.target.value = '';
+              }}
+            />
+            {(err || uploadError) && (
+              <span className="text-xs text-danger">{err ?? uploadError}</span>
+            )}
+            {!err && !uploadError && (
+              <span className="font-mono text-xs text-ink-faint">
+                {text.length > 0 ? `${text.length}` : '⌘↵ to post'}
+              </span>
+            )}
+          </div>
           <button
             type="button"
             onClick={publish}

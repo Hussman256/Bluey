@@ -1,19 +1,7 @@
-import { nip19 } from '@nostr-dev-kit/ndk';
 import { useProfileValue } from '@nostr-dev-kit/react';
 import { Link } from 'react-router-dom';
-
-export function npubOf(pubkey: string) {
-  try {
-    return nip19.npubEncode(pubkey);
-  } catch {
-    return pubkey;
-  }
-}
-
-export function shortNpub(pubkey: string) {
-  const n = npubOf(pubkey);
-  return `${n.slice(0, 10)}…${n.slice(-4)}`;
-}
+import { npubOf, shortNpub } from '../nostr/ids';
+import { useNow } from './useNow';
 
 export function Avatar({ pubkey, size = 40 }: { pubkey: string; size?: number }) {
   const profile = useProfileValue(pubkey);
@@ -34,6 +22,7 @@ export function Avatar({ pubkey, size = 40 }: { pubkey: string; size?: number })
         <span
           className="grid place-items-center rounded-full bg-proto-soft font-mono text-xs text-proto"
           style={{ width: size, height: size }}
+          aria-hidden="true"
         >
           {(profile?.name ?? '?').slice(0, 2)}
         </span>
@@ -54,13 +43,14 @@ export function DisplayName({ pubkey, className = '' }: { pubkey: string; classN
 
 export function Handle({ pubkey }: { pubkey: string }) {
   const profile = useProfileValue(pubkey);
-  if (profile?.nip05) return <span className="text-ink-faint">{profile.nip05.replace(/^_@/, '')}</span>;
-  return <span className="text-ink-faint">{shortNpub(pubkey)}</span>;
+  const text = profile?.nip05 ? profile.nip05.replace(/^_@/, '') : shortNpub(pubkey);
+  return <span className="truncate text-ink-faint">{text}</span>;
 }
 
 export function RelativeTime({ ts }: { ts?: number }) {
+  const now = useNow();
   if (!ts) return null;
-  const secs = Math.max(1, Math.floor(Date.now() / 1000 - ts));
+  const secs = Math.max(1, now - ts);
   const label =
     secs < 60
       ? `${secs}s`
@@ -72,56 +62,12 @@ export function RelativeTime({ ts }: { ts?: number }) {
             ? `${Math.floor(secs / 86400)}d`
             : new Date(ts * 1000).toLocaleDateString();
   return (
-    <time dateTime={new Date(ts * 1000).toISOString()} className="text-ink-faint" title={new Date(ts * 1000).toLocaleString()}>
+    <time
+      dateTime={new Date(ts * 1000).toISOString()}
+      className="text-ink-faint"
+      title={new Date(ts * 1000).toLocaleString()}
+    >
       {label}
     </time>
-  );
-}
-
-const IMG_RE = /https?:\/\/\S+\.(?:png|jpe?g|gif|webp|avif)(?:\?\S*)?/gi;
-const URL_RE = /https?:\/\/[^\s<]+/g;
-
-/** Minimal, safe-ish content renderer: links, images, nostr: mentions stripped to short refs. */
-export function NoteContent({ content }: { content: string }) {
-  const images = content.match(IMG_RE) ?? [];
-  const text = content
-    .replace(IMG_RE, '')
-    .replace(/nostr:(npub1|nprofile1|note1|nevent1|naddr1)\w+/g, (m) => {
-      const id = m.slice(6);
-      return id.slice(0, 12) + '…';
-    })
-    .trim();
-
-  const parts = text.split(URL_RE);
-  const urls = text.match(URL_RE) ?? [];
-
-  return (
-    <div className="space-y-2">
-      <p className="whitespace-pre-wrap break-words leading-relaxed">
-        {parts.flatMap((p, i) => [
-          <span key={`t${i}`}>{p}</span>,
-          urls[i] ? (
-            <a
-              key={`u${i}`}
-              href={urls[i]}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="text-proto hover:underline"
-            >
-              {urls[i].replace(/^https?:\/\//, '').slice(0, 48)}
-            </a>
-          ) : null,
-        ])}
-      </p>
-      {images.slice(0, 4).map((src) => (
-        <img
-          key={src}
-          src={src}
-          alt=""
-          loading="lazy"
-          className="max-h-[28rem] rounded-xl border border-line object-cover"
-        />
-      ))}
-    </div>
   );
 }

@@ -1,14 +1,23 @@
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/react';
-import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { APP_NAME } from './nostr/config';
-import { FeedPage } from './routes/FeedPage';
-import { MyProfileRedirect, ProfilePage } from './routes/ProfilePage';
-import { ReadsPage } from './routes/ReadsPage';
-import { SettingsPage } from './routes/SettingsPage';
-import { ThreadPage } from './routes/ThreadPage';
 import { LoginScreen } from './session/LoginScreen';
+
+const FeedPage = lazy(() => import('./routes/FeedPage').then((m) => ({ default: m.FeedPage })));
+const ReadsPage = lazy(() => import('./routes/ReadsPage').then((m) => ({ default: m.ReadsPage })));
+const ThreadPage = lazy(() => import('./routes/ThreadPage').then((m) => ({ default: m.ThreadPage })));
+const ProfilePage = lazy(() =>
+  import('./routes/ProfilePage').then((m) => ({ default: m.ProfilePage })),
+);
+const MyProfileRedirect = lazy(() =>
+  import('./routes/ProfilePage').then((m) => ({ default: m.MyProfileRedirect })),
+);
+const SettingsPage = lazy(() =>
+  import('./routes/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
 
 function Splash() {
   return (
@@ -21,34 +30,53 @@ function Splash() {
   );
 }
 
+/** A stored session key means NDK is hydrating a login — wait for it rather than flashing the login screen. */
+const sessionPending = () => {
+  try {
+    return !!localStorage.getItem('ndk-active-pubkey');
+  } catch {
+    return false;
+  }
+};
+
 export function App() {
   const { ndk } = useNDK();
   const me = useNDKCurrentUser();
-  const [booted, setBooted] = useState(false);
+  const location = useLocation();
+  const [hydrationTimedOut, setHydrationTimedOut] = useState(false);
+  const [expectSession] = useState(sessionPending);
 
+  // bound how long we wait for a stored session to hydrate before showing login
   useEffect(() => {
-    if (me) {
-      setBooted(true);
-      return;
-    }
-    const t = setTimeout(() => setBooted(true), 600);
+    if (!expectSession) return;
+    const t = setTimeout(() => setHydrationTimedOut(true), 2500);
     return () => clearTimeout(t);
-  }, [me]);
+  }, [expectSession]);
 
-  if (!ndk || !booted) return <Splash />;
+  const hydrating = expectSession && !me && !hydrationTimedOut;
+
+  if (!ndk || hydrating) return <Splash />;
   if (!me) return <LoginScreen />;
 
   return (
     <Layout>
-      <Routes>
-        <Route path="/" element={<FeedPage />} />
-        <Route path="/reads" element={<ReadsPage />} />
-        <Route path="/e/:id" element={<ThreadPage />} />
-        <Route path="/p/:npub" element={<ProfilePage />} />
-        <Route path="/me" element={<MyProfileRedirect />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <ErrorBoundary key={location.pathname}>
+        <Suspense
+          fallback={
+            <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">loading…</p>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<FeedPage />} />
+            <Route path="/reads" element={<ReadsPage />} />
+            <Route path="/e/:id" element={<ThreadPage />} />
+            <Route path="/p/:npub" element={<ProfilePage />} />
+            <Route path="/me" element={<MyProfileRedirect />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </Layout>
   );
 }

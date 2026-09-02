@@ -1,15 +1,14 @@
-import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useFollows, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Composer } from '../components/Composer';
 import { NoteCard } from '../components/NoteCard';
 import { LS } from '../nostr/config';
+import { EngagementScope } from '../nostr/engagement';
 import { KIND } from '../nostr/kinds';
+import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
 import { useWebOfTrust } from '../nostr/useWebOfTrust';
 
 type Tab = 'following' | 'discover';
-
-const isReply = (e: NDKEvent) => e.tags.some((t) => t[0] === 'e' || t[0] === 'a' || t[0] === 'q');
 
 export function FeedPage() {
   const me = useNDKCurrentUser();
@@ -28,31 +27,39 @@ export function FeedPage() {
 
   const { events: followingEvents } = useSubscribe(
     tab === 'following' && followAuthors.length
-      ? [{ kinds: [KIND.Text], authors: followAuthors, limit: 80 }]
+      ? [{ kinds: [KIND.Text, KIND.Repost], authors: followAuthors, limit: 100 }]
       : false,
     { closeOnEose: false },
     [tab, followAuthors.length],
   );
 
   const { events: discoverEvents } = useSubscribe(
-    tab === 'discover' ? [{ kinds: [KIND.Text], limit: 150 }] : false,
+    tab === 'discover' ? [{ kinds: [KIND.Text, KIND.Repost], limit: 200 }] : false,
     { closeOnEose: false },
     [tab],
   );
 
   const notes = useMemo(() => {
     const raw = tab === 'following' ? followingEvents : discoverEvents;
-    let list = raw.filter((e) => !isReply(e));
-    // Only trust-filter once we actually have a web of trust to filter by —
-    // a brand-new account with no follows would otherwise see an empty Discover.
+    let list = raw.filter((e) => !isReplyNote(e) && !isJunkNote(e));
     if (tab === 'discover' && wot.size > 0) {
       list = list.filter((e) => wot.isTrusted(e.pubkey));
     }
+    // de-dupe by subject so a note and its reposts don't both show
+    const seen = new Set<string>();
     return list
       .slice()
       .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
-      .slice(0, 100);
+      .filter((e) => {
+        const s = subjectId(e);
+        if (seen.has(s)) return false;
+        seen.add(s);
+        return true;
+      })
+      .slice(0, 120);
   }, [tab, followingEvents, discoverEvents, wot]);
+
+  const engagementIds = useMemo(() => notes.map(subjectId), [notes]);
 
   return (
     <div>
@@ -76,7 +83,7 @@ export function FeedPage() {
 
       {tab === 'following' && followAuthors.length === 0 && (
         <p className="px-4 py-10 text-center text-sm text-ink-soft">
-          You don&apos;t follow anyone yet. Open the <strong>Discover</strong> tab to find builders.
+          You don&apos;t follow anyone yet. Open <strong>Discover</strong> to find builders.
         </p>
       )}
 
@@ -90,9 +97,11 @@ export function FeedPage() {
         </p>
       )}
 
-      {notes.map((e) => (
-        <NoteCard key={e.id} event={e} />
-      ))}
+      <EngagementScope ids={engagementIds}>
+        {notes.map((e) => (
+          <NoteCard key={e.id} event={e} />
+        ))}
+      </EngagementScope>
 
       {notes.length === 0 && (followAuthors.length > 0 || tab === 'discover') && (
         <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">listening…</p>

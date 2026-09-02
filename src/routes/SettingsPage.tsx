@@ -2,7 +2,7 @@ import { NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useState } from 'react';
 import { DEFAULT_RELAYS } from '../nostr/config';
-import { npubOf } from '../components/primitives';
+import { npubOf } from '../nostr/ids';
 import { useWallet } from '../wallet/WalletProvider';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
