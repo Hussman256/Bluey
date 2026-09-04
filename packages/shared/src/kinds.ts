@@ -73,6 +73,13 @@ export const KIND = {
   // reporting — NIP-56
   Report: 1984,
 
+  // labels / attestations — NIP-32
+  Label: 1985,
+
+  // data vending machines — NIP-90 (feed algos)
+  DvmFeedRequest: 5300,
+  DvmFeedResult: 6300,
+
   // app data
   AppSpecificData: 30078, // NIP-78
 } as const;
@@ -85,7 +92,12 @@ export const TAG = {
   bootcamp: '1btc:bootcamp',
   lesson: '1btc:lesson',
   liveClass: '1btc:live',
+  ship: '1btc:ship',
 } as const;
+
+/** NIP-32 label namespace for verified proof-of-work. */
+export const SHIP_LABEL_NS = '1btc.ship';
+export const SHIP_LABEL_VERIFIED = 'verified';
 
 /** Kinds the index service ingests from the relay firehose. */
 export const INGEST_KINDS: number[] = [

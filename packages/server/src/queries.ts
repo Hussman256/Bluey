@@ -100,7 +100,7 @@ export function feed(params: {
      FROM events e
      LEFT JOIN wot w ON w.pubkey = e.pubkey
      WHERE e.kind IN (${KIND.Text}, ${KIND.Repost}) AND e.is_reply = 0 AND e.created_at < ?
-     ORDER BY e.created_at DESC LIMIT 1200`,
+     ORDER BY e.created_at DESC LIMIT 600`,
     until,
   );
 
@@ -111,11 +111,12 @@ export function feed(params: {
     .map((r) => {
       const ageH = Math.max(0.1, (now - r.created_at) / 3600);
       const recency = 1 / (1 + ageH / 8);
-      const trustBoost = trusted.has(r.pubkey) ? 1 : r.wot;
+      // everyone gets a small floor so the feed is never empty; trusted authors
+      // and high web-of-trust authors rank far above it.
+      const trustBoost = trusted.has(r.pubkey) ? 1.5 : 0.05 + r.wot;
       const engagement = 1 + Math.log1p(r.eng);
       return { r, score: trustBoost * recency * engagement };
     })
-    .filter((x) => x.score > 0.0005)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
     .map((x) => toEvent(x.r));

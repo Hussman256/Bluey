@@ -43,6 +43,7 @@ db.exec(`
     PRIMARY KEY (follower, followee)
   );
   CREATE INDEX IF NOT EXISTS ix_follows_followee ON follows (followee);
+  CREATE INDEX IF NOT EXISTS ix_follows_follower ON follows (follower);
 
   CREATE TABLE IF NOT EXISTS edges (
     src_id     TEXT NOT NULL,

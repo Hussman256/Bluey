@@ -38,4 +38,5 @@ export const LS = {
   nwc: '1btc:nwc-uri',
   relays: '1btc:relays',
   feedTab: '1btc:feed-tab',
+  dvmFeeds: '1btc:dvm-feeds',
 } as const;

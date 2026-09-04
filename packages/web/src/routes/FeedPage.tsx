@@ -5,56 +5,94 @@ import { Composer } from '../components/Composer';
 import { NoteCard } from '../components/NoteCard';
 import { LS } from '../nostr/config';
 import { EngagementScope } from '../nostr/engagement';
+import { BUILTIN_FEEDS, addDvmFeed, loadDvmFeeds, removeDvmFeed, type FeedRef } from '../nostr/feeds';
 import { KIND } from '../nostr/kinds';
 import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
-import { useIndexFeed, useIndexStatus } from '../nostr/useIndex';
+import { useDvmFeed, useEventsByIds } from '../nostr/useDvmFeed';
+import { useIndexFeed } from '../nostr/useIndex';
+import { useShipFeed } from '../nostr/useShips';
 import { useWebOfTrust } from '../nostr/useWebOfTrust';
-
-type Tab = 'following' | 'discover';
 
 export function FeedPage() {
   const me = useNDKCurrentUser();
   const follows = useFollows();
   const wot = useWebOfTrust();
-  const indexUp = useIndexStatus();
-  const [tab, setTab] = useState<Tab>(
-    (localStorage.getItem(LS.feedTab) as Tab) || 'following',
-  );
 
-  function pick(t: Tab) {
-    setTab(t);
-    localStorage.setItem(LS.feedTab, t);
+  const [dvmFeeds, setDvmFeeds] = useState(loadDvmFeeds);
+  const allFeeds: FeedRef[] = useMemo(() => [...BUILTIN_FEEDS, ...dvmFeeds], [dvmFeeds]);
+  const [feedId, setFeedId] = useState<string>(
+    () => localStorage.getItem(LS.feedTab) || 'following',
+  );
+  const feed = allFeeds.find((f) => f.id === feedId) ?? BUILTIN_FEEDS[0];
+  const [addOpen, setAddOpen] = useState(false);
+  const [dvmInput, setDvmInput] = useState('');
+  const [dvmName, setDvmName] = useState('');
+
+  function pick(id: string) {
+    setFeedId(id);
+    localStorage.setItem(LS.feedTab, id);
+  }
+  function saveDvm(e: React.FormEvent) {
+    e.preventDefault();
+    const f = addDvmFeed(dvmInput, dvmName);
+    if (f) {
+      setDvmFeeds(loadDvmFeeds());
+      setDvmInput('');
+      setDvmName('');
+      setAddOpen(false);
+      pick(f.id);
+    }
   }
 
-  // --- index feed (fast path) ---
-  const idx = useIndexFeed({ scope: tab, pubkey: me?.pubkey, limit: 80 });
+  const builtin = feed.kind === 'builtin' ? feed.id : null;
 
-  // --- relay feed (fallback / used until the index answers) ---
+  // ----- built-in: following / discover via index (relay fallback) -----
+  const idx = useIndexFeed({
+    scope: builtin === 'discover' ? 'discover' : 'following',
+    pubkey: me?.pubkey,
+    limit: 80,
+  });
   const useRelay = !idx.fromIndex;
   const followAuthors = useMemo(() => [...follows].slice(0, 800), [follows]);
 
-  const { events: followingEvents } = useSubscribe(
-    useRelay && tab === 'following' && followAuthors.length
+  const { events: relayFollowing } = useSubscribe(
+    useRelay && builtin === 'following' && followAuthors.length
       ? [{ kinds: [KIND.Text, KIND.Repost], authors: followAuthors, limit: 100 }]
       : false,
     { closeOnEose: false },
-    [useRelay, tab, followAuthors.length],
+    [useRelay, builtin, followAuthors.length],
   );
-  const { events: discoverEvents } = useSubscribe(
-    useRelay && tab === 'discover' ? [{ kinds: [KIND.Text, KIND.Repost], limit: 200 }] : false,
+  const { events: relayDiscover } = useSubscribe(
+    (useRelay && builtin === 'discover') || builtin === 'latest'
+      ? [{ kinds: [KIND.Text, KIND.Repost], limit: 200 }]
+      : false,
     { closeOnEose: false },
-    [useRelay, tab],
+    [useRelay, builtin],
   );
 
-  const relayNotes = useMemo(() => {
-    const raw = tab === 'following' ? followingEvents : discoverEvents;
-    let list = raw.filter((e: NDKEvent) => !isReplyNote(e) && !isJunkNote(e));
-    if (tab === 'discover' && wot.size > 0) list = list.filter((e) => wot.isTrusted(e.pubkey));
-    return list;
-  }, [tab, followingEvents, discoverEvents, wot]);
+  // ----- built-in: ships -----
+  const ships = useShipFeed(undefined, builtin === 'ships');
+
+  // ----- dvm feed -----
+  const dvm = useDvmFeed(feed.kind === 'dvm' ? feed.id : null);
+  const dvmEvents = useEventsByIds(dvm.refIds);
 
   const notes = useMemo(() => {
-    const source = idx.fromIndex && idx.data ? idx.data : relayNotes;
+    let source: NDKEvent[] = [];
+    if (feed.kind === 'dvm') source = dvmEvents;
+    else if (builtin === 'ships') source = ships;
+    else if (builtin === 'latest')
+      source = relayDiscover.filter((e) => !isReplyNote(e));
+    else {
+      const relaySrc = builtin === 'following' ? relayFollowing : relayDiscover;
+      let list = (idx.fromIndex && idx.data ? idx.data : relaySrc).filter(
+        (e) => !isReplyNote(e),
+      );
+      if (builtin === 'discover' && !idx.fromIndex && wot.size > 0)
+        list = list.filter((e) => wot.isTrusted(e.pubkey));
+      source = list;
+    }
+
     const seen = new Set<string>();
     return source
       .filter((e) => !isJunkNote(e))
@@ -67,47 +105,99 @@ export function FeedPage() {
         return true;
       })
       .slice(0, 120);
-  }, [idx.fromIndex, idx.data, relayNotes]);
+  }, [feed.kind, builtin, dvmEvents, ships, relayFollowing, relayDiscover, idx, wot]);
 
   const engagementIds = useMemo(() => notes.map(subjectId), [notes]);
 
   return (
     <div>
-      <header className="sticky top-0 z-10 flex border-b border-line bg-bg/90 backdrop-blur">
-        {(['following', 'discover'] as Tab[]).map((t) => (
+      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
+        <div className="flex items-center gap-1.5 overflow-x-auto px-3 py-2.5">
+          {allFeeds.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => pick(f.id)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
+                f.id === feed.id
+                  ? 'bg-ink text-bg'
+                  : 'text-ink-faint hover:bg-surface hover:text-ink'
+              }`}
+            >
+              {f.name}
+              {f.kind === 'dvm' && f.id === feed.id && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeDvmFeed(f.id);
+                    setDvmFeeds(loadDvmFeeds());
+                    pick('following');
+                  }}
+                  className="ml-1.5 opacity-60 hover:opacity-100"
+                >
+                  ×
+                </span>
+              )}
+            </button>
+          ))}
           <button
-            key={t}
             type="button"
-            onClick={() => pick(t)}
-            className={`flex-1 py-3.5 text-sm font-semibold capitalize transition ${
-              tab === t ? 'text-ink' : 'text-ink-faint hover:text-ink-soft'
-            }`}
+            onClick={() => setAddOpen((v) => !v)}
+            className="shrink-0 rounded-full border border-line-strong px-2.5 py-1.5 text-sm font-semibold text-ink-faint hover:border-proto hover:text-proto"
           >
-            {t}
-            {tab === t && <span className="mx-auto mt-2 block h-0.5 w-10 rounded bg-zap" />}
+            +
           </button>
-        ))}
+        </div>
+
+        {addOpen && (
+          <form onSubmit={saveDvm} className="flex flex-col gap-2 border-t border-line px-4 py-3">
+            <p className="text-xs text-ink-faint">
+              Add a NIP-90 feed DVM by its npub — any third-party algorithm.
+            </p>
+            <input
+              value={dvmInput}
+              onChange={(e) => setDvmInput(e.target.value)}
+              placeholder="npub1… (the DVM)"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-proto"
+            />
+            <input
+              value={dvmName}
+              onChange={(e) => setDvmName(e.target.value)}
+              placeholder="Name it"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-proto"
+            />
+            <button
+              type="submit"
+              disabled={!dvmInput.trim()}
+              className="self-start rounded-full bg-ink px-3.5 py-1.5 text-xs font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+            >
+              Add feed
+            </button>
+          </form>
+        )}
       </header>
 
-      {me && <Composer />}
+      {me && builtin !== 'ships' && <Composer />}
 
       <p className="px-4 py-2 text-center font-mono text-[11px] text-ink-faint">
-        {tab === 'discover' && idx.fromIndex
-          ? '1btc index · ranked by web of trust'
-          : tab === 'discover' && wot.size > 0
-            ? `web-of-trust filter · ${wot.size.toLocaleString()} accounts`
-            : tab === 'following' && idx.fromIndex
-              ? '1btc index'
-              : indexUp
-                ? 'connecting to 1btc index…'
-                : 'direct from relays'}
+        {feed.kind === 'dvm'
+          ? dvm.status === 'requesting'
+            ? 'asking the DVM…'
+            : dvm.status === 'error'
+              ? 'the DVM didn’t answer'
+              : `${feed.name} · via NIP-90`
+          : builtin === 'discover' && idx.fromIndex
+            ? '1btc index · web-of-trust ranked'
+            : builtin === 'ships'
+              ? 'proof of work'
+              : builtin === 'latest'
+                ? 'everything, newest first'
+                : idx.fromIndex
+                  ? '1btc index'
+                  : 'direct from relays'}
       </p>
-
-      {tab === 'following' && followAuthors.length === 0 && !idx.fromIndex && (
-        <p className="px-4 py-10 text-center text-sm text-ink-soft">
-          You don&apos;t follow anyone yet. Open <strong>Discover</strong> to find builders.
-        </p>
-      )}
 
       <EngagementScope ids={engagementIds}>
         {notes.map((e) => (
@@ -115,8 +205,10 @@ export function FeedPage() {
         ))}
       </EngagementScope>
 
-      {notes.length === 0 && !idx.loading && (
-        <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">listening…</p>
+      {notes.length === 0 && (
+        <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">
+          {feed.kind === 'dvm' && dvm.status === 'error' ? 'no results' : 'listening…'}
+        </p>
       )}
     </div>
   );

@@ -27,6 +27,7 @@ const LessonPage = lazy(() => import('./routes/LessonPage').then((m) => ({ defau
 const LiveClassPage = lazy(() =>
   import('./routes/LiveClassPage').then((m) => ({ default: m.LiveClassPage })),
 );
+const ShipsPage = lazy(() => import('./routes/ShipsPage').then((m) => ({ default: m.ShipsPage })));
 const ProfilePage = lazy(() =>
   import('./routes/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
@@ -86,6 +87,7 @@ export function App() {
         >
           <Routes>
             <Route path="/" element={<FeedPage />} />
+            <Route path="/ships" element={<ShipsPage />} />
             <Route path="/clubs" element={<ClubsPage />} />
             <Route path="/clubs/:id" element={<ClubPage />} />
             <Route path="/learn" element={<BootcampsPage />} />

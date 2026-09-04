@@ -48,8 +48,16 @@ Club and **enrolment = joining that club (free)**. Live classes are NIP-53 event
 (1311), gated by cohort membership. Completion badges are NIP-58 (30009 / 8),
 shown on the learner's profile.
 
-**Next:** Phase 5 — Reputation (composite builder score, verified-ship review) &
-the feed / DVM marketplace.
+**Phase 5 — Reputation & the feed marketplace** (done):
+- **Ships** — proof-of-work posts (kind 1 + `1btc:ship`) with repo/demo links;
+  peers attest to them with NIP-32 `verified` labels (kind 1985).
+- **Builder score** — a 0–100 composite the *client* computes from four public,
+  verifiable signals (sats received, web-of-trust, badges, verified ships),
+  shown with its full breakdown. Not a stored number.
+- **Feed picker** — Following / Discover / Ships / Latest, plus **add any
+  NIP-90 feed DVM by npub** — feeds are a marketplace.
+
+**Next:** Phase 6 — polish, PWA/offline, deploy.
 
 See the architecture brief: *Zero Club on Nostr*.
 

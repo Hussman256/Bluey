@@ -2,6 +2,7 @@ import { useFollows, useNDKCurrentUser, useProfileValue, useSubscribe } from '@n
 import { useMemo, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { NoteCard } from '../components/NoteCard';
+import { BuilderScoreCard } from '../components/BuilderScoreCard';
 import { useProfileBadges } from '../nostr/badges';
 import { EngagementScope } from '../nostr/engagement';
 import { npubOf, pubkeyFrom } from '../nostr/ids';
@@ -155,6 +156,7 @@ export function ProfilePage() {
           </a>
         </div>
 
+        <BuilderScoreCard pubkey={pubkey} />
         <ProfileBadges pubkey={pubkey} />
       </div>
 

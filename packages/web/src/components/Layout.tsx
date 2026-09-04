@@ -8,6 +8,7 @@ import { Avatar } from './primitives';
 
 const nav = [
   { to: '/', label: 'Feed', end: true, icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
+  { to: '/ships', label: 'Ships', icon: 'M12 2 3 7v7c0 4 4 6 9 8 5-2 9-4 9-8V7l-9-5zM9 12l2 2 4-4' },
   { to: '/clubs', label: 'Clubs', icon: 'M9 7a3 3 0 100-6 3 3 0 000 6zM17 8a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM2 20a7 7 0 0114 0M15 20c0-2.5 1.5-4.5 4-5' },
   { to: '/learn', label: 'Learn', icon: 'M12 3 2 8l10 5 10-5-10-5zM4 10v6l8 4 8-4v-6' },
   { to: '/search', label: 'Search', icon: 'M11 4a7 7 0 105.2 11.7L21 21M11 4a7 7 0 010 14' },
