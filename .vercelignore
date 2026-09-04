@@ -1,0 +1,16 @@
+# Vercel builds only packages/web (see vercel.json) — everything below is
+# either irrelevant to that build or actively too large to upload.
+packages/server/data
+packages/relay/data
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/*.key
+node_modules
+packages/*/node_modules
+packages/web/dev-dist
+packages/web/dist
+.git
+*.md
+DEPLOY.md
+docker-compose.yml
