@@ -41,7 +41,15 @@ directly whenever the index is unreachable.
 Browse and create clubs, join (free and open — no zap-gating in v1), member-only
 group chat. Admin add/remove members and edit metadata.
 
-**Next:** Phase 4 — Learning (bootcamps as curation sets + cohort clubs, live classes).
+**Phase 4 — Learning** (done): Bootcamps as NIP-51 curation sets (30004) whose
+lessons are NIP-23 articles (30023); each bootcamp gets an auto-created cohort
+Club and **enrolment = joining that club (free)**. Live classes are NIP-53 events
+(30311) with an embedded stream (YouTube / Twitch / HLS) and NIP-53 live chat
+(1311), gated by cohort membership. Completion badges are NIP-58 (30009 / 8),
+shown on the learner's profile.
+
+**Next:** Phase 5 — Reputation (composite builder score, verified-ship review) &
+the feed / DVM marketplace.
 
 See the architecture brief: *Zero Club on Nostr*.
 

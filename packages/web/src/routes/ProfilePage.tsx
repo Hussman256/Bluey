@@ -2,11 +2,35 @@ import { useFollows, useNDKCurrentUser, useProfileValue, useSubscribe } from '@n
 import { useMemo, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { NoteCard } from '../components/NoteCard';
+import { useProfileBadges } from '../nostr/badges';
 import { EngagementScope } from '../nostr/engagement';
 import { npubOf, pubkeyFrom } from '../nostr/ids';
 import { KIND } from '../nostr/kinds';
 import { isJunkNote, subjectId } from '../nostr/notes';
 import { ZapButton } from '../components/ZapButton';
+
+function ProfileBadges({ pubkey }: { pubkey: string }) {
+  const badges = useProfileBadges(pubkey);
+  if (badges.length === 0) return null;
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {badges.map((b, i) => (
+        <span
+          key={i}
+          title={b.description}
+          className="inline-flex items-center gap-1.5 rounded-full border border-zap/30 bg-zap-soft px-2.5 py-1 text-xs font-semibold text-zap"
+        >
+          {b.image ? (
+            <img src={b.image} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />
+          ) : (
+            <span aria-hidden="true">◆</span>
+          )}
+          {b.name}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export function MyProfileRedirect() {
   const me = useNDKCurrentUser();
@@ -130,6 +154,8 @@ export function ProfilePage() {
             {npubOf(pubkey).slice(0, 16)}…
           </a>
         </div>
+
+        <ProfileBadges pubkey={pubkey} />
       </div>
 
       <div className="mt-4 border-b border-line px-4 py-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">

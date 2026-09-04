@@ -9,6 +9,7 @@ import { Avatar } from './primitives';
 const nav = [
   { to: '/', label: 'Feed', end: true, icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
   { to: '/clubs', label: 'Clubs', icon: 'M9 7a3 3 0 100-6 3 3 0 000 6zM17 8a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM2 20a7 7 0 0114 0M15 20c0-2.5 1.5-4.5 4-5' },
+  { to: '/learn', label: 'Learn', icon: 'M12 3 2 8l10 5 10-5-10-5zM4 10v6l8 4 8-4v-6' },
   { to: '/search', label: 'Search', icon: 'M11 4a7 7 0 105.2 11.7L21 21M11 4a7 7 0 010 14' },
   { to: '/notifications', label: 'Alerts', icon: 'M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0' },
   { to: '/reads', label: 'Reads', icon: 'M4 5h16v14H4zM8 5v14' },

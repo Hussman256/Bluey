@@ -17,6 +17,16 @@ const SearchPage = lazy(() =>
 );
 const ClubsPage = lazy(() => import('./routes/ClubsPage').then((m) => ({ default: m.ClubsPage })));
 const ClubPage = lazy(() => import('./routes/ClubPage').then((m) => ({ default: m.ClubPage })));
+const BootcampsPage = lazy(() =>
+  import('./routes/BootcampsPage').then((m) => ({ default: m.BootcampsPage })),
+);
+const BootcampPage = lazy(() =>
+  import('./routes/BootcampPage').then((m) => ({ default: m.BootcampPage })),
+);
+const LessonPage = lazy(() => import('./routes/LessonPage').then((m) => ({ default: m.LessonPage })));
+const LiveClassPage = lazy(() =>
+  import('./routes/LiveClassPage').then((m) => ({ default: m.LiveClassPage })),
+);
 const ProfilePage = lazy(() =>
   import('./routes/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
@@ -78,6 +88,10 @@ export function App() {
             <Route path="/" element={<FeedPage />} />
             <Route path="/clubs" element={<ClubsPage />} />
             <Route path="/clubs/:id" element={<ClubPage />} />
+            <Route path="/learn" element={<BootcampsPage />} />
+            <Route path="/learn/:naddr" element={<BootcampPage />} />
+            <Route path="/lesson/:naddr" element={<LessonPage />} />
+            <Route path="/live/:naddr" element={<LiveClassPage />} />
             <Route path="/reads" element={<ReadsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/search" element={<SearchPage />} />

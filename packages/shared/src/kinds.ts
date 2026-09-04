@@ -79,6 +79,14 @@ export const KIND = {
 
 export type Kind = (typeof KIND)[keyof typeof KIND];
 
+/** `t` tag markers so 1btc can find its own content among generic Nostr kinds. */
+export const TAG = {
+  client: '1btc',
+  bootcamp: '1btc:bootcamp',
+  lesson: '1btc:lesson',
+  liveClass: '1btc:live',
+} as const;
+
 /** Kinds the index service ingests from the relay firehose. */
 export const INGEST_KINDS: number[] = [
   KIND.Metadata,
