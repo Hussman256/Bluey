@@ -1,9 +1,10 @@
 /**
- * Relay configuration for 1btc.
+ * Relay + service configuration for 1btc.
  *
- * Phase 1 rides entirely on public relays — no 1btc-operated relay or caching
- * service yet. The DEFAULT set is used for the general feed and profile lookups;
- * later phases add a 1btc caching-service websocket and a NIP-29 group relay.
+ * DEFAULT_RELAYS is the public relay set NDK connects to directly. Two more
+ * 1btc-operated services layer on top when reachable (both optional, both
+ * degrade gracefully): the index service (nostr/indexClient.ts) and the clubs
+ * relay (nostr/clubs.ts).
  */
 export const DEFAULT_RELAYS = [
   'wss://relay.damus.io',
@@ -33,6 +34,9 @@ export const BLOSSOM_FALLBACK = 'https://blossom.band';
 export const APP_NAME = '1btc';
 export const APP_TAGLINE = 'Build in public. Get zapped.';
 
+/** The index service URL actually in effect (honours VITE_INDEX_URL). */
+export const INDEX_URL = (import.meta.env.VITE_INDEX_URL as string | undefined) || 'ws://localhost:8787';
+
 /** Local-storage keys — namespaced so nothing collides with NDK's own. */
 export const LS = {
   nwc: '1btc:nwc-uri',
@@ -40,3 +44,21 @@ export const LS = {
   feedTab: '1btc:feed-tab',
   dvmFeeds: '1btc:dvm-feeds',
 } as const;
+
+/** The relay set to boot with: user-added relays (if any) merged over the defaults. */
+export function loadRelayList(): string[] {
+  try {
+    const extra = JSON.parse(localStorage.getItem(LS.relays) ?? '[]');
+    if (Array.isArray(extra) && extra.every((r) => typeof r === 'string')) {
+      return [...new Set([...DEFAULT_RELAYS, ...extra])];
+    }
+  } catch {
+    /* ignore */
+  }
+  return DEFAULT_RELAYS;
+}
+
+export function saveExtraRelays(urls: string[]) {
+  const extra = urls.filter((u) => !DEFAULT_RELAYS.includes(u));
+  localStorage.setItem(LS.relays, JSON.stringify(extra));
+}

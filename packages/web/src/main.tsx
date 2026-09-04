@@ -5,14 +5,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
-import { DEFAULT_RELAYS } from './nostr/config';
+import { loadRelayList } from './nostr/config';
 import { WalletProvider } from './wallet/WalletProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <NDKHeadless
       ndk={{
-        explicitRelayUrls: DEFAULT_RELAYS,
+        explicitRelayUrls: loadRelayList(),
         clientName: '1btc',
         autoConnectUserRelays: true,
       }}

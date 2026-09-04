@@ -1,9 +1,5 @@
-import {
-  DEFAULT_INDEX_URL,
-  type Frame,
-  type Request,
-  type RequestMethod,
-} from '@1btc/shared';
+import type { Frame, Request, RequestMethod } from '@1btc/shared';
+import { INDEX_URL } from './config';
 
 type Pending = {
   resolve: (f: Frame) => void;
@@ -25,7 +21,7 @@ export class IndexClient {
   private closed = false;
   private listeners = new Set<(up: boolean) => void>();
 
-  constructor(url = import.meta.env.VITE_INDEX_URL || DEFAULT_INDEX_URL) {
+  constructor(url: string = INDEX_URL) {
     this.url = url;
     this.connect();
   }
