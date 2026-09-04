@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/dev-dist
+**/data
+**/.vite
+packages/web
+.git
+*.md
+.env

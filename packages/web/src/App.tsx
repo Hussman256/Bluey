@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
+import { PwaPrompt } from './components/PwaPrompt';
 import { APP_NAME } from './nostr/config';
 import { LoginScreen } from './session/LoginScreen';
 
@@ -75,10 +76,17 @@ export function App() {
   const hydrating = expectSession && !me && !hydrationTimedOut;
 
   if (!ndk || hydrating) return <Splash />;
-  if (!me) return <LoginScreen />;
+  if (!me)
+    return (
+      <>
+        <LoginScreen />
+        <PwaPrompt />
+      </>
+    );
 
   return (
     <Layout>
+      <PwaPrompt />
       <ErrorBoundary key={location.pathname}>
         <Suspense
           fallback={

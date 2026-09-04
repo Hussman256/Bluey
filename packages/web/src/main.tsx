@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 import { DEFAULT_RELAYS } from './nostr/config';
 import { WalletProvider } from './wallet/WalletProvider';
@@ -21,9 +22,11 @@ createRoot(document.getElementById('root')!).render(
       }}
     />
     <BrowserRouter>
-      <WalletProvider>
-        <App />
-      </WalletProvider>
+      <ErrorBoundary>
+        <WalletProvider>
+          <App />
+        </WalletProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
 );

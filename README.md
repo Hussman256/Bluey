@@ -57,7 +57,13 @@ shown on the learner's profile.
 - **Feed picker** — Following / Discover / Ships / Latest, plus **add any
   NIP-90 feed DVM by npub** — feeds are a marketplace.
 
-**Next:** Phase 6 — polish, PWA/offline, deploy.
+**Phase 6 — PWA & deploy** (done): installable PWA (Workbox service worker,
+offline app shell, runtime-cached fonts + media, update prompt), a
+relays / index / clubs connection indicator in the sidebar, a root error
+boundary, and deploy config — `vercel.json` for the client, Dockerfiles +
+`docker-compose.yml` for the two services, and `DEPLOY.md`.
+
+See **[DEPLOY.md](./DEPLOY.md)**.
 
 See the architecture brief: *Zero Club on Nostr*.
 

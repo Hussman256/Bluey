@@ -1,10 +1,24 @@
 import { useNDKCurrentUser, useNDKSessionLogout } from '@nostr-dev-kit/react';
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useClubsRelaySet } from '../nostr/clubs';
 import { APP_NAME } from '../nostr/config';
+import { useServiceStatus } from '../nostr/useServiceStatus';
 import { useWallet } from '../wallet/WalletProvider';
 import { npubOf } from '../nostr/ids';
 import { Avatar } from './primitives';
+
+function Dot({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5" title={label}>
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${ok ? 'bg-good' : 'bg-ink-faint'}`}
+        aria-hidden="true"
+      />
+      {label}
+    </span>
+  );
+}
 
 const nav = [
   { to: '/', label: 'Feed', end: true, icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
@@ -31,6 +45,8 @@ export function Layout({ children }: { children: ReactNode }) {
   const logout = useNDKSessionLogout();
   const navigate = useNavigate();
   const { balance, wallet } = useWallet();
+  const svc = useServiceStatus();
+  useClubsRelaySet(); // connect the clubs relay on app load, not just on /clubs
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-5xl">
@@ -62,6 +78,11 @@ export function Layout({ children }: { children: ReactNode }) {
 
         {me && (
           <div className="flex flex-col gap-2 px-1">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 px-1 font-mono text-[10px] text-ink-faint">
+              <Dot ok={svc.relays.connected > 0} label={`${svc.relays.connected} relays`} />
+              <Dot ok={svc.index} label="index" />
+              <Dot ok={svc.clubs} label="clubs" />
+            </div>
             <div className="rounded-xl border border-line px-3 py-2 text-xs">
               <div className="text-ink-faint">Wallet</div>
               <div className="mt-0.5 font-mono">

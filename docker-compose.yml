@@ -1,0 +1,32 @@
+# 1btc backend services. The web client deploys separately (Vercel).
+# On a VPS: `docker compose up -d` then point a TLS reverse proxy at 8787 / 8788.
+
+services:
+  index:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '8787:8787'
+    environment:
+      RELAYS: ${INDEX_RELAYS:-wss://relay.damus.io,wss://relay.primal.net,wss://nos.lol,wss://relay.nostr.band,wss://nostr.wine}
+      RETENTION_DAYS: ${RETENTION_DAYS:-21}
+    volumes:
+      - index-data:/data
+
+  relay:
+    build:
+      context: .
+      dockerfile: packages/relay/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '8788:8788'
+    environment:
+      RELAY_NAME: ${RELAY_NAME:-1btc clubs}
+    volumes:
+      - relay-data:/data
+
+volumes:
+  index-data:
+  relay-data:
