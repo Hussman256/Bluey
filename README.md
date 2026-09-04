@@ -9,18 +9,17 @@ work, get zapped. Concept modelled on Zero Club; execution modelled on Primal.
 |---|---|
 | `packages/web` | The client — React 19 + Vite + Tailwind v4 + NDK 3 |
 | `packages/server` | The index service — ingests the Nostr firehose into SQLite, serves fast feeds / search / notifications / web-of-trust over one WebSocket |
-| `packages/shared` | Event kinds + the index wire protocol, shared by both |
+| `packages/relay` | The clubs relay — a minimal NIP-29 group relay with relay-enforced membership |
+| `packages/shared` | Event kinds + the index wire protocol |
 
 ## Run
 
 ```bash
 npm install
 
-# terminal 1 — the client (works standalone on public relays)
-npm run dev            # http://localhost:5173
-
-# terminal 2 — the index service (unlocks Discover ranking, Notifications, Search)
-npm run dev:server     # ws + http on :8787
+npm run dev            # client — http://localhost:5173  (works standalone on public relays)
+npm run dev:server     # index service — :8787  (Discover ranking, Notifications, Search)
+npm run dev:relay      # clubs relay — :8788  (Clubs)
 ```
 
 `npm run check` runs typecheck + lint across all packages. `npm run build`
@@ -38,7 +37,11 @@ ranked by a global PageRank-over-follows web-of-trust score; Notifications and
 Search are served from the index. The client falls back to talking to relays
 directly whenever the index is unreachable.
 
-**Next:** Phase 3 — Clubs (NIP-29 relay-enforced groups with zap-gated entry).
+**Phase 3 — Clubs** (done): a NIP-29 relay with relay-enforced membership.
+Browse and create clubs, join (free and open — no zap-gating in v1), member-only
+group chat. Admin add/remove members and edit metadata.
+
+**Next:** Phase 4 — Learning (bootcamps as curation sets + cohort clubs, live classes).
 
 See the architecture brief: *Zero Club on Nostr*.
 
