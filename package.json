@@ -6,6 +6,7 @@
   "workspaces": [
     "packages/shared",
     "packages/server",
+    "packages/relay",
     "packages/web"
   ],
   "overrides": {
@@ -16,6 +17,7 @@
   "scripts": {
     "dev": "npm run dev --workspace @1btc/web",
     "dev:server": "npm run dev --workspace @1btc/server",
+    "dev:relay": "npm run dev --workspace @1btc/relay",
     "build": "npm run typecheck --workspaces --if-present && npm run build --workspace @1btc/web",
     "lint": "npm run lint --workspace @1btc/web",
     "typecheck": "npm run typecheck --workspaces --if-present",

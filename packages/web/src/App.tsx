@@ -15,6 +15,8 @@ const NotificationsPage = lazy(() =>
 const SearchPage = lazy(() =>
   import('./routes/SearchPage').then((m) => ({ default: m.SearchPage })),
 );
+const ClubsPage = lazy(() => import('./routes/ClubsPage').then((m) => ({ default: m.ClubsPage })));
+const ClubPage = lazy(() => import('./routes/ClubPage').then((m) => ({ default: m.ClubPage })));
 const ProfilePage = lazy(() =>
   import('./routes/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
@@ -74,6 +76,8 @@ export function App() {
         >
           <Routes>
             <Route path="/" element={<FeedPage />} />
+            <Route path="/clubs" element={<ClubsPage />} />
+            <Route path="/clubs/:id" element={<ClubPage />} />
             <Route path="/reads" element={<ReadsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/search" element={<SearchPage />} />

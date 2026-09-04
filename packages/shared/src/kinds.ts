@@ -35,11 +35,20 @@ export const KIND = {
   FollowSet: 30000,
 
   // groups / clubs — NIP-29
-  GroupMetadata: 39000,
-  GroupAdmins: 39001,
-  GroupMembers: 39002,
-  GroupRoles: 39003,
-  GroupChatMessage: 9,
+  GroupMetadata: 39000, // relay-generated: name/about/picture/flags
+  GroupAdmins: 39001, // relay-generated: admin list + roles
+  GroupMembers: 39002, // relay-generated: member list
+  GroupRoles: 39003, // relay-generated: role definitions
+  GroupChatMessage: 9, // member chat
+  GroupChatReply: 10,
+  GroupThread: 11, // member forum post
+  GroupThreadReply: 1111,
+  GroupAddUser: 9000, // admin: put-user (add member / set roles)
+  GroupRemoveUser: 9001, // admin: remove member
+  GroupEditMetadata: 9002, // admin: edit name/about/picture
+  GroupDeleteEvent: 9005, // admin: delete a message
+  GroupCreate: 9007, // create group (sender becomes admin)
+  GroupDelete: 9008, // admin: delete group
   GroupJoinRequest: 9021,
   GroupLeaveRequest: 9022,
 
