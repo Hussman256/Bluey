@@ -3,8 +3,8 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
+import { Mark } from './components/primitives';
 import { PwaPrompt } from './components/PwaPrompt';
-import { APP_NAME } from './nostr/config';
 import { LoginScreen } from './session/LoginScreen';
 
 const FeedPage = lazy(() => import('./routes/FeedPage').then((m) => ({ default: m.FeedPage })));
@@ -42,10 +42,7 @@ const SettingsPage = lazy(() =>
 function Splash() {
   return (
     <div className="grid min-h-dvh place-items-center">
-      <div className="font-display text-2xl font-bold tracking-tight text-ink-soft">
-        {APP_NAME}
-        <span className="text-zap">.</span>
-      </div>
+      <Mark size={40} />
     </div>
   );
 }

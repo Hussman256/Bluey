@@ -14,9 +14,9 @@ export default defineConfig({
       manifest: {
         name: '1btc',
         short_name: '1btc',
-        description: 'A builder network on Nostr and Lightning. Ship provable work, get zapped.',
-        theme_color: '#14121b',
-        background_color: '#14121b',
+        description: 'A Bitcoin social and learning app on Nostr. Learn Bitcoin, talk Bitcoin, find your people.',
+        theme_color: '#fdfbf7',
+        background_color: '#fdfbf7',
         display: 'standalone',
         start_url: '/',
         scope: '/',

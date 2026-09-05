@@ -112,15 +112,16 @@ export function FeedPage() {
   return (
     <div>
       <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
-        <div className="flex items-center gap-1.5 overflow-x-auto px-3 py-2.5">
+        <h1 className="px-5 pb-2 pt-4 font-display text-xl font-extrabold tracking-tight">Feed</h1>
+        <div className="flex items-center gap-1.5 overflow-x-auto px-4 pb-2.5">
           {allFeeds.map((f) => (
             <button
               key={f.id}
               type="button"
               onClick={() => pick(f.id)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
+              className={`shrink-0 rounded-full px-3 py-1.5 text-[13px] font-semibold transition ${
                 f.id === feed.id
-                  ? 'bg-ink text-bg'
+                  ? 'bg-slab text-white'
                   : 'text-ink-faint hover:bg-surface hover:text-ink'
               }`}
             >
@@ -145,7 +146,7 @@ export function FeedPage() {
           <button
             type="button"
             onClick={() => setAddOpen((v) => !v)}
-            className="shrink-0 rounded-full border border-line-strong px-2.5 py-1.5 text-sm font-semibold text-ink-faint hover:border-proto hover:text-proto"
+            className="shrink-0 rounded-full border border-line-strong px-2.5 py-1.5 text-sm font-semibold text-ink-faint hover:border-zap hover:text-zap-ink"
           >
             +
           </button>
@@ -160,18 +161,18 @@ export function FeedPage() {
               value={dvmInput}
               onChange={(e) => setDvmInput(e.target.value)}
               placeholder="npub1… (the DVM)"
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-proto"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-zap"
             />
             <input
               value={dvmName}
               onChange={(e) => setDvmName(e.target.value)}
               placeholder="Name it"
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-proto"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-zap"
             />
             <button
               type="submit"
               disabled={!dvmInput.trim()}
-              className="self-start rounded-full bg-ink px-3.5 py-1.5 text-xs font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+              className="self-start rounded-full bg-slab px-3.5 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Add feed
             </button>

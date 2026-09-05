@@ -76,7 +76,7 @@ export function ZapButton({
           ) : (
             <div className="max-w-[14rem] p-1 text-xs text-ink-soft">
               Connect a Lightning wallet to zap.{' '}
-              <Link to="/settings" className="text-proto hover:underline" onClick={() => setOpen(false)}>
+              <Link to="/settings" className="text-zap-ink hover:underline" onClick={() => setOpen(false)}>
                 Connect →
               </Link>
             </div>

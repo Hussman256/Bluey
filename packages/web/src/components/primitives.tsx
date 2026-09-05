@@ -3,6 +3,38 @@ import { Link } from 'react-router-dom';
 import { npubOf, shortNpub } from '../nostr/ids';
 import { useNow } from './useNow';
 
+/** The 1btc mark: a lightning bolt cut out of a bitcoin-orange disc. */
+export function Mark({ size = 30 }: { size?: number }) {
+  return (
+    <span
+      className="relative block shrink-0 overflow-hidden rounded-full bg-zap"
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
+      <span
+        className="absolute bg-bg"
+        style={{
+          width: size * 0.1,
+          height: size * 1.4,
+          left: size * 0.46,
+          top: -size * 0.2,
+          transform: 'rotate(24deg)',
+        }}
+      />
+      <span
+        className="absolute bg-bg"
+        style={{
+          width: size * 0.1,
+          height: size * 1.4,
+          left: size * 0.68,
+          top: -size * 0.2,
+          transform: 'rotate(24deg)',
+        }}
+      />
+    </span>
+  );
+}
+
 export function Avatar({ pubkey, size = 40 }: { pubkey: string; size?: number }) {
   const profile = useProfileValue(pubkey);
   const url = profile?.picture;

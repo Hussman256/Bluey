@@ -116,7 +116,7 @@ function PlainNote({ event, bare = false }: { event: NDKEvent; bare?: boolean })
         <div className="mt-2.5 flex items-center gap-1 text-ink-faint">
           <Link
             to={link}
-            className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs transition hover:bg-proto-soft hover:text-proto"
+            className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs transition hover:bg-surface hover:text-ink"
             aria-label="Replies"
           >
             <ActionIcon path="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />

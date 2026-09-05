@@ -1,41 +1,51 @@
 @import 'tailwindcss';
 
 /*
- * 1btc — dark-first theme.
- * gold  = lightning / value flow
- * violet = nostr / protocol
+ * 1btc — "warm ledger" theme (design direction B).
+ * Primal's restraint — hairlines, whitespace, one accent — on a warm paper
+ * ground. Bitcoin orange is the only accent; everything else is ink on paper.
  */
 @theme {
-  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --color-bg: #14121b;
-  --color-surface: #1c1a25;
-  --color-sunk: #211f2c;
-  --color-line: #2c2839;
-  --color-line-strong: #403a53;
-  --color-ink: #ece9f2;
-  --color-ink-soft: #a8a3ba;
-  --color-ink-faint: #756f88;
+  --color-bg: #fdfbf7;
+  --color-surface: #f6f0e4;
+  --color-sunk: #f0e9d8;
+  --color-line: #eee4d2;
+  --color-line-strong: #ddd0b5;
+  --color-ink: #1c1a16;
+  --color-ink-soft: #6b5f4a;
+  --color-ink-faint: #a89d87;
 
-  --color-zap: #f7b500;
-  --color-zap-soft: #35280a;
-  --color-proto: #a78bfa;
-  --color-proto-soft: #241a3d;
-  --color-good: #4ec58f;
-  --color-danger: #f2748a;
+  /* the dark ticker strip + inverted panels (Vouched card, code blocks) */
+  --color-slab: #1c1a16;
+  --color-slab-line: #332e26;
+  --color-slab-ink: #c9bfa8;
+
+  --color-zap: #f7931a;
+  --color-zap-soft: #fdeecb;
+  --color-zap-ink: #8a5a10;
+
+  /* secondary — avatar fallbacks, muted marks; never competes with the accent */
+  --color-proto: #b6704f;
+  --color-proto-soft: #f4e6dc;
+
+  --color-good: #1f8a63;
+  --color-danger: #c0392b;
 }
 
 @layer base {
   html {
     background: var(--color-bg);
     color: var(--color-ink);
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     margin: 0;
     font-family: var(--font-sans);
+    font-feature-settings: 'tnum' 1;
     -webkit-font-smoothing: antialiased;
   }
   * {
@@ -45,18 +55,12 @@
     color: inherit;
   }
   ::selection {
-    background: var(--color-proto);
-    color: #14121b;
+    background: var(--color-zap);
+    color: #ffffff;
   }
   :focus-visible {
     outline: 2px solid var(--color-zap);
     outline-offset: 2px;
     border-radius: 3px;
   }
-}
-
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  font-display: swap;
-  src: local('Bricolage Grotesque');
 }

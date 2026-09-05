@@ -32,7 +32,7 @@ export const BLOSSOM_PRIMARY = 'https://blossom.primal.net';
 export const BLOSSOM_FALLBACK = 'https://blossom.band';
 
 export const APP_NAME = '1btc';
-export const APP_TAGLINE = 'Build in public. Get zapped.';
+export const APP_TAGLINE = 'Learn Bitcoin. Find your people.';
 
 /** The index service URL actually in effect (honours VITE_INDEX_URL). */
 export const INDEX_URL = (import.meta.env.VITE_INDEX_URL as string | undefined) || 'ws://localhost:8787';
