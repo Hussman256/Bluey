@@ -14,6 +14,9 @@ dev-dist
 .vercel
 *.local
 
+# SSH keys generated for deployment — never commit
+.deploy-keys/
+
 # index service local data
 packages/server/data/
 *.db
