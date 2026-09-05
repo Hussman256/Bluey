@@ -1,7 +1,22 @@
 # 1btc
 
-A builder network on **Nostr** + **Lightning**. Learn in public, ship provable
-work, get zapped. Concept modelled on Zero Club; execution modelled on Primal.
+A **Bitcoin social + learning app**, built on **Nostr** + **Lightning**. A place
+to learn Bitcoin, talk Bitcoin, and find your people — the feed is connective
+tissue; learning and community are the spine. Execution modelled on Primal.
+
+## Positioning
+
+- **Not** a "build in the open, get paid in sats" job platform. Collaboration and
+  opportunities are a *byproduct* of people meeting trustworthy people here —
+  never the pitch.
+- **Audience:** newcomers and Bitcoin/Nostr veterans alike — content
+  self-segments through clubs and learning tracks.
+- **Geography:** the product is global and geography-neutral. The team is
+  Nigeria-based; that story lives in who we are, not in the tagline.
+- **Financial inclusion** is a real, un-hyped consequence — through literacy
+  (Learning), a bank-free identity (a Lightning address for every key, no KYC),
+  frictionless small zaps, a reputation graph that needs no credit bureau, and
+  nothing paywalled in v1. 1btc does not do on/off-ramp and does not claim to.
 
 ## Monorepo
 
@@ -65,7 +80,27 @@ boundary, and deploy config — `vercel.json` for the client, Dockerfiles +
 
 See **[DEPLOY.md](./DEPLOY.md)**.
 
-See the architecture brief: *Zero Club on Nostr*.
+## Planned (post-v1)
+
+Borrowed from other Nostr clients, each chosen because it reinforces the
+social + learning spine:
+
+1. **Highlights (NIP-84) wired to lessons** — highlight a passage of a bootcamp
+   lesson or article and repost it to the feed with your own commentary. Makes
+   "learning and social are one graph" literally true. *(highest priority)*
+2. **Auto-translate posts** — silent inline translation in the feed, so language
+   is never a barrier to reading along.
+3. **Zap the person, not just the post** — a quick-zap action on the profile
+   header, for thanking someone for a good answer days later.
+4. **"Trending now"** — a short time-windowed view alongside the web-of-trust
+   Discover feed, so a brand-new user with zero follows still sees signs of life.
+
+Plus granular notification controls + mute-words, so early noise doesn't sour
+first-time users.
+
+Also revisit: **"Ships" / "Builder score"** become one optional interest area,
+not the app's central metaphor; the score's name and composition get another
+pass under the positioning above.
 
 ## Wallet stance
 
