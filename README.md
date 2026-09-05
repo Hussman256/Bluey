@@ -98,9 +98,11 @@ social + learning spine:
 Plus granular notification controls + mute-words, so early noise doesn't sour
 first-time users.
 
-Also revisit: **"Ships" / "Builder score"** become one optional interest area,
-not the app's central metaphor; the score's name and composition get another
-pass under the positioning above.
+Reputation rework: the 0–100 **Builder score** is being replaced with a factual
+**"Vouched"** block — public signals shown as facts, not a rating ("N people you
+follow follow them", sats received, courses completed, account age). The profile
+goes clean and Primal-like (Notes / Replies / Badges / Clubs); **Ships** becomes
+one optional tab that only appears when the person has posted any.
 
 ## Wallet stance
 
