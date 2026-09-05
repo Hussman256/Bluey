@@ -53,7 +53,7 @@ export function LessonPage() {
 
         <nav className="mt-10 flex justify-between gap-3 border-t border-line pt-4 text-sm">
           {prev ? (
-            <Link to={`/lesson/${naddrOf(prev.addr)}`} className="text-proto hover:underline">
+            <Link to={`/lesson/${naddrOf(prev.addr)}`} className="text-zap-ink hover:underline">
               ← {prev.title}
             </Link>
           ) : (
@@ -62,7 +62,7 @@ export function LessonPage() {
           {next ? (
             <Link
               to={`/lesson/${naddrOf(next.addr)}`}
-              className="text-right text-proto hover:underline"
+              className="text-right text-zap-ink hover:underline"
             >
               {next.title} →
             </Link>

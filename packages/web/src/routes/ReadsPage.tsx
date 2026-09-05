@@ -39,7 +39,7 @@ export function ReadsPage() {
   return (
     <div>
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-bg/90 px-4 py-3 backdrop-blur">
-        <span className="font-display text-lg font-bold">Reads</span>
+        <span className="font-display text-xl font-extrabold tracking-tight">Reads</span>
         <div className="flex gap-1 text-xs">
           {(['following', 'all'] as Scope[]).map((s) => (
             <button

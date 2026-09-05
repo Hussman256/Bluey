@@ -52,7 +52,7 @@ export function Avatar({ pubkey, size = 40 }: { pubkey: string; size?: number })
         />
       ) : (
         <span
-          className="grid place-items-center rounded-full bg-proto-soft font-mono text-xs text-proto"
+          className="grid place-items-center rounded-full bg-zap-soft font-mono text-xs text-zap-ink"
           style={{ width: size, height: size }}
           aria-hidden="true"
         >

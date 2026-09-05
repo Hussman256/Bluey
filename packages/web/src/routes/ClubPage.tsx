@@ -56,7 +56,7 @@ export function ClubPage() {
         {meta?.picture ? (
           <img src={meta.picture} alt="" className="h-9 w-9 rounded-lg object-cover" />
         ) : (
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-proto-soft font-display text-xs font-bold text-proto">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-zap-soft font-display text-xs font-bold text-zap-ink">
             {(meta?.name ?? '··').slice(0, 2).toUpperCase()}
           </div>
         )}
@@ -82,7 +82,7 @@ export function ClubPage() {
               type="button"
               onClick={join}
               disabled={busy !== null}
-              className="rounded-full bg-ink px-3.5 py-1.5 text-xs font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+              className="rounded-full bg-slab px-3.5 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               {busy === 'join' ? '…' : 'Join'}
             </button>
@@ -132,12 +132,12 @@ export function ClubPage() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={`Message ${meta?.name ?? 'the club'}…`}
-              className="flex-1 rounded-full border border-line-strong bg-surface px-4 py-2 text-sm outline-none focus:border-proto"
+              className="flex-1 rounded-full border border-line-strong bg-surface px-4 py-2 text-sm outline-none focus:border-zap"
             />
             <button
               type="submit"
               disabled={!text.trim()}
-              className="rounded-full bg-zap px-4 py-2 text-sm font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+              className="rounded-full bg-zap px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Send
             </button>

@@ -16,7 +16,7 @@ function verb(n: NotificationItem): { text: string; color: string } {
     case KIND.GenericRepost:
       return { text: 'reposted your note', color: 'text-good' };
     default:
-      return { text: n.contentPreview ? 'mentioned you' : 'replied to your note', color: 'text-proto' };
+      return { text: n.contentPreview ? 'mentioned you' : 'replied to your note', color: 'text-zap-ink' };
   }
 }
 
@@ -43,7 +43,7 @@ export function NotificationsPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-4 py-3.5 font-display text-lg font-bold backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-4 py-3.5 font-display text-xl font-extrabold tracking-tight backdrop-blur">
         Notifications
       </header>
 

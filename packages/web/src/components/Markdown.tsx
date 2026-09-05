@@ -34,7 +34,7 @@ function inline(text: string, keyBase: string): ReactNode[] {
             href={m[3]}
             target="_blank"
             rel="noreferrer noopener"
-            className="text-proto hover:underline"
+            className="text-zap-ink hover:underline"
           >
             {m[2] || m[3]}
           </a>,
@@ -60,7 +60,7 @@ function inline(text: string, keyBase: string): ReactNode[] {
           href={m[10]}
           target="_blank"
           rel="noreferrer noopener"
-          className="text-proto hover:underline"
+          className="text-zap-ink hover:underline"
         >
           {m[10].replace(/^https?:\/\//, '')}
         </a>,

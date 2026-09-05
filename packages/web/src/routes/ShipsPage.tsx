@@ -40,18 +40,18 @@ function ShipComposer({ onDone }: { onDone: () => void }) {
         onChange={(e) => setText(e.target.value)}
         rows={3}
         placeholder="What did you ship? What does it do?"
-        className="resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-proto"
+        className="resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-zap"
       />
       <input
         value={links}
         onChange={(e) => setLinks(e.target.value)}
         placeholder="Repo / demo links (space-separated)"
-        className="rounded-xl border border-line-strong bg-surface px-3.5 py-2 font-mono text-xs outline-none focus:border-proto"
+        className="rounded-xl border border-line-strong bg-surface px-3.5 py-2 font-mono text-xs outline-none focus:border-zap"
       />
       <button
         type="submit"
         disabled={!text.trim() || busy}
-        className="self-start rounded-full bg-zap px-4 py-1.5 text-sm font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+        className="self-start rounded-full bg-zap px-4 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
       >
         {busy ? 'Shipping…' : 'Ship it'}
       </button>
@@ -81,7 +81,7 @@ function ShipCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-1.5 text-sm">
             <DisplayName pubkey={ship.pubkey} />
-            <span className="rounded-full bg-proto-soft px-1.5 py-0.5 font-mono text-[10px] uppercase text-proto">
+            <span className="rounded-full bg-zap-soft px-1.5 py-0.5 font-mono text-[10px] uppercase text-zap-ink">
               ship
             </span>
             <span className="text-ink-faint">·</span>
@@ -100,7 +100,7 @@ function ShipCard({
                   href={l}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="rounded-full border border-line-strong px-2.5 py-1 font-mono text-[11px] text-proto hover:border-proto"
+                  className="rounded-full border border-line-strong px-2.5 py-1 font-mono text-[11px] text-zap-ink hover:border-zap"
                 >
                   {l.replace(/^https?:\/\//, '').slice(0, 36)}
                 </a>
@@ -144,14 +144,14 @@ export function ShipsPage() {
     <div>
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-bg/90 px-4 py-3.5 backdrop-blur">
         <div>
-          <span className="font-display text-lg font-bold">Ships</span>
+          <span className="font-display text-xl font-extrabold tracking-tight">Ships</span>
           <p className="text-[11px] text-ink-faint">proof of work — verified by your peers</p>
         </div>
         {me && (
           <button
             type="button"
             onClick={() => setComposing((v) => !v)}
-            className="rounded-full bg-zap px-3.5 py-1.5 text-sm font-semibold text-bg hover:opacity-90"
+            className="rounded-full bg-zap px-3.5 py-1.5 text-sm font-semibold text-white hover:opacity-90"
           >
             {composing ? 'Cancel' : 'Ship'}
           </button>

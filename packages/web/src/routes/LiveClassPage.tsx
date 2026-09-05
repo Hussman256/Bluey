@@ -106,7 +106,7 @@ export function LiveClassPage() {
               ? 'bg-danger/15 text-danger'
               : live.status === 'ended'
                 ? 'bg-sunk text-ink-faint'
-                : 'bg-proto-soft text-proto'
+                : 'bg-zap-soft text-zap-ink'
           }`}
         >
           {live.status}
@@ -119,7 +119,7 @@ export function LiveClassPage() {
           <div className="rounded-xl border border-line bg-surface/50 px-4 py-10 text-center text-sm text-ink-soft">
             Enrol in{' '}
             {bootcamp ? (
-              <Link to={`/learn/${naddrOf(bootcamp.addr)}`} className="text-proto hover:underline">
+              <Link to={`/learn/${naddrOf(bootcamp.addr)}`} className="text-zap-ink hover:underline">
                 {bootcamp.title}
               </Link>
             ) : (
@@ -143,7 +143,7 @@ export function LiveClassPage() {
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder={live.streaming ?? 'Stream URL (YouTube / Twitch / HLS)'}
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-proto"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-zap"
             />
             <div className="flex gap-2">
               <button
@@ -198,12 +198,12 @@ export function LiveClassPage() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Message the class…"
-              className="flex-1 rounded-full border border-line-strong bg-surface px-4 py-2 text-sm outline-none focus:border-proto"
+              className="flex-1 rounded-full border border-line-strong bg-surface px-4 py-2 text-sm outline-none focus:border-zap"
             />
             <button
               type="submit"
               disabled={!text.trim()}
-              className="rounded-full bg-zap px-4 py-2 text-sm font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+              className="rounded-full bg-zap px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Send
             </button>

@@ -19,7 +19,7 @@ export function PwaPrompt() {
             <button
               type="button"
               onClick={() => updateServiceWorker(true)}
-              className="rounded-full bg-zap px-3 py-1 text-xs font-semibold text-bg"
+              className="rounded-full bg-zap px-3 py-1 text-xs font-semibold text-white"
             >
               Reload
             </button>

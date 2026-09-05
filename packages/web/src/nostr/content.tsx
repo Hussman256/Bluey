@@ -14,7 +14,7 @@ function MentionName({ pubkey }: { pubkey: string }) {
   const p = useProfileValue(pubkey);
   const name = p?.displayName || p?.name || shortNpub(pubkey);
   return (
-    <Link to={`/p/${npubOf(pubkey)}`} className="text-proto hover:underline">
+    <Link to={`/p/${npubOf(pubkey)}`} className="text-zap-ink hover:underline">
       @{name}
     </Link>
   );
@@ -91,7 +91,7 @@ export function NoteContent({ content, small = false }: { content: string; small
             href={piece}
             target="_blank"
             rel="noreferrer noopener"
-            className="text-proto hover:underline"
+            className="text-zap-ink hover:underline"
           >
             {piece.replace(/^https?:\/\//, '').slice(0, 60)}
           </a>,
@@ -133,7 +133,7 @@ export function NoteContent({ content, small = false }: { content: string; small
 
     if (piece.startsWith('#') && piece.length > 1) {
       inline.push(
-        <span key={`h${i}`} className="text-proto/80">
+        <span key={`h${i}`} className="text-zap-ink/80">
           {piece}
         </span>,
       );

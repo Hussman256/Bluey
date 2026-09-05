@@ -1,94 +1,99 @@
-import { useNDKCurrentUser } from '@nostr-dev-kit/react';
-import { useMemo } from 'react';
+import { useFollows, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProfileBadges } from './badges';
 import { getIndexClient } from './indexClient';
 import { useIndexStatus } from './useIndex';
-import { useVerifiedShipCount } from './useShips';
-import { useEffect, useState } from 'react';
+import { KIND } from './kinds';
 
 /**
- * The 1btc builder score.
+ * "Vouched" — the public, re-derivable signals shown on a profile.
  *
- * NOT a number stored anywhere. It's this client's reading of four PUBLIC,
- * verifiable signals — another client could weight them differently, and that's
- * the point. Shown with its breakdown so it's never a black box.
+ * NOT a score. Just facts a newcomer needs to answer "is this person real and
+ * here in good faith?" — every one of them checkable by any other client:
+ *  - how many people the viewer follows also follow this person (web of trust)
+ *  - sats received (zap receipts, via the index)
+ *  - courses completed (NIP-58 completion badges)
+ *  - roughly how long they've been on Nostr (earliest kind-0 we can see)
  */
-export interface BuilderScore {
-  total: number; // 0..100
-  parts: {
-    sats: { raw: number; n: number };
-    trust: { raw: number; n: number };
-    badges: { raw: number; n: number };
-    ships: { raw: number; n: number };
-  };
+export interface Vouched {
+  mutualFollows: number | null;
+  satsReceived: number | null;
+  courses: string[];
+  firstSeen: number | null;
   ready: boolean;
 }
 
-const WEIGHTS = { sats: 0.35, trust: 0.35, badges: 0.15, ships: 0.15 };
-
-export function computeScore(input: {
-  satsReceived: number;
-  wot: number;
-  badges: number;
-  verifiedShips: number;
-}): BuilderScore {
-  const satsN = Math.min(Math.log10(1 + Math.max(0, input.satsReceived)) / 7, 1); // 10M sats → 1
-  const trustN = Math.max(0, Math.min(input.wot, 1));
-  const badgeN = Math.min(input.badges / 5, 1);
-  const shipN = Math.min(input.verifiedShips / 8, 1);
-  const total = Math.round(
-    100 * (WEIGHTS.sats * satsN + WEIGHTS.trust * trustN + WEIGHTS.badges * badgeN + WEIGHTS.ships * shipN),
-  );
-  return {
-    total,
-    parts: {
-      sats: { raw: input.satsReceived, n: satsN },
-      trust: { raw: input.wot, n: trustN },
-      badges: { raw: input.badges, n: badgeN },
-      ships: { raw: input.verifiedShips, n: shipN },
-    },
-    ready: true,
-  };
-}
-
-export function useBuilderScore(pubkey?: string): BuilderScore | null {
+export function useVouched(pubkey?: string): Vouched | null {
   const me = useNDKCurrentUser();
+  const myFollows = useFollows();
   const indexUp = useIndexStatus();
   const badges = useProfileBadges(pubkey);
-  const verifiedShips = useVerifiedShipCount(pubkey);
-  const [idx, setIdx] = useState<{ sats: number; wot: number } | null>(null);
 
+  // contact lists that tag this pubkey → people who follow them
+  const { events: followers } = useSubscribe(
+    pubkey && me?.pubkey && pubkey !== me.pubkey
+      ? [{ kinds: [KIND.Contacts], '#p': [pubkey], limit: 600 }]
+      : false,
+    { closeOnEose: false },
+    [pubkey, me?.pubkey],
+  );
+
+  // earliest kind-0 we can see, as a "joined" proxy
+  const { events: profileEvents } = useSubscribe(
+    pubkey ? [{ kinds: [KIND.Metadata], authors: [pubkey], limit: 5 }] : false,
+    { closeOnEose: true },
+    [pubkey],
+  );
+
+  const [sats, setSats] = useState<number | null>(null);
   useEffect(() => {
     if (!pubkey || !indexUp) {
       // oxlint-disable-next-line react/set-state-in-effect
-      setIdx(null);
+      setSats(null);
       return;
     }
     let live = true;
-    Promise.all([
-      getIndexClient().request('profile', { pubkey }).catch(() => null),
-      getIndexClient()
-        .request('wot', { pubkey, from: me?.pubkey })
-        .catch(() => null),
-    ]).then(([p, w]) => {
-      if (!live) return;
-      const sats = p?.counts?.[0]?.zapSats ?? 0;
-      const wot = w?.score ?? 0;
-      setIdx({ sats, wot });
-    });
+    getIndexClient()
+      .request('profile', { pubkey })
+      .then((p) => {
+        if (live) setSats(p?.counts?.[0]?.zapSats ?? 0);
+      })
+      .catch(() => {
+        if (live) setSats(null);
+      });
     return () => {
       live = false;
     };
-  }, [pubkey, indexUp, me?.pubkey]);
+  }, [pubkey, indexUp]);
 
   return useMemo(() => {
     if (!pubkey) return null;
-    if (!idx) return { ...computeScore({ satsReceived: 0, wot: 0, badges: 0, verifiedShips: 0 }), ready: false };
-    return computeScore({
-      satsReceived: idx.sats,
-      wot: idx.wot,
-      badges: badges.length,
-      verifiedShips,
-    });
-  }, [pubkey, idx, badges.length, verifiedShips]);
+
+    const mutualFollows =
+      me?.pubkey && pubkey !== me.pubkey
+        ? new Set(followers.map((e) => e.pubkey).filter((a) => myFollows.has(a))).size
+        : null;
+
+    const courses = [
+      ...new Set(
+        badges
+          .map((b) => b.name)
+          .filter((n) => / — Completed$/.test(n))
+          .map((n) => n.replace(/ — Completed$/, '')),
+      ),
+    ];
+
+    const firstSeen =
+      profileEvents.length > 0
+        ? Math.min(...profileEvents.map((e) => e.created_at ?? Infinity))
+        : null;
+
+    return {
+      mutualFollows,
+      satsReceived: sats,
+      courses,
+      firstSeen: Number.isFinite(firstSeen) ? firstSeen : null,
+      ready: true,
+    };
+  }, [pubkey, me, followers, myFollows, badges, profileEvents, sats]);
 }

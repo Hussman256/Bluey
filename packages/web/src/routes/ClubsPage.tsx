@@ -28,12 +28,12 @@ export function ClubsPage() {
   return (
     <div>
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-bg/90 px-4 py-3.5 backdrop-blur">
-        <span className="font-display text-lg font-bold">Clubs</span>
+        <span className="font-display text-xl font-extrabold tracking-tight">Clubs</span>
         {me && (
           <button
             type="button"
             onClick={() => setCreating((v) => !v)}
-            className="rounded-full bg-zap px-3.5 py-1.5 text-sm font-semibold text-bg hover:opacity-90"
+            className="rounded-full bg-zap px-3.5 py-1.5 text-sm font-semibold text-white hover:opacity-90"
           >
             {creating ? 'Cancel' : 'New club'}
           </button>
@@ -45,20 +45,20 @@ export function ClubsPage() {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Club name — e.g. Rust Builders"
-            className="rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-proto"
+            placeholder="Club name — e.g. Lightning Study Group"
+            className="rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-zap"
           />
           <textarea
             value={about}
             onChange={(e) => setAbout(e.target.value)}
             rows={2}
             placeholder="What's this club for? (optional)"
-            className="resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-proto"
+            className="resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-zap"
           />
           <button
             type="submit"
             disabled={!name.trim() || busy}
-            className="self-start rounded-full bg-ink px-4 py-2 text-sm font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+            className="self-start rounded-full bg-slab px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
           >
             {busy ? 'Creating…' : 'Create club'}
           </button>
@@ -85,7 +85,7 @@ export function ClubsPage() {
               {c.picture ? (
                 <img src={c.picture} alt="" className="h-11 w-11 rounded-xl object-cover" />
               ) : (
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-proto-soft font-display text-sm font-bold text-proto">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-zap-soft font-display text-sm font-bold text-zap-ink">
                   {c.name.slice(0, 2).toUpperCase()}
                 </div>
               )}

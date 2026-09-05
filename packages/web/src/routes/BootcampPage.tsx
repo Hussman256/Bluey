@@ -137,7 +137,7 @@ export function BootcampPage() {
                 type="button"
                 onClick={enrol}
                 disabled={busy !== null}
-                className="rounded-full bg-zap px-4 py-1.5 text-sm font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+                className="rounded-full bg-zap px-4 py-1.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
               >
                 {busy === 'enrol' ? '…' : 'Enrol — free'}
               </button>
@@ -145,7 +145,7 @@ export function BootcampPage() {
           {bootcamp.cohortId && (enrolled || isTutor) && (
             <Link
               to={`/clubs/${bootcamp.cohortId}`}
-              className="rounded-full border border-line-strong px-3 py-1.5 text-xs font-semibold hover:border-proto hover:text-proto"
+              className="rounded-full border border-line-strong px-3 py-1.5 text-xs font-semibold hover:border-zap hover:text-ink-soft"
             >
               Cohort chat →
             </Link>
@@ -164,7 +164,7 @@ export function BootcampPage() {
             <button
               type="button"
               onClick={() => setShowLesson((v) => !v)}
-              className="text-xs font-semibold text-proto hover:underline"
+              className="text-xs font-semibold text-zap-ink hover:underline"
             >
               {showLesson ? 'cancel' : '+ lesson'}
             </button>
@@ -177,19 +177,19 @@ export function BootcampPage() {
               value={lTitle}
               onChange={(e) => setLTitle(e.target.value)}
               placeholder="Lesson title"
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-proto"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-zap"
             />
             <textarea
               value={lContent}
               onChange={(e) => setLContent(e.target.value)}
               rows={5}
               placeholder="Lesson content (Markdown supported)"
-              className="resize-none rounded-lg border border-line-strong bg-surface px-3 py-2 font-mono text-xs outline-none focus:border-proto"
+              className="resize-none rounded-lg border border-line-strong bg-surface px-3 py-2 font-mono text-xs outline-none focus:border-zap"
             />
             <button
               type="submit"
               disabled={busy === 'lesson' || !lTitle.trim() || !lContent.trim()}
-              className="self-start rounded-full bg-ink px-3.5 py-1.5 text-xs font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+              className="self-start rounded-full bg-slab px-3.5 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               {busy === 'lesson' ? 'Publishing…' : 'Publish lesson'}
             </button>
@@ -227,7 +227,7 @@ export function BootcampPage() {
             <button
               type="button"
               onClick={() => setShowLive((v) => !v)}
-              className="text-xs font-semibold text-proto hover:underline"
+              className="text-xs font-semibold text-zap-ink hover:underline"
             >
               {showLive ? 'cancel' : '+ schedule'}
             </button>
@@ -240,18 +240,18 @@ export function BootcampPage() {
               value={liveTitle}
               onChange={(e) => setLiveTitle(e.target.value)}
               placeholder="Session title"
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-proto"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-zap"
             />
             <input
               value={liveUrl}
               onChange={(e) => setLiveUrl(e.target.value)}
               placeholder="Stream URL (HLS / YouTube / Twitch) — optional, add later"
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-proto"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-zap"
             />
             <button
               type="submit"
               disabled={busy === 'live' || !liveTitle.trim()}
-              className="self-start rounded-full bg-ink px-3.5 py-1.5 text-xs font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+              className="self-start rounded-full bg-slab px-3.5 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               {busy === 'live' ? 'Scheduling…' : 'Schedule'}
             </button>
@@ -274,7 +274,7 @@ export function BootcampPage() {
                         ? 'bg-danger/15 text-danger'
                         : lc.status === 'ended'
                           ? 'bg-sunk text-ink-faint'
-                          : 'bg-proto-soft text-proto'
+                          : 'bg-zap-soft text-zap-ink'
                     }`}
                   >
                     {lc.status}
@@ -297,7 +297,7 @@ export function BootcampPage() {
               type="button"
               onClick={publishBadge}
               disabled={busy === 'badge'}
-              className="text-xs font-semibold text-proto hover:underline disabled:opacity-40"
+              className="text-xs font-semibold text-zap-ink hover:underline disabled:opacity-40"
             >
               {busy === 'badge' ? '…' : 'define badge'}
             </button>

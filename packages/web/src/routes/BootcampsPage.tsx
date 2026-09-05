@@ -29,12 +29,12 @@ export function BootcampsPage() {
   return (
     <div>
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-bg/90 px-4 py-3.5 backdrop-blur">
-        <span className="font-display text-lg font-bold">Bootcamps</span>
+        <span className="font-display text-xl font-extrabold tracking-tight">Bootcamps</span>
         {me && (
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="rounded-full bg-zap px-3.5 py-1.5 text-sm font-semibold text-bg hover:opacity-90"
+            className="rounded-full bg-zap px-3.5 py-1.5 text-sm font-semibold text-white hover:opacity-90"
           >
             {open ? 'Cancel' : 'Teach one'}
           </button>
@@ -47,19 +47,19 @@ export function BootcampsPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Bootcamp title — e.g. Ship a Nostr client in 2 weeks"
-            className="rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-proto"
+            className="rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-zap"
           />
           <textarea
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             rows={2}
             placeholder="Who's it for and what will they build?"
-            className="resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-proto"
+            className="resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-zap"
           />
           <button
             type="submit"
             disabled={!title.trim() || busy}
-            className="self-start rounded-full bg-ink px-4 py-2 text-sm font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+            className="self-start rounded-full bg-slab px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
           >
             {busy ? 'Creating…' : 'Create bootcamp'}
           </button>
@@ -88,7 +88,7 @@ export function BootcampsPage() {
               {b.image ? (
                 <img src={b.image} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover" />
               ) : (
-                <div className="grid h-16 w-24 shrink-0 place-items-center rounded-lg bg-proto-soft font-display text-xs font-bold text-proto">
+                <div className="grid h-16 w-24 shrink-0 place-items-center rounded-lg bg-zap-soft font-display text-xs font-bold text-zap-ink">
                   {b.lessons.length} lesson{b.lessons.length === 1 ? '' : 's'}
                 </div>
               )}

@@ -92,7 +92,7 @@ export function SettingsPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-4 py-3.5 font-display text-lg font-bold backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-4 py-3.5 font-display text-xl font-extrabold tracking-tight backdrop-blur">
         Settings
       </header>
 
@@ -110,7 +110,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={refreshBalance}
-                  className="rounded-lg border border-line-strong px-2.5 py-1 text-xs hover:border-proto"
+                  className="rounded-lg border border-line-strong px-2.5 py-1 text-xs hover:border-zap"
                 >
                   Refresh
                 </button>
@@ -132,12 +132,12 @@ export function SettingsPage() {
                   value={amt}
                   min={1}
                   onChange={(e) => setAmt(Number(e.target.value))}
-                  className="w-28 rounded-lg border border-line-strong bg-surface px-2.5 py-1.5 font-mono text-xs outline-none focus:border-proto"
+                  className="w-28 rounded-lg border border-line-strong bg-surface px-2.5 py-1.5 font-mono text-xs outline-none focus:border-zap"
                 />
                 <button
                   type="button"
                   onClick={makeInvoice}
-                  className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-bg hover:opacity-90"
+                  className="rounded-lg bg-slab px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
                 >
                   Create invoice
                 </button>
@@ -157,7 +157,7 @@ export function SettingsPage() {
           <div className="space-y-2.5 text-sm">
             <p className="text-ink-soft">
               1btc holds no funds. Connect a wallet you control with a{' '}
-              <span className="font-mono text-proto">nostr+walletconnect://</span> string — from
+              <span className="font-mono text-zap-ink">nostr+walletconnect://</span> string — from
               Alby, Zeus, Coinos, or Alby Hub.
             </p>
             <textarea
@@ -165,13 +165,13 @@ export function SettingsPage() {
               onChange={(e) => setUri(e.target.value)}
               rows={3}
               placeholder="nostr+walletconnect://…"
-              className="w-full resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-3 font-mono text-xs outline-none focus:border-proto"
+              className="w-full resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-3 font-mono text-xs outline-none focus:border-zap"
             />
             <button
               type="button"
               onClick={() => connectNwc(uri)}
               disabled={status === 'connecting' || !uri.trim()}
-              className="rounded-xl bg-zap px-4 py-2.5 text-sm font-semibold text-bg transition hover:opacity-90 disabled:opacity-50"
+              className="rounded-xl bg-zap px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
               {status === 'connecting' ? 'Connecting…' : 'Connect wallet'}
             </button>
@@ -268,12 +268,12 @@ export function SettingsPage() {
             value={newRelay}
             onChange={(e) => setNewRelay(e.target.value)}
             placeholder="wss://relay.example.com"
-            className="flex-1 rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-proto"
+            className="flex-1 rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-zap"
           />
           <button
             type="submit"
             disabled={!newRelay.trim()}
-            className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+            className="shrink-0 rounded-lg bg-slab px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
           >
             Add
           </button>
