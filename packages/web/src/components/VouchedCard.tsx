@@ -4,9 +4,6 @@ import { useVouched } from '../nostr/reputation';
 const fmtSats = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n.toLocaleString();
 
-const fmtMonth = (ts: number) =>
-  new Date(ts * 1000).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
-
 function Row({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
     <div className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
@@ -29,8 +26,7 @@ export function VouchedCard({ pubkey }: { pubkey: string }) {
   const hasMutual = v.mutualFollows != null && v.mutualFollows > 0;
   const hasSats = v.satsReceived != null && v.satsReceived > 0;
   const hasCourses = v.courses.length > 0;
-  const hasFirstSeen = v.firstSeen != null;
-  if (!hasMutual && !hasSats && !hasCourses && !hasFirstSeen) return null;
+  if (!hasMutual && !hasSats && !hasCourses) return null;
 
   return (
     <div className="mt-4 rounded-2xl bg-slab p-5 text-slab-ink">
@@ -84,19 +80,6 @@ export function VouchedCard({ pubkey }: { pubkey: string }) {
                 <span className="font-semibold text-white">{c}</span>
               </span>
             ))}
-          </Row>
-        )}
-
-        {hasFirstSeen && (
-          <Row
-            icon={
-              <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7v5l3 2" strokeLinecap="round" />
-              </svg>
-            }
-          >
-            On Nostr since <span className="font-semibold text-white">{fmtMonth(v.firstSeen as number)}</span>
           </Row>
         )}
       </div>

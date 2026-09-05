@@ -5,6 +5,7 @@ import { useClubsRelaySet } from '../nostr/clubs';
 import { useServiceStatus } from '../nostr/useServiceStatus';
 import { useWallet } from '../wallet/WalletProvider';
 import { Avatar, Mark } from './primitives';
+import { RightRail } from './RightRail';
 import { useBlockHeight } from './useBlockHeight';
 
 function Dot({ ok, label }: { ok: boolean; label: string }) {
@@ -68,7 +69,7 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
       </div>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-1">
+      <div className="mx-auto flex w-full max-w-[1140px] flex-1">
         {/* icon rail */}
         <aside className="sticky top-8 hidden h-[calc(100dvh-2rem)] w-[76px] shrink-0 flex-col items-center justify-between border-r border-line py-5 sm:flex">
           <div className="flex flex-col items-center gap-6">
@@ -124,6 +125,8 @@ export function Layout({ children }: { children: ReactNode }) {
 
         {/* main */}
         <main className="min-w-0 flex-1 border-r border-line pb-20 sm:pb-0">{children}</main>
+
+        <RightRail />
       </div>
 
       {/* mobile bottom nav */}

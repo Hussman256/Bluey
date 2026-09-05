@@ -13,13 +13,11 @@ import { KIND } from './kinds';
  *  - how many people the viewer follows also follow this person (web of trust)
  *  - sats received (zap receipts, via the index)
  *  - courses completed (NIP-58 completion badges)
- *  - roughly how long they've been on Nostr (earliest kind-0 we can see)
  */
 export interface Vouched {
   mutualFollows: number | null;
   satsReceived: number | null;
   courses: string[];
-  firstSeen: number | null;
   ready: boolean;
 }
 
@@ -36,13 +34,6 @@ export function useVouched(pubkey?: string): Vouched | null {
       : false,
     { closeOnEose: false },
     [pubkey, me?.pubkey],
-  );
-
-  // earliest kind-0 we can see, as a "joined" proxy
-  const { events: profileEvents } = useSubscribe(
-    pubkey ? [{ kinds: [KIND.Metadata], authors: [pubkey], limit: 5 }] : false,
-    { closeOnEose: true },
-    [pubkey],
   );
 
   const [sats, setSats] = useState<number | null>(null);
@@ -83,17 +74,11 @@ export function useVouched(pubkey?: string): Vouched | null {
       ),
     ];
 
-    const firstSeen =
-      profileEvents.length > 0
-        ? Math.min(...profileEvents.map((e) => e.created_at ?? Infinity))
-        : null;
-
     return {
       mutualFollows,
       satsReceived: sats,
       courses,
-      firstSeen: Number.isFinite(firstSeen) ? firstSeen : null,
       ready: true,
     };
-  }, [pubkey, me, followers, myFollows, badges, profileEvents, sats]);
+  }, [pubkey, me, followers, myFollows, badges, sats]);
 }
