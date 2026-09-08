@@ -1,12 +1,13 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useFollows, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Composer } from '../components/Composer';
 import { NoteCard } from '../components/NoteCard';
 import { LS } from '../nostr/config';
 import { EngagementScope } from '../nostr/engagement';
 import { BUILTIN_FEEDS, addDvmFeed, loadDvmFeeds, removeDvmFeed, type FeedRef } from '../nostr/feeds';
 import { KIND } from '../nostr/kinds';
+import { feedLangMode, inReadableScript, readableScripts } from '../nostr/lang';
 import { isMuted, useMutes } from '../nostr/mutes';
 import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
 import { useDvmFeed, useEventsByIds } from '../nostr/useDvmFeed';
@@ -19,6 +20,17 @@ export function FeedPage() {
   const follows = useFollows();
   const wot = useWebOfTrust();
   const mutes = useMutes();
+
+  const [langMode, setLangMode] = useState(feedLangMode);
+  const [scripts, setScripts] = useState(readableScripts);
+  useEffect(() => {
+    const h = () => {
+      setLangMode(feedLangMode());
+      setScripts(readableScripts());
+    };
+    window.addEventListener('1btc:feed-langs', h);
+    return () => window.removeEventListener('1btc:feed-langs', h);
+  }, []);
 
   const [dvmFeeds, setDvmFeeds] = useState(loadDvmFeeds);
   const allFeeds: FeedRef[] = useMemo(() => [...BUILTIN_FEEDS, ...dvmFeeds], [dvmFeeds]);
@@ -99,9 +111,15 @@ export function FeedPage() {
       source = list;
     }
 
+    const langOk = (e: NDKEvent) =>
+      langMode === 'all' ||
+      builtin === 'following' ||
+      e.kind === KIND.Repost ||
+      inReadableScript(e.content, scripts);
+
     const seen = new Set<string>();
     return source
-      .filter((e) => !isJunkNote(e) && !isMuted(e, mutes))
+      .filter((e) => !isJunkNote(e) && !isMuted(e, mutes) && langOk(e))
       .slice()
       .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
       .filter((e) => {
@@ -111,7 +129,7 @@ export function FeedPage() {
         return true;
       })
       .slice(0, 120);
-  }, [feed.kind, builtin, dvmEvents, ships, relayFollowing, relayDiscover, idx, wot, mutes]);
+  }, [feed.kind, builtin, dvmEvents, ships, relayFollowing, relayDiscover, idx, wot, mutes, langMode, scripts]);
 
   const engagementIds = useMemo(() => notes.map(subjectId), [notes]);
 

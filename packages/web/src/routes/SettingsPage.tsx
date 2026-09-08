@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { CLUBS_RELAY } from '../nostr/clubs';
 import { DEFAULT_RELAYS, INDEX_URL, loadRelayList, saveExtraRelays } from '../nostr/config';
 import { npubOf } from '../nostr/ids';
+import { feedLangMode, setFeedLangMode } from '../nostr/lang';
 import { useMuteActions } from '../nostr/mutes';
 import { useServiceStatus } from '../nostr/useServiceStatus';
 import { useWallet } from '../wallet/WalletProvider';
@@ -43,6 +44,7 @@ export function SettingsPage() {
   const [tick, setTick] = useState(0);
   const { mutes, addWord, removeWord, unmutePubkey } = useMuteActions();
   const [newMute, setNewMute] = useState('');
+  const [langMode, setLangMode] = useState(feedLangMode);
 
   // repaint connection dots periodically
   useEffect(() => {
@@ -282,6 +284,33 @@ export function SettingsPage() {
           </button>
         </form>
         {relayErr && <p className="mt-1 text-xs text-danger">{relayErr}</p>}
+      </Section>
+
+      <Section title="Feed language">
+        <p className="mb-3 text-xs text-ink-faint">
+          Discover and Latest lean on recency until your follow graph fills in, which floods
+          the feed with the busiest corners of Nostr. Keep it to scripts your device reads,
+          or show everything.
+        </p>
+        <div className="flex gap-2">
+          {(['mine', 'all'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => {
+                setFeedLangMode(m);
+                setLangMode(m);
+              }}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                langMode === m
+                  ? 'bg-slab text-white'
+                  : 'border border-line-strong text-ink-soft hover:text-ink'
+              }`}
+            >
+              {m === 'mine' ? 'Scripts I read' : 'Everything'}
+            </button>
+          ))}
+        </div>
       </Section>
 
       <Section title="Muted words">

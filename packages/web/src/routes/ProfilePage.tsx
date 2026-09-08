@@ -1,6 +1,7 @@
 import { useFollows, useNDKCurrentUser, useProfileValue, useSubscribe } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
+import { EditProfile } from '../components/EditProfile';
 import { NoteCard } from '../components/NoteCard';
 import { VouchedCard } from '../components/VouchedCard';
 import { useProfileBadges } from '../nostr/badges';
@@ -53,6 +54,7 @@ export function ProfilePage() {
   const [busyFollow, setBusyFollow] = useState(false);
   const [followOverride, setFollowOverride] = useState<boolean | null>(null);
   const [tab, setTab] = useState<Tab>('notes');
+  const [editing, setEditing] = useState(false);
 
   const followingActual = pubkey ? follows.has(pubkey) : false;
   const following = followOverride ?? followingActual;
@@ -125,6 +127,7 @@ export function ProfilePage() {
 
   return (
     <div>
+      {editing && isMe && <EditProfile pubkey={pubkey} onClose={() => setEditing(false)} />}
       <div className="h-32 w-full bg-sunk">
         {profile?.banner && <img src={profile.banner} alt="" className="h-full w-full object-cover" />}
       </div>
@@ -138,6 +141,15 @@ export function ProfilePage() {
             />
           ) : (
             <div className="h-20 w-20 rounded-full border-4 border-bg bg-zap-soft" />
+          )}
+          {isMe && (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="mb-1 rounded-full border border-line-strong px-5 py-1.5 text-sm font-bold transition hover:border-zap hover:text-zap-ink"
+            >
+              Edit profile
+            </button>
           )}
           {!isMe && me && (
             <div className="mb-1 flex items-center gap-2">
