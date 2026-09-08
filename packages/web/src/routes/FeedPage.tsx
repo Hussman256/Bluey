@@ -88,8 +88,12 @@ export function FeedPage() {
       let list = (idx.fromIndex && idx.data ? idx.data : relaySrc).filter(
         (e) => !isReplyNote(e),
       );
-      if (builtin === 'discover' && !idx.fromIndex && wot.size > 0)
-        list = list.filter((e) => wot.isTrusted(e.pubkey));
+      if (builtin === 'discover' && !idx.fromIndex) {
+        // No index ranking available. Only safe cut is the viewer's own trust
+        // graph — without it, relayDiscover is the raw firehose, so show nothing
+        // rather than spam and point the user at Latest.
+        list = wot.size > 0 ? list.filter((e) => wot.isTrusted(e.pubkey)) : [];
+      }
       source = list;
     }
 
@@ -207,9 +211,26 @@ export function FeedPage() {
       </EngagementScope>
 
       {notes.length === 0 && (
-        <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">
-          {feed.kind === 'dvm' && dvm.status === 'error' ? 'no results' : 'listening…'}
-        </p>
+        <div className="px-6 py-12 text-center">
+          {feed.kind === 'dvm' && dvm.status === 'error' ? (
+            <p className="font-mono text-xs text-ink-faint">no results</p>
+          ) : builtin === 'discover' && !idx.fromIndex && wot.size === 0 ? (
+            <p className="text-sm text-ink-soft">
+              Discover ranks by web of trust — it fills in once you follow a few people, or
+              when the 1btc index is reachable.{' '}
+              <button
+                type="button"
+                onClick={() => pick('latest')}
+                className="font-semibold text-zap-ink hover:underline"
+              >
+                Browse Latest
+              </button>{' '}
+              meanwhile.
+            </p>
+          ) : (
+            <p className="font-mono text-xs text-ink-faint">listening…</p>
+          )}
+        </div>
       )}
     </div>
   );

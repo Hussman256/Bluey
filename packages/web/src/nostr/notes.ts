@@ -1,3 +1,4 @@
+import { isSpamContent } from '@1btc/shared';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { KIND } from './kinds';
 
@@ -10,8 +11,8 @@ export function isReplyNote(e: NDKEvent): boolean {
 }
 
 /**
- * Heuristic junk filter. Some clients dump structured JSON into kind:1 content;
- * those are never real posts and just make the feed look broken.
+ * Heuristic junk filter: structured-JSON dumps (some clients post those) and
+ * SEO link-farm / hashtag-salad spam (see @1btc/shared `isSpamContent`).
  */
 export function isJunkNote(e: NDKEvent): boolean {
   if (e.kind !== KIND.Text) return false;
@@ -25,7 +26,7 @@ export function isJunkNote(e: NDKEvent): boolean {
       /* not JSON — keep it */
     }
   }
-  return false;
+  return isSpamContent(c);
 }
 
 /** The event id whose engagement a feed row represents (unwraps reposts). */

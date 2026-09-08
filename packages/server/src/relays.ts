@@ -1,4 +1,4 @@
-import { INGEST_KINDS, KIND, type NostrEventLike } from '@1btc/shared';
+import { INGEST_KINDS, KIND, isSpamContent, type NostrEventLike } from '@1btc/shared';
 import { type Filter, SimplePool, verifyEvent } from 'nostr-tools';
 import { config } from './config.ts';
 import { ingest } from './db.ts';
@@ -11,6 +11,11 @@ let rejected = 0;
 function handle(ev: NostrEventLike) {
   if (!ev?.id || !ev.sig || !Array.isArray(ev.tags)) return;
   if (!INGEST_KINDS.includes(ev.kind)) return;
+  // drop link-farm / hashtag-salad kind:1 before it ever hits the DB
+  if (ev.kind === KIND.Text && isSpamContent(ev.content)) {
+    rejected++;
+    return;
+  }
   try {
     if (!verifyEvent(ev as never)) {
       rejected++;

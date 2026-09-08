@@ -1,5 +1,6 @@
 import {
   KIND,
+  isSpamContent,
   type EngagementCount,
   type NostrEventLike,
   type NotificationItem,
@@ -93,33 +94,45 @@ export function feed(params: {
       .map(toEvent);
   }
 
-  const candidates = q.all<Row & { wot: number; eng: number }>(
-    `SELECT e.*, COALESCE(w.score, 0) AS wot,
+  const candidates = q
+    .all<Row & { wot: number; eng: number }>(
+      `SELECT e.*, COALESCE(w.score, 0) AS wot,
             (SELECT COALESCE(SUM(CASE WHEN kind=${KIND.ZapReceipt} THEN sats ELSE 0 END), 0)
                    + COUNT(*) FROM edges WHERE target_id = e.id) AS eng
      FROM events e
      LEFT JOIN wot w ON w.pubkey = e.pubkey
      WHERE e.kind IN (${KIND.Text}, ${KIND.Repost}) AND e.is_reply = 0 AND e.created_at < ?
      ORDER BY e.created_at DESC LIMIT 600`,
-    until,
-  );
+      until,
+    )
+    .filter((r) => r.kind !== KIND.Text || !isSpamContent(r.content));
 
   const trusted = params.pubkey ? trustSet(params.pubkey) : new Set<string>();
   const now = Date.now() / 1000;
 
-  return candidates
-    .map((r) => {
-      const ageH = Math.max(0.1, (now - r.created_at) / 3600);
-      const recency = 1 / (1 + ageH / 8);
-      // everyone gets a small floor so the feed is never empty; trusted authors
-      // and high web-of-trust authors rank far above it.
-      const trustBoost = trusted.has(r.pubkey) ? 1.5 : 0.05 + r.wot;
-      const engagement = 1 + Math.log1p(r.eng);
-      return { r, score: trustBoost * recency * engagement };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map((x) => toEvent(x.r));
+  // A viewer with a real follow graph gets follows-of-follows ranking. A viewer
+  // with almost no follows (brand-new / logged-out) has no trust root, so we
+  // must NOT fall back to the raw firehose — require a real global web-of-trust
+  // score instead, and only relax that if it would leave the feed near-empty.
+  const coldStart = trusted.size < 15;
+  const MIN_WOT = 0.12;
+
+  const rank = (minWot: number) =>
+    candidates
+      .filter((r) => trusted.has(r.pubkey) || r.wot >= minWot)
+      .map((r) => {
+        const ageH = Math.max(0.1, (now - r.created_at) / 3600);
+        const recency = 1 / (1 + ageH / 8);
+        const trustBoost = trusted.has(r.pubkey) ? 1.5 : r.wot;
+        const engagement = 1 + Math.log1p(r.eng);
+        return { r, score: trustBoost * recency * engagement };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+  let ranked = rank(coldStart ? MIN_WOT : 0.02);
+  if (ranked.length < 8) ranked = rank(0); // network genuinely too thin — show what we have
+  return ranked.map((x) => toEvent(x.r));
 }
 
 // ---------- thread ----------

@@ -1,6 +1,7 @@
 import { useNDKCurrentUser, useProfileValue } from '@nostr-dev-kit/react';
 import { Link } from 'react-router-dom';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
+import { isJunkNote } from '../nostr/notes';
 import { useIndexFeed } from '../nostr/useIndex';
 import { Avatar } from './primitives';
 
@@ -28,7 +29,12 @@ export function RightRail() {
   const { data, fromIndex } = useIndexFeed({ scope: 'discover', pubkey: me?.pubkey, limit: 12 });
 
   const trending = (data ?? [])
-    .filter((e) => snippet(e.content).length > 20 && !e.tags.some((t) => t[0] === 'e'))
+    .filter(
+      (e) =>
+        !isJunkNote(e) &&
+        snippet(e.content).length > 20 &&
+        !e.tags.some((t) => t[0] === 'e'),
+    )
     .slice(0, 5);
 
   return (
