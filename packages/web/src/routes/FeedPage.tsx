@@ -7,6 +7,7 @@ import { LS } from '../nostr/config';
 import { EngagementScope } from '../nostr/engagement';
 import { BUILTIN_FEEDS, addDvmFeed, loadDvmFeeds, removeDvmFeed, type FeedRef } from '../nostr/feeds';
 import { KIND } from '../nostr/kinds';
+import { isMuted, useMutes } from '../nostr/mutes';
 import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
 import { useDvmFeed, useEventsByIds } from '../nostr/useDvmFeed';
 import { useIndexFeed } from '../nostr/useIndex';
@@ -17,6 +18,7 @@ export function FeedPage() {
   const me = useNDKCurrentUser();
   const follows = useFollows();
   const wot = useWebOfTrust();
+  const mutes = useMutes();
 
   const [dvmFeeds, setDvmFeeds] = useState(loadDvmFeeds);
   const allFeeds: FeedRef[] = useMemo(() => [...BUILTIN_FEEDS, ...dvmFeeds], [dvmFeeds]);
@@ -99,7 +101,7 @@ export function FeedPage() {
 
     const seen = new Set<string>();
     return source
-      .filter((e) => !isJunkNote(e))
+      .filter((e) => !isJunkNote(e) && !isMuted(e, mutes))
       .slice()
       .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
       .filter((e) => {
@@ -109,7 +111,7 @@ export function FeedPage() {
         return true;
       })
       .slice(0, 120);
-  }, [feed.kind, builtin, dvmEvents, ships, relayFollowing, relayDiscover, idx, wot]);
+  }, [feed.kind, builtin, dvmEvents, ships, relayFollowing, relayDiscover, idx, wot, mutes]);
 
   const engagementIds = useMemo(() => notes.map(subjectId), [notes]);
 

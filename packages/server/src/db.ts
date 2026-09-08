@@ -72,6 +72,16 @@ db.exec(`
     updated_at INTEGER NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS reports (
+    reporter   TEXT NOT NULL,
+    target     TEXT NOT NULL,   -- reported event id or pubkey
+    ref        TEXT NOT NULL,   -- 'e' or 'p'
+    type       TEXT,            -- NIP-56 report type
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (reporter, target)
+  );
+  CREATE INDEX IF NOT EXISTS ix_reports_target ON reports (target);
+
   CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT NOT NULL);
 `);
 
@@ -125,6 +135,9 @@ const insEdge = db.prepare(`
 `);
 const insMention = db.prepare(`
   INSERT OR IGNORE INTO mentions (event_id, pubkey, author, created_at) VALUES (?, ?, ?, ?)
+`);
+const insReport = db.prepare(`
+  INSERT OR IGNORE INTO reports (reporter, target, ref, type, created_at) VALUES (?, ?, ?, ?, ?)
 `);
 const getFollowTs = db.prepare(`SELECT v FROM meta WHERE k = ?`);
 const setFollowTs = db.prepare(`INSERT OR REPLACE INTO meta (k, v) VALUES (?, ?)`);
@@ -202,6 +215,14 @@ export function ingest(ev: NostrEventLike): boolean {
   } else if (ev.kind === KIND.Reaction || ev.kind === KIND.Repost || ev.kind === KIND.GenericRepost) {
     const target = ev.tags.filter((t) => t[0] === 'e').pop()?.[1];
     if (target) insEdge.run(ev.id, target, ev.kind, ev.pubkey, ev.created_at, 0);
+  } else if (ev.kind === KIND.Report) {
+    // NIP-56: ["e", <id>, <type>] and/or ["p", <pubkey>, <type>]
+    for (const t of ev.tags) {
+      if ((t[0] === 'e' || t[0] === 'p') && /^[0-9a-f]{64}$/.test(t[1] ?? '')) {
+        const type = t[2] || t[3] || null;
+        insReport.run(ev.pubkey, t[1], t[0], type, ev.created_at);
+      }
+    }
   } else if (ev.kind === KIND.ZapReceipt) {
     const target = ev.tags.find((t) => t[0] === 'e')?.[1];
     const zapper = ev.tags.find((t) => t[0] === 'P')?.[1] ?? ev.pubkey;
@@ -227,6 +248,7 @@ export function pruneOld(): number {
     .changes;
   db.prepare(`DELETE FROM edges WHERE created_at < ?`).run(cutoff);
   db.prepare(`DELETE FROM mentions WHERE created_at < ?`).run(cutoff);
+  db.prepare(`DELETE FROM reports WHERE created_at < ?`).run(cutoff);
   if (ftsAvailable) {
     db.exec(
       `DELETE FROM note_fts WHERE id NOT IN (SELECT id FROM events WHERE kind = ${KIND.Text})`,

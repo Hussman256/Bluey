@@ -1,6 +1,7 @@
 import { useNDKCurrentUser, useProfileValue } from '@nostr-dev-kit/react';
 import { Link } from 'react-router-dom';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
+import { isMuted, useMutes } from '../nostr/mutes';
 import { isJunkNote } from '../nostr/notes';
 import { useIndexFeed } from '../nostr/useIndex';
 import { Avatar } from './primitives';
@@ -26,12 +27,14 @@ function TrendingRow({ event }: { event: NDKEvent }) {
 
 export function RightRail() {
   const me = useNDKCurrentUser();
+  const mutes = useMutes();
   const { data, fromIndex } = useIndexFeed({ scope: 'discover', pubkey: me?.pubkey, limit: 12 });
 
   const trending = (data ?? [])
     .filter(
       (e) =>
         !isJunkNote(e) &&
+        !isMuted(e, mutes) &&
         snippet(e.content).length > 20 &&
         !e.tags.some((t) => t[0] === 'e'),
     )

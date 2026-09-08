@@ -110,6 +110,23 @@ export function feed(params: {
   const trusted = params.pubkey ? trustSet(params.pubkey) : new Set<string>();
   const now = Date.now() / 1000;
 
+  // NIP-56 reports: an event id or author is suppressed once reporters carry
+  // enough web-of-trust weight between them (sybil-resistant) or enough
+  // distinct real accounts have flagged it.
+  const reported = new Set(
+    q
+      .all<{ target: string }>(
+        `SELECT r.target
+         FROM reports r
+         LEFT JOIN wot w ON w.pubkey = r.reporter
+         GROUP BY r.target
+         HAVING COALESCE(SUM(w.score), 0) >= 0.10
+             OR SUM(CASE WHEN w.score > 0 THEN 1 ELSE 0 END) >= 3`,
+      )
+      .map((r) => r.target),
+  );
+  const flagged = (r: Row) => reported.has(r.id) || reported.has(r.pubkey);
+
   // A viewer with a real follow graph gets follows-of-follows ranking. A viewer
   // with almost no follows (brand-new / logged-out) has no trust root, so we
   // must NOT fall back to the raw firehose — require a real global web-of-trust
@@ -119,7 +136,7 @@ export function feed(params: {
 
   const rank = (minWot: number) =>
     candidates
-      .filter((r) => trusted.has(r.pubkey) || r.wot >= minWot)
+      .filter((r) => !flagged(r) && (trusted.has(r.pubkey) || r.wot >= minWot))
       .map((r) => {
         const ageH = Math.max(0.1, (now - r.created_at) / 3600);
         const recency = 1 / (1 + ageH / 8);

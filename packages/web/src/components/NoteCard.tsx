@@ -6,9 +6,76 @@ import { parseAddr } from '../nostr/bootcamps';
 import { NoteContent } from '../nostr/content';
 import { useNoteStats } from '../nostr/engagement';
 import { KIND } from '../nostr/kinds';
+import { useMuteActions } from '../nostr/mutes';
 import { SourceTitle } from '../nostr/sourceTitle';
 import { Avatar, DisplayName, Handle, RelativeTime } from './primitives';
 import { ZapButton } from './ZapButton';
+
+/** Per-note overflow: mute the author, or file a NIP-56 spam report. */
+function NoteMenu({ event }: { event: NDKEvent }) {
+  const { ndk } = useNDK();
+  const me = useNDKCurrentUser();
+  const { mutePubkey } = useMuteActions();
+  const [open, setOpen] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+  if (!me || me.pubkey === event.pubkey) return null;
+
+  async function report() {
+    if (!ndk) return;
+    const r = new NDKEvent(ndk);
+    r.kind = KIND.Report;
+    r.content = '';
+    r.tags = [
+      ['e', event.id, 'spam'],
+      ['p', event.pubkey, 'spam'],
+    ];
+    await r.publish().catch(() => undefined);
+    setDone('Reported');
+  }
+
+  return (
+    <div className="relative ml-auto">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="rounded-full px-2 py-1 text-xs transition hover:bg-surface hover:text-ink"
+        aria-label="More"
+      >
+        <ActionIcon path="M12 5h.01M12 12h.01M12 19h.01" />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-8 z-20 w-44 overflow-hidden rounded-xl border border-line bg-bg py-1 text-sm shadow-lg"
+          onMouseLeave={() => setOpen(false)}
+        >
+          {done ? (
+            <span className="block px-3 py-2 text-xs text-ink-faint">{done}</span>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  void mutePubkey(event.pubkey);
+                  setOpen(false);
+                }}
+                className="block w-full px-3 py-2 text-left hover:bg-surface"
+              >
+                Mute this account
+              </button>
+              <button
+                type="button"
+                onClick={() => void report()}
+                className="block w-full px-3 py-2 text-left text-danger hover:bg-danger/10"
+              >
+                Report as spam
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ActionIcon({ path, filled = false }: { path: string; filled?: boolean }) {
   return (
@@ -189,6 +256,7 @@ function PlainNote({ event, bare = false }: { event: NDKEvent; bare?: boolean })
             totalSats={stats.zapSats}
             count={stats.zapCount}
           />
+          <NoteMenu event={event} />
         </div>
       </div>
     </article>

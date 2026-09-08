@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { CLUBS_RELAY } from '../nostr/clubs';
 import { DEFAULT_RELAYS, INDEX_URL, loadRelayList, saveExtraRelays } from '../nostr/config';
 import { npubOf } from '../nostr/ids';
+import { useMuteActions } from '../nostr/mutes';
 import { useServiceStatus } from '../nostr/useServiceStatus';
 import { useWallet } from '../wallet/WalletProvider';
 
@@ -40,6 +41,8 @@ export function SettingsPage() {
   const [newRelay, setNewRelay] = useState('');
   const [relayErr, setRelayErr] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  const { mutes, addWord, removeWord, unmutePubkey } = useMuteActions();
+  const [newMute, setNewMute] = useState('');
 
   // repaint connection dots periodically
   useEffect(() => {
@@ -279,6 +282,72 @@ export function SettingsPage() {
           </button>
         </form>
         {relayErr && <p className="mt-1 text-xs text-danger">{relayErr}</p>}
+      </Section>
+
+      <Section title="Muted words">
+        <p className="mb-3 text-xs text-ink-faint">
+          Notes containing these words — or a muted <code className="font-mono">#hashtag</code> —
+          are hidden from every feed. Synced to your other clients (NIP-51).
+        </p>
+        {(mutes.words.length > 0 || mutes.hashtags.length > 0) && (
+          <ul className="mb-3 flex flex-wrap gap-1.5">
+            {[...mutes.hashtags.map((h) => `#${h}`), ...mutes.words].map((w) => (
+              <li key={w}>
+                <button
+                  type="button"
+                  onClick={() => removeWord(w.replace(/^#/, ''))}
+                  className="flex items-center gap-1.5 rounded-full border border-line-strong px-2.5 py-1 text-xs text-ink-soft hover:border-danger hover:text-danger"
+                >
+                  {w}
+                  <span aria-hidden="true">×</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (newMute.trim()) {
+              void addWord(newMute);
+              setNewMute('');
+            }
+          }}
+          className="flex gap-2"
+        >
+          <input
+            value={newMute}
+            onChange={(e) => setNewMute(e.target.value)}
+            placeholder="word or #hashtag"
+            className="flex-1 rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-zap"
+          />
+          <button
+            type="submit"
+            disabled={!newMute.trim()}
+            className="shrink-0 rounded-lg bg-slab px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
+          >
+            Mute
+          </button>
+        </form>
+        {mutes.pubkeys.length > 0 && (
+          <div className="mt-4">
+            <div className="mb-1.5 text-xs text-ink-faint">Muted accounts</div>
+            <ul className="space-y-1">
+              {mutes.pubkeys.map((pk) => (
+                <li key={pk} className="flex items-center justify-between gap-2">
+                  <span className="truncate font-mono text-xs text-ink-soft">{npubOf(pk)}</span>
+                  <button
+                    type="button"
+                    onClick={() => unmutePubkey(pk)}
+                    className="shrink-0 text-xs text-ink-faint hover:text-zap-ink"
+                  >
+                    unmute
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Section>
     </div>
   );

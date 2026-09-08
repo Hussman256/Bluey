@@ -8,6 +8,7 @@ import { NoteContent } from '../nostr/content';
 import { EngagementScope } from '../nostr/engagement';
 import { eventIdFrom } from '../nostr/ids';
 import { KIND } from '../nostr/kinds';
+import { isMuted, useMutes } from '../nostr/mutes';
 
 export function ThreadPage() {
   const { id } = useParams();
@@ -20,13 +21,14 @@ export function ThreadPage() {
     [eventId],
   );
 
+  const mutes = useMutes();
   const sortedReplies = useMemo(
     () =>
       replies
-        .filter((r) => r.id !== eventId)
+        .filter((r) => r.id !== eventId && !isMuted(r, mutes))
         .slice()
         .sort((a, b) => (a.created_at ?? 0) - (b.created_at ?? 0)),
-    [replies, eventId],
+    [replies, eventId, mutes],
   );
 
   const engagementIds = useMemo(() => sortedReplies.map((r) => r.id), [sortedReplies]);

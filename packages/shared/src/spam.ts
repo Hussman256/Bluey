@@ -33,6 +33,11 @@ export function isSpamContent(content: string): boolean {
   const lower = c.toLowerCase();
   for (const d of SPAM_DOMAINS) if (lower.includes(d)) return true;
 
+  // machine payload dumps: one enormous unbroken token (base64 blobs, serialized
+  // state) or a mesh/broadcast bot envelope
+  if (/\S{220,}/.test(c)) return true;
+  if (/^\[broadcast:|"maxHop"\s*:|"ar_profile"|"msg_uuid"/i.test(c)) return true;
+
   // bot roster / "hex salad" dumps: `channel:__roster` + walls of raw pubkeys
   if (/^channel:__?\w+/i.test(c)) return true;
   const hexHits = (c.match(HEX64) ?? []).length;

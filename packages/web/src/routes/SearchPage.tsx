@@ -2,17 +2,23 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { NoteCard } from '../components/NoteCard';
 import { EngagementScope } from '../nostr/engagement';
-import { subjectId } from '../nostr/notes';
+import { isMuted, useMutes } from '../nostr/mutes';
+import { isJunkNote, subjectId } from '../nostr/notes';
 import { useIndexSearch, useIndexStatus } from '../nostr/useIndex';
 
 export function SearchPage() {
   const [params, setParams] = useSearchParams();
   const q = params.get('q') ?? '';
   const indexUp = useIndexStatus();
+  const mutes = useMutes();
 
   const query = useMemo(() => (q.trim().length >= 2 ? { q: q.trim(), limit: 50 } : null), [q]);
   const { data, loading, fromIndex } = useIndexSearch(query);
-  const ids = useMemo(() => (data ?? []).map(subjectId), [data]);
+  const results = useMemo(
+    () => (data ?? []).filter((e) => !isJunkNote(e) && !isMuted(e, mutes)),
+    [data, mutes],
+  );
+  const ids = useMemo(() => results.map(subjectId), [results]);
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,12 +53,12 @@ export function SearchPage() {
       {indexUp && query && loading && (
         <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">searching…</p>
       )}
-      {indexUp && query && fromIndex && data && data.length === 0 && (
+      {indexUp && query && fromIndex && data && results.length === 0 && !loading && (
         <p className="px-4 py-10 text-center text-sm text-ink-soft">No matches.</p>
       )}
 
       <EngagementScope ids={ids}>
-        {(data ?? []).map((e) => (
+        {results.map((e) => (
           <NoteCard key={e.id} event={e} />
         ))}
       </EngagementScope>
