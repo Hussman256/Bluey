@@ -1,6 +1,6 @@
 import { nip19 } from '@nostr-dev-kit/ndk';
 import { useEvent, useProfileValue } from '@nostr-dev-kit/react';
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { parseAddr } from './bootcamps';
 import { npubOf, shortNpub } from './ids';
@@ -76,8 +76,34 @@ function QuoteHeader({ pubkey }: { pubkey: string }) {
   );
 }
 
+/** Media hidden behind a click — for NIP-36 content-warning notes. */
+function SensitiveMedia({ reason, children }: { reason?: string; children: ReactNode }) {
+  const [shown, setShown] = useState(false);
+  if (shown) return <div className="space-y-2">{children}</div>;
+  return (
+    <button
+      type="button"
+      onClick={() => setShown(true)}
+      className="flex w-full flex-col items-center gap-1 rounded-xl border border-line bg-surface px-4 py-8 text-center text-sm text-ink-soft transition hover:border-line-strong"
+    >
+      <span className="font-semibold">Sensitive content</span>
+      <span className="text-xs text-ink-faint">{reason ? `${reason} · ` : ''}tap to view</span>
+    </button>
+  );
+}
+
 /** Render note content: links, media, nostr mentions, quoted notes, hashtags. */
-export function NoteContent({ content, small = false }: { content: string; small?: boolean }) {
+export function NoteContent({
+  content,
+  small = false,
+  sensitive = false,
+  sensitiveReason,
+}: {
+  content: string;
+  small?: boolean;
+  sensitive?: boolean;
+  sensitiveReason?: string;
+}) {
   const media: ReactNode[] = [];
   const inline: ReactNode[] = [];
 
@@ -174,7 +200,12 @@ export function NoteContent({ content, small = false }: { content: string; small
           {inline}
         </p>
       )}
-      {media.length > 0 && <div className="space-y-2">{media.slice(0, 6)}</div>}
+      {media.length > 0 &&
+        (sensitive ? (
+          <SensitiveMedia reason={sensitiveReason}>{media.slice(0, 6)}</SensitiveMedia>
+        ) : (
+          <div className="space-y-2">{media.slice(0, 6)}</div>
+        ))}
     </div>
   );
 }

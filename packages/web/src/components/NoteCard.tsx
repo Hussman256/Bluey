@@ -142,7 +142,11 @@ function PlainNote({ event, bare = false }: { event: NDKEvent; bare?: boolean })
         </div>
 
         <div className="mt-1">
-          <NoteContent content={event.content} />
+          <NoteContent
+            content={event.content}
+            sensitive={event.tags.some((t) => t[0] === 'content-warning')}
+            sensitiveReason={event.tags.find((t) => t[0] === 'content-warning')?.[1]}
+          />
         </div>
 
         <div className="mt-2.5 flex items-center gap-1 text-ink-faint">

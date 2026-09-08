@@ -24,12 +24,23 @@ const SEARCH_FARM =
 const HASHTAG = /(?:^|\s)#[\p{L}\p{N}_]{2,}/gu;
 const URL = /https?:\/\/\S+/gi;
 
+const HEX64 = /\b[0-9a-f]{64}\b/gi;
+
 export function isSpamContent(content: string): boolean {
   const c = (content ?? '').trim();
   if (!c) return true;
 
   const lower = c.toLowerCase();
   for (const d of SPAM_DOMAINS) if (lower.includes(d)) return true;
+
+  // bot roster / "hex salad" dumps: `channel:__roster` + walls of raw pubkeys
+  if (/^channel:__?\w+/i.test(c)) return true;
+  const hexHits = (c.match(HEX64) ?? []).length;
+  // raw 64-char hex is only ever machine output in a kind:1 — a couple with
+  // barely any other text, or a wall of them, is a bot dump
+  const nonHex = c.replace(HEX64, '').replace(/[\s,]+/g, '');
+  if (hexHits >= 4) return true;
+  if (hexHits >= 1 && nonHex.length < 24) return true;
 
   // several "?reports=FOO%20BAR" / "search.html?q=" style links in one note
   if ((c.match(SEARCH_FARM) ?? []).length >= 2) return true;
