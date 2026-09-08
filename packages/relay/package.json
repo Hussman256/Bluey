@@ -12,12 +12,12 @@
   "dependencies": {
     "@1btc/shared": "*",
     "nostr-tools": "^2.25.1",
+    "tsx": "^4.19.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
     "@types/ws": "^8.5.13",
-    "tsx": "^4.19.2",
     "typescript": "~6.0.2"
   }
 }
