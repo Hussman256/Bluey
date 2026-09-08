@@ -1,14 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { HighlightPopover } from '../components/HighlightPopover';
 import { Markdown } from '../components/Markdown';
-import { DisplayName, RelativeTime } from '../components/primitives';
-import { addrFromNaddr, naddrOf } from '../nostr/bootcamps';
+import { Avatar, DisplayName, RelativeTime } from '../components/primitives';
+import { addrFromNaddr, naddrOf, type Addr } from '../nostr/bootcamps';
+import { npubOf } from '../nostr/ids';
+import { useLessonHighlights } from '../nostr/highlights';
 import { useBootcamp, useLesson, useLessons } from '../nostr/useBootcamps';
 
 export function LessonPage() {
   const { naddr } = useParams();
   const addr = naddr ? addrFromNaddr(naddr) : null;
   const lesson = useLesson(addr?.pubkey, addr?.identifier);
+  const articleRef = useRef<HTMLDivElement>(null);
 
   const bootcamp = useBootcamp(lesson?.bootcampAddr?.pubkey, lesson?.bootcampAddr?.identifier);
   const siblings = useLessons(bootcamp);
@@ -47,9 +51,19 @@ export function LessonPage() {
         {lesson.image && (
           <img src={lesson.image} alt="" className="mt-4 w-full rounded-xl border border-line" />
         )}
-        <div className="mt-5">
+        <p className="mt-4 flex items-center gap-1.5 font-mono text-[11px] text-ink-faint">
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M9 11l3 3 8-8M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Select any passage to highlight it
+        </p>
+        <div ref={articleRef} className="mt-3">
           <Markdown source={lesson.content} />
         </div>
+
+        <HighlightPopover containerRef={articleRef} source={lesson.addr} sourceAuthor={lesson.pubkey} />
+
+        <LessonHighlights source={lesson.addr} />
 
         <nav className="mt-10 flex justify-between gap-3 border-t border-line pt-4 text-sm">
           {prev ? (
@@ -80,5 +94,38 @@ export function LessonPage() {
         )}
       </article>
     </div>
+  );
+}
+
+function LessonHighlights({ source }: { source: Addr }) {
+  const highlights = useLessonHighlights(source);
+  if (highlights.length === 0) return null;
+
+  return (
+    <section className="mt-10 border-t border-line pt-5">
+      <h2 className="font-display text-sm font-semibold text-ink-soft">
+        Highlights <span className="text-ink-faint">· {highlights.length}</span>
+      </h2>
+      <ul className="mt-3 space-y-3">
+        {highlights.map((h) => (
+          <li key={h.id} className="rounded-xl border border-line bg-surface/40 px-3.5 py-3">
+            <blockquote className="border-l-2 border-zap pl-3 text-sm text-ink-soft">
+              {h.text}
+            </blockquote>
+            <div className="mt-2 flex items-center gap-2 text-xs text-ink-faint">
+              <Link
+                to={`/p/${npubOf(h.pubkey)}`}
+                className="flex items-center gap-1.5 hover:text-ink"
+              >
+                <Avatar pubkey={h.pubkey} size={18} />
+                <DisplayName pubkey={h.pubkey} className="text-xs" />
+              </Link>
+              <span>·</span>
+              <RelativeTime ts={h.created_at} />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

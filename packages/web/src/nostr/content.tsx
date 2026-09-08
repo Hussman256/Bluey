@@ -2,7 +2,10 @@ import { nip19 } from '@nostr-dev-kit/ndk';
 import { useEvent, useProfileValue } from '@nostr-dev-kit/react';
 import { Fragment, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { parseAddr } from './bootcamps';
 import { npubOf, shortNpub } from './ids';
+import { KIND } from './kinds';
+import { SourceTitle } from './sourceTitle';
 
 const IMG_EXT = /\.(png|jpe?g|gif|webp|avif|bmp)(\?\S*)?$/i;
 const VIDEO_EXT = /\.(mp4|webm|mov|m4v)(\?\S*)?$/i;
@@ -29,6 +32,7 @@ function QuoteCard({ id }: { id: string }) {
       </div>
     );
   }
+  if (ev.kind === KIND.Highlight) return <HighlightQuote ev={ev} />;
   return (
     <Link
       to={`/e/${ev.encode()}`}
@@ -39,6 +43,24 @@ function QuoteCard({ id }: { id: string }) {
         {ev.content}
       </p>
     </Link>
+  );
+}
+
+/** A quoted NIP-84 highlight: the lifted passage + a link back to its source. */
+function HighlightQuote({ ev }: { ev: { content: string; tags: string[][] } }) {
+  const src = ev.tags.find((t) => t[0] === 'a')?.[1];
+  return (
+    <div className="my-1 rounded-xl border border-line bg-surface/50 px-3.5 py-3">
+      <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink-faint">
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M9 11l3 3 8-8M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Highlight from <SourceTitle source={src ? parseAddr(src) : null} />
+      </p>
+      <blockquote className="border-l-2 border-zap pl-3 text-sm leading-relaxed text-ink-soft">
+        {ev.content}
+      </blockquote>
+    </div>
   );
 }
 

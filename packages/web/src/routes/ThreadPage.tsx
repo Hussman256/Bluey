@@ -44,7 +44,9 @@ export function ThreadPage() {
         <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">loading note…</p>
       )}
 
-      {root && (
+      {root && root.kind === KIND.Highlight && <NoteCard event={root} />}
+
+      {root && root.kind !== KIND.Highlight && (
         <article className="border-b border-line px-4 py-4">
           <div className="flex items-center gap-3">
             <Avatar pubkey={root.pubkey} />

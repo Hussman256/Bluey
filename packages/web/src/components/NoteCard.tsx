@@ -2,9 +2,11 @@ import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useEvent, useNDK, useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { parseAddr } from '../nostr/bootcamps';
 import { NoteContent } from '../nostr/content';
 import { useNoteStats } from '../nostr/engagement';
 import { KIND } from '../nostr/kinds';
+import { SourceTitle } from '../nostr/sourceTitle';
 import { Avatar, DisplayName, Handle, RelativeTime } from './primitives';
 import { ZapButton } from './ZapButton';
 
@@ -28,7 +30,37 @@ export function NoteCard({ event }: { event: NDKEvent }) {
   if (event.kind === KIND.Repost || event.kind === KIND.GenericRepost) {
     return <RepostCard event={event} />;
   }
+  if (event.kind === KIND.Highlight) {
+    return <HighlightCard event={event} />;
+  }
   return <PlainNote event={event} />;
+}
+
+/** A bare NIP-84 highlight (no commentary) surfaced on its own. */
+function HighlightCard({ event }: { event: NDKEvent }) {
+  const src = event.tags.find((t) => t[0] === 'a')?.[1];
+  const link = `/e/${event.encode()}`;
+  return (
+    <article className="flex gap-3 border-b border-line px-4 py-3.5">
+      <Avatar pubkey={event.pubkey} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-1.5 text-sm">
+          <DisplayName pubkey={event.pubkey} />
+          <span className="text-ink-faint">highlighted</span>
+          <span className="text-ink-faint">·</span>
+          <Link to={link} className="shrink-0 hover:underline">
+            <RelativeTime ts={event.created_at} />
+          </Link>
+        </div>
+        <blockquote className="mt-2 border-l-2 border-zap pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
+          {event.content}
+        </blockquote>
+        <p className="mt-2 text-xs text-ink-faint">
+          from <SourceTitle source={src ? parseAddr(src) : null} />
+        </p>
+      </div>
+    </article>
+  );
 }
 
 function RepostCard({ event }: { event: NDKEvent }) {
