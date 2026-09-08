@@ -6,6 +6,12 @@ import { config } from './config.ts';
 
 /** The relay's own identity. It signs the relay-generated 39000–39002 events. */
 function load(): Uint8Array {
+  // Hosts with an ephemeral filesystem (Render free, Fly without a volume, …)
+  // must pass the key in as an env var so the relay identity survives restarts —
+  // otherwise every restart regenerates it and orphans every existing club.
+  const fromEnv = process.env.RELAY_SECRET_KEY?.trim();
+  if (fromEnv) return hexToBytes(fromEnv);
+
   try {
     return hexToBytes(readFileSync(config.keyPath, 'utf8').trim());
   } catch {

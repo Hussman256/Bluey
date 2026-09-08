@@ -1,0 +1,34 @@
+# Render Blueprint — the two 1btc WebSocket backends (index + clubs relay).
+#
+# BRIDGE DEPLOYMENT ONLY. Render's free plan has no persistent disk and sleeps
+# a service after 15 min idle, so:
+#   - keep both services awake with an external pinger (cron-job.org) hitting
+#     https://<service>.onrender.com/health every 10 min
+#   - RELAY_SECRET_KEY MUST be set (dashboard) so the relay keeps one identity
+#     across restarts — without it every restart orphans every club
+#   - SQLite data still resets on any redeploy/restart. Fine for pre-launch
+#     testing, not for real users. Move to a host with a volume before launch.
+services:
+  - type: web
+    name: 1btc-index
+    runtime: docker
+    dockerfilePath: ./packages/server/Dockerfile
+    dockerContext: .
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: RETENTION_DAYS
+        value: "21"
+
+  - type: web
+    name: 1btc-relay
+    runtime: docker
+    dockerfilePath: ./packages/relay/Dockerfile
+    dockerContext: .
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: RELAY_SECRET_KEY
+        sync: false   # set in the Render dashboard — never commit the key
