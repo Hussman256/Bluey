@@ -86,11 +86,13 @@ export function EditProfile({ pubkey, onClose }: { pubkey: string; onClose: () =
       const ev = new NDKEvent(ndk);
       ev.kind = KIND.Metadata;
       ev.content = JSON.stringify(merged);
-      await ev.publish();
-      onClose();
+      const relays = await ev.publish(undefined, 6000);
+      if (relays.size === 0) throw new Error('No relay accepted the update — try again');
+      // NDK keeps the previous kind:0 cached; a reload is the reliable way to
+      // show the new name/picture everywhere at once.
+      window.location.reload();
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Could not save');
-    } finally {
       setBusy(false);
     }
   }

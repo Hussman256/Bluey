@@ -7,7 +7,7 @@ import { LS } from '../nostr/config';
 import { EngagementScope } from '../nostr/engagement';
 import { BUILTIN_FEEDS, addDvmFeed, loadDvmFeeds, removeDvmFeed, type FeedRef } from '../nostr/feeds';
 import { KIND } from '../nostr/kinds';
-import { feedLangMode, inReadableScript, readableScripts } from '../nostr/lang';
+import { feedLangMode, inReadableScript, readableScripts, repostInReadableScript } from '../nostr/lang';
 import { isMuted, useMutes } from '../nostr/mutes';
 import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
 import { useDvmFeed, useEventsByIds } from '../nostr/useDvmFeed';
@@ -111,11 +111,12 @@ export function FeedPage() {
       source = list;
     }
 
-    const langOk = (e: NDKEvent) =>
-      langMode === 'all' ||
-      builtin === 'following' ||
-      e.kind === KIND.Repost ||
-      inReadableScript(e.content, scripts);
+    const langOk = (e: NDKEvent) => {
+      if (langMode === 'all' || builtin === 'following') return true;
+      if (e.kind === KIND.Repost || e.kind === KIND.GenericRepost)
+        return repostInReadableScript(e.content, scripts);
+      return inReadableScript(e.content, scripts);
+    };
 
     const seen = new Set<string>();
     return source

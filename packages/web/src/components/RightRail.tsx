@@ -1,6 +1,7 @@
 import { useNDKCurrentUser, useProfileValue } from '@nostr-dev-kit/react';
 import { Link } from 'react-router-dom';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
+import { feedLangMode, inReadableScript, readableScripts } from '../nostr/lang';
 import { isMuted, useMutes } from '../nostr/mutes';
 import { isJunkNote } from '../nostr/notes';
 import { useIndexFeed } from '../nostr/useIndex';
@@ -28,7 +29,9 @@ function TrendingRow({ event }: { event: NDKEvent }) {
 export function RightRail() {
   const me = useNDKCurrentUser();
   const mutes = useMutes();
-  const { data, fromIndex } = useIndexFeed({ scope: 'discover', pubkey: me?.pubkey, limit: 12 });
+  const { data, fromIndex } = useIndexFeed({ scope: 'discover', pubkey: me?.pubkey, limit: 20 });
+  const langFilter = feedLangMode() === 'mine';
+  const scripts = readableScripts();
 
   const trending = (data ?? [])
     .filter(
@@ -36,7 +39,8 @@ export function RightRail() {
         !isJunkNote(e) &&
         !isMuted(e, mutes) &&
         snippet(e.content).length > 20 &&
-        !e.tags.some((t) => t[0] === 'e'),
+        !e.tags.some((t) => t[0] === 'e') &&
+        (!langFilter || inReadableScript(e.content, scripts)),
     )
     .slice(0, 5);
 
