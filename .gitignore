@@ -24,6 +24,11 @@ packages/server/data/
 *.db-wal
 .env
 
+# relay local data and secret keys
+packages/relay/data/
+*.key
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
