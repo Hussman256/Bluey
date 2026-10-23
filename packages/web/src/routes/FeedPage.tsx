@@ -28,8 +28,8 @@ export function FeedPage() {
       setLangMode(feedLangMode());
       setScripts(readableScripts());
     };
-    window.addEventListener('1btc:feed-langs', h);
-    return () => window.removeEventListener('1btc:feed-langs', h);
+    window.addEventListener('bluey:feed-langs', h);
+    return () => window.removeEventListener('bluey:feed-langs', h);
   }, []);
 
   const [dvmFeeds, setDvmFeeds] = useState(loadDvmFeeds);
@@ -215,13 +215,13 @@ export function FeedPage() {
               ? 'the DVM didn’t answer'
               : `${feed.name} · via NIP-90`
           : builtin === 'discover' && idx.fromIndex
-            ? '1btc index · web-of-trust ranked'
+            ? 'Bluey index · web-of-trust ranked'
             : builtin === 'ships'
               ? 'proof of work'
               : builtin === 'latest'
                 ? 'everything, newest first'
                 : idx.fromIndex
-                  ? '1btc index'
+                  ? 'Bluey index'
                   : 'direct from relays'}
       </p>
 
@@ -238,7 +238,7 @@ export function FeedPage() {
           ) : builtin === 'discover' && !idx.fromIndex && wot.size === 0 ? (
             <p className="text-sm text-ink-soft">
               Discover ranks by web of trust — it fills in once you follow a few people, or
-              when the 1btc index is reachable.{' '}
+              when the Bluey index is reachable.{' '}
               <button
                 type="button"
                 onClick={() => pick('latest')}

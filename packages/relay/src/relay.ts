@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
-import { KIND } from '@1btc/shared';
+import { KIND } from '@bluey/shared';
 import { verifyEvent, type Event } from 'nostr-tools/pure';
 import { matchFilters, type Filter } from 'nostr-tools/filter';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -114,7 +114,7 @@ export function startRelay() {
       return;
     }
     res.writeHead(200, { 'content-type': 'text/plain' });
-    res.end('1btc clubs relay — connect over websocket\n');
+    res.end('Bluey clubs relay — connect over websocket\n');
   });
 
   const wss = new WebSocketServer({ server: http });

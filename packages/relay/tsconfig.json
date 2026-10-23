@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "types": ["node"],
     "paths": {
-      "@1btc/shared": ["../shared/src/index.ts"]
+      "@bluey/shared": ["../shared/src/index.ts"]
     }
   },
   "include": ["src"]

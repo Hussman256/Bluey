@@ -1,5 +1,5 @@
 /**
- * Nostr event kinds used across 1btc (client + index service).
+ * Nostr event kinds used across Bluey (client + index service).
  */
 export const KIND = {
   // NIP-01 core
@@ -86,17 +86,17 @@ export const KIND = {
 
 export type Kind = (typeof KIND)[keyof typeof KIND];
 
-/** `t` tag markers so 1btc can find its own content among generic Nostr kinds. */
+/** `t` tag markers so Bluey can find its own content among generic Nostr kinds. */
 export const TAG = {
-  client: '1btc',
-  bootcamp: '1btc:bootcamp',
-  lesson: '1btc:lesson',
-  liveClass: '1btc:live',
-  ship: '1btc:ship',
+  client: 'bluey',
+  bootcamp: 'bluey:bootcamp',
+  lesson: 'bluey:lesson',
+  liveClass: 'bluey:live',
+  ship: 'bluey:ship',
 } as const;
 
 /** NIP-32 label namespace for verified proof-of-work. */
-export const SHIP_LABEL_NS = '1btc.ship';
+export const SHIP_LABEL_NS = 'bluey.ship';
 export const SHIP_LABEL_VERIFIED = 'verified';
 
 /** Kinds the index service ingests from the relay firehose. */

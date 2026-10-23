@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'prompt',
       pwaAssets: { config: true },
       manifest: {
-        name: '1btc',
-        short_name: '1btc',
+        name: 'Bluey',
+        short_name: 'Bluey',
         description: 'A Bitcoin social and learning app on Nostr. Learn Bitcoin, talk Bitcoin, find your people.',
         theme_color: '#fdfbf7',
         background_color: '#fdfbf7',

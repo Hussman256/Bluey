@@ -1,4 +1,4 @@
-# 1btc index service
+# Bluey index service
 FROM node:24-slim AS base
 WORKDIR /app
 
@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/server/package.json packages/server/
-RUN npm install --omit=dev --workspace @1btc/server --include-workspace-root
+RUN npm install --omit=dev --workspace @bluey/server --include-workspace-root
 
 COPY packages/shared packages/shared
 COPY packages/server packages/server
@@ -20,4 +20,4 @@ EXPOSE 8787
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD node -e "fetch('http://localhost:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-CMD ["npm", "run", "start", "--workspace", "@1btc/server"]
+CMD ["npm", "run", "start", "--workspace", "@bluey/server"]

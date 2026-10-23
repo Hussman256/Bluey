@@ -1,4 +1,4 @@
-import { KIND, SHIP_LABEL_NS, TAG } from '@1btc/shared';
+import { KIND, SHIP_LABEL_NS, TAG } from '@bluey/shared';
 import type { NDKEvent, NDKFilter } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
 import { useCallback, useMemo } from 'react';

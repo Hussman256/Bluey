@@ -1,4 +1,4 @@
-# Render Blueprint — the two 1btc WebSocket backends (index + clubs relay).
+# Render Blueprint — the two Bluey WebSocket backends (index + clubs relay).
 #
 # BRIDGE DEPLOYMENT ONLY. Render's free plan has no persistent disk and sleeps
 # a service after 15 min idle, so:
@@ -10,7 +10,7 @@
 #     testing, not for real users. Move to a host with a volume before launch.
 services:
   - type: web
-    name: 1btc-index
+    name: bluey-index
     runtime: docker
     dockerfilePath: ./packages/server/Dockerfile
     dockerContext: .
@@ -22,7 +22,7 @@ services:
         value: "21"
 
   - type: web
-    name: 1btc-relay
+    name: bluey-relay
     runtime: docker
     dockerfilePath: ./packages/relay/Dockerfile
     dockerContext: .

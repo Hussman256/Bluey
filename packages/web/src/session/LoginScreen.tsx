@@ -13,7 +13,7 @@ type Mode = 'choose' | 'paste' | 'created';
 const points = [
   {
     t: 'Non-custodial, always.',
-    d: 'Connect a wallet you control — 1btc holds no funds, ever.',
+    d: 'Connect a wallet you control — Bluey holds no funds, ever.',
   },
   {
     t: 'Free clubs and courses, no gatekeeping.',
@@ -213,7 +213,7 @@ export function LoginScreen() {
 
               {err && <p className="mt-3 text-sm text-danger">{err}</p>}
               <p className="mt-6 rounded-xl bg-surface px-4 py-3 text-xs leading-relaxed text-ink-soft">
-                Your key signs everything you post. 1btc never sees it, stores it, or can act on
+                Your key signs everything you post. Bluey never sees it, stores it, or can act on
                 your behalf.
               </p>
             </>
@@ -256,7 +256,7 @@ export function LoginScreen() {
             <div className="flex flex-col gap-3">
               <h2 className="font-display text-xl font-extrabold">Save your key</h2>
               <p className="text-sm text-ink-soft">
-                This is your secret key. It is the <em>only</em> way back into this account — 1btc
+                This is your secret key. It is the <em>only</em> way back into this account — Bluey
                 cannot reset it. Save it in a password manager now.
               </p>
               <div className="rounded-xl border border-zap/40 bg-zap-soft px-3.5 py-3 font-mono text-xs break-all">
@@ -284,7 +284,7 @@ export function LoginScreen() {
                 disabled={!ack || busy !== null}
                 className="rounded-xl bg-slab px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:opacity-50"
               >
-                {busy === 'created' ? 'Starting…' : 'Enter 1btc'}
+                {busy === 'created' ? 'Starting…' : 'Enter Bluey'}
               </button>
               {err && <p className="text-sm text-danger">{err}</p>}
             </div>

@@ -1,4 +1,4 @@
-import { KIND } from '@1btc/shared';
+import { KIND } from '@bluey/shared';
 import { finalizeEvent, type Event, type EventTemplate } from 'nostr-tools/pure';
 import { config } from './config.ts';
 import { q } from './db.ts';

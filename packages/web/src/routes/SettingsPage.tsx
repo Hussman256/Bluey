@@ -58,7 +58,7 @@ export function SettingsPage() {
   async function makeInvoice() {
     if (!wallet) return;
     try {
-      setInvoice(await wallet.createInvoice(amt, 'Top up via 1btc'));
+      setInvoice(await wallet.createInvoice(amt, 'Top up via Bluey'));
     } catch (e) {
       setInvoice(`error: ${e instanceof Error ? e.message : e}`);
     }
@@ -161,7 +161,7 @@ export function SettingsPage() {
         ) : (
           <div className="space-y-2.5 text-sm">
             <p className="text-ink-soft">
-              1btc holds no funds. Connect a wallet you control with a{' '}
+              Bluey holds no funds. Connect a wallet you control with a{' '}
               <span className="font-mono text-zap-ink">nostr+walletconnect://</span> string — from
               Alby, Zeus, Coinos, or Alby Hub.
             </p>
@@ -224,7 +224,7 @@ export function SettingsPage() {
         )}
       </Section>
 
-      <Section title="1btc services">
+      <Section title="Bluey services">
         <ul className="space-y-2 text-sm">
           <li className="flex items-center justify-between">
             <span className="flex items-center gap-2">

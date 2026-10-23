@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { npubOf, shortNpub } from '../nostr/ids';
 import { useNow } from './useNow';
 
-/** The 1btc mark: a lightning bolt cut out of a bitcoin-orange disc. */
+/** The Bluey mark: a lightning bolt cut out of a bitcoin-orange disc. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
     <span

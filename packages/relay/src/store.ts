@@ -1,4 +1,4 @@
-import { KIND } from '@1btc/shared';
+import { KIND } from '@bluey/shared';
 import type { Event } from 'nostr-tools/pure';
 import type { Filter } from 'nostr-tools/filter';
 import { groupIdOf } from './groups.ts';

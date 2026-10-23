@@ -7,10 +7,10 @@ export const config = {
 
   /** NIP-11 relay information. */
   info: {
-    name: process.env.RELAY_NAME ?? '1btc clubs',
-    description: 'NIP-29 group relay for 1btc — free, member-enforced clubs.',
+    name: process.env.RELAY_NAME ?? 'Bluey clubs',
+    description: 'NIP-29 group relay for Bluey — free, member-enforced clubs.',
     supported_nips: [1, 11, 29, 42],
-    software: 'https://github.com/Hussman256/1btc',
+    software: 'https://github.com/Hussman256/Bluey',
     version: '0.1.0',
   },
 

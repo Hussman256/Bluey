@@ -1,7 +1,7 @@
 /**
  * Wallet abstraction.
  *
- * 1btc custodies NOTHING. Every implementation of this interface delegates to a
+ * Bluey custodies NOTHING. Every implementation of this interface delegates to a
  * wallet the user controls. NWC is the first backend; a guided third-party
  * custodial signup (Coinos / Alby, connected over NWC) and an in-app Cashu
  * (NIP-60) wallet are future backends that satisfy the same contract.

@@ -14,7 +14,7 @@ export function PwaPrompt() {
     <div className="fixed inset-x-3 bottom-20 z-50 mx-auto max-w-sm rounded-xl border border-line-strong bg-surface px-4 py-3 shadow-xl sm:bottom-4">
       {needRefresh ? (
         <div className="flex items-center justify-between gap-3 text-sm">
-          <span>A new version of 1btc is ready.</span>
+          <span>A new version of Bluey is ready.</span>
           <div className="flex gap-2">
             <button
               type="button"
@@ -34,7 +34,7 @@ export function PwaPrompt() {
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="text-ink-soft">1btc is ready to work offline.</span>
+          <span className="text-ink-soft">Bluey is ready to work offline.</span>
           <button
             type="button"
             onClick={() => setOfflineReady(false)}

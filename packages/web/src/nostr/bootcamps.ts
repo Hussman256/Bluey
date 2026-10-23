@@ -1,4 +1,4 @@
-import { KIND, TAG } from '@1btc/shared';
+import { KIND, TAG } from '@bluey/shared';
 import NDK, { NDKEvent, nip19 } from '@nostr-dev-kit/ndk';
 
 // ---------- addressable-event helpers ----------

@@ -4,7 +4,7 @@ import { pruneOld, stats } from './db.ts';
 import { backfill, shutdownRelays, startFirehose } from './relays.ts';
 import { recomputeWot } from './wot.ts';
 
-console.log('1btc index service starting…');
+console.log('Bluey index service starting…');
 console.log('  db:', config.dbPath);
 console.log('  relays:', config.relays.join(', '));
 

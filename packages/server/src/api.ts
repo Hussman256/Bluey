@@ -10,7 +10,7 @@ import type {
   SearchParams,
   ThreadParams,
   WotParams,
-} from '@1btc/shared';
+} from '@bluey/shared';
 import { WebSocketServer } from 'ws';
 import { config } from './config.ts';
 import { stats } from './db.ts';

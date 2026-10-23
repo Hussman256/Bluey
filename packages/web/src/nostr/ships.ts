@@ -1,4 +1,4 @@
-import { KIND, SHIP_LABEL_NS, SHIP_LABEL_VERIFIED, TAG } from '@1btc/shared';
+import { KIND, SHIP_LABEL_NS, SHIP_LABEL_VERIFIED, TAG } from '@bluey/shared';
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 
 export interface Ship {

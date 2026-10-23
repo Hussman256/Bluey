@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')!).render(
     <NDKHeadless
       ndk={{
         explicitRelayUrls: loadRelayList(),
-        clientName: '1btc',
+        clientName: 'Bluey',
         autoConnectUserRelays: true,
       }}
       session={{

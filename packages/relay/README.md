@@ -1,6 +1,6 @@
-# @1btc/relay — clubs relay (NIP-29)
+# @bluey/relay — clubs relay (NIP-29)
 
-A minimal NIP-29 relay for 1btc's Clubs. Relay-enforced membership: only members
+A minimal NIP-29 relay for Bluey's Clubs. Relay-enforced membership: only members
 can post to a group, only admins can moderate. Groups are **free and open** in
 v1 — a join request auto-approves. No zap-gating.
 

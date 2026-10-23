@@ -1,4 +1,4 @@
-import { isSpamContent } from '@1btc/shared';
+import { isSpamContent } from '@bluey/shared';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { KIND } from './kinds';
 
@@ -12,7 +12,7 @@ export function isReplyNote(e: NDKEvent): boolean {
 
 /**
  * Heuristic junk filter: structured-JSON dumps (some clients post those) and
- * SEO link-farm / hashtag-salad spam (see @1btc/shared `isSpamContent`).
+ * SEO link-farm / hashtag-salad spam (see @bluey/shared `isSpamContent`).
  */
 export function isJunkNote(e: NDKEvent): boolean {
   if (e.kind !== KIND.Text) return false;

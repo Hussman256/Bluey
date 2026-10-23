@@ -1,4 +1,4 @@
-# 1btc backend services. The web client deploys separately (Vercel).
+# Bluey backend services. The web client deploys separately (Vercel).
 # On a VPS: `docker compose up -d` then point a TLS reverse proxy at 8787 / 8788.
 
 services:
@@ -23,7 +23,7 @@ services:
     ports:
       - '8788:8788'
     environment:
-      RELAY_NAME: ${RELAY_NAME:-1btc clubs}
+      RELAY_NAME: ${RELAY_NAME:-Bluey clubs}
     volumes:
       - relay-data:/data
 

@@ -1,4 +1,4 @@
-import { INGEST_KINDS, KIND, isSpamContent, type NostrEventLike } from '@1btc/shared';
+import { INGEST_KINDS, KIND, isSpamContent, type NostrEventLike } from '@bluey/shared';
 import { type Filter, SimplePool, verifyEvent } from 'nostr-tools';
 import { config } from './config.ts';
 import { ingest } from './db.ts';

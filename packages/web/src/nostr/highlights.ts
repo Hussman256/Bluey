@@ -1,4 +1,4 @@
-import { KIND, TAG } from '@1btc/shared';
+import { KIND, TAG } from '@bluey/shared';
 import NDK, { NDKEvent, nip19, type NDKFilter } from '@nostr-dev-kit/ndk';
 import { useNDK, useSubscribe } from '@nostr-dev-kit/react';
 import { useCallback, useMemo } from 'react';
@@ -6,7 +6,7 @@ import { addrString, parseAddr, type Addr } from './bootcamps';
 
 /**
  * NIP-84 highlights (kind 9802). A highlight is a verbatim passage lifted from
- * a source — for 1btc, almost always a bootcamp lesson (a kind:30023 article).
+ * a source — for Bluey, almost always a bootcamp lesson (a kind:30023 article).
  * `.content` is the passage; an `a` tag points at the source and a `p` tag
  * credits its author. An optional `context` tag carries the surrounding text.
  *

@@ -1,5 +1,5 @@
 {
-  "name": "@1btc/relay",
+  "name": "@bluey/relay",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@1btc/shared": "*",
+    "@bluey/shared": "*",
     "nostr-tools": "^2.25.1",
     "tsx": "^4.19.2",
     "ws": "^8.18.0"

@@ -4,7 +4,7 @@ import {
   type EngagementCount,
   type NostrEventLike,
   type NotificationItem,
-} from '@1btc/shared';
+} from '@bluey/shared';
 import { ftsAvailable, q } from './db.ts';
 
 interface Row {

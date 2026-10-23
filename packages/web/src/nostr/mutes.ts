@@ -10,7 +10,7 @@ import { KIND } from './kinds';
  * so the list follows the user to other clients.
  */
 
-const LS_KEY = '1btc:mutes';
+const LS_KEY = 'bluey:mutes';
 const MUTE_KIND = 10000;
 
 export interface Mutes {
@@ -46,7 +46,7 @@ function saveMutes(m: Mutes) {
   } catch {
     /* private mode */
   }
-  window.dispatchEvent(new Event('1btc:mutes'));
+  window.dispatchEvent(new Event('bluey:mutes'));
 }
 
 function fromEvent(e: NDKEvent): Mutes {
@@ -66,10 +66,10 @@ export function useMutes(): Mutes {
 
   useEffect(() => {
     const h = () => setLocal(loadMutes());
-    window.addEventListener('1btc:mutes', h);
+    window.addEventListener('bluey:mutes', h);
     window.addEventListener('storage', h);
     return () => {
-      window.removeEventListener('1btc:mutes', h);
+      window.removeEventListener('bluey:mutes', h);
       window.removeEventListener('storage', h);
     };
   }, []);

@@ -20,7 +20,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[1btc] render error', error, info.componentStack);
+    console.error('[Bluey] render error', error, info.componentStack);
   }
 
   render() {
@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="mx-auto max-w-md px-6 py-16 text-center">
           <p className="font-display text-lg font-bold">Something broke on this screen.</p>
           <p className="mt-2 text-sm text-ink-soft">
-            A note or profile didn&apos;t load cleanly. The rest of 1btc is fine — try another tab.
+            A note or profile didn&apos;t load cleanly. The rest of Bluey is fine — try another tab.
           </p>
         </div>
       );

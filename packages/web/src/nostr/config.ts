@@ -1,8 +1,8 @@
 /**
- * Relay + service configuration for 1btc.
+ * Relay + service configuration for Bluey.
  *
  * DEFAULT_RELAYS is the public relay set NDK connects to directly. Two more
- * 1btc-operated services layer on top when reachable (both optional, both
+ * Bluey-operated services layer on top when reachable (both optional, both
  * degrade gracefully): the index service (nostr/indexClient.ts) and the clubs
  * relay (nostr/clubs.ts).
  */
@@ -31,7 +31,7 @@ export const NWC_RELAY_HINTS = ['wss://relay.getalby.com/v1', 'wss://relay.prima
 export const BLOSSOM_PRIMARY = 'https://blossom.primal.net';
 export const BLOSSOM_FALLBACK = 'https://blossom.band';
 
-export const APP_NAME = '1btc';
+export const APP_NAME = 'Bluey';
 export const APP_TAGLINE = 'Learn Bitcoin. Find your people.';
 
 /** The index service URL actually in effect (honours VITE_INDEX_URL). */
@@ -39,10 +39,10 @@ export const INDEX_URL = (import.meta.env.VITE_INDEX_URL as string | undefined) 
 
 /** Local-storage keys — namespaced so nothing collides with NDK's own. */
 export const LS = {
-  nwc: '1btc:nwc-uri',
-  relays: '1btc:relays',
-  feedTab: '1btc:feed-tab',
-  dvmFeeds: '1btc:dvm-feeds',
+  nwc: 'bluey:nwc-uri',
+  relays: 'bluey:relays',
+  feedTab: 'bluey:feed-tab',
+  dvmFeeds: 'bluey:dvm-feeds',
 } as const;
 
 /** The relay set to boot with: user-added relays (if any) merged over the defaults. */

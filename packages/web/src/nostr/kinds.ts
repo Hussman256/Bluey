@@ -1,2 +1,2 @@
-export { KIND, INGEST_KINDS } from '@1btc/shared';
-export type { Kind } from '@1btc/shared';
+export { KIND, INGEST_KINDS } from '@bluey/shared';
+export type { Kind } from '@bluey/shared';

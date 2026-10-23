@@ -1,4 +1,4 @@
-# Deploying 1btc
+# Deploying Bluey
 
 Three moving parts:
 
@@ -18,8 +18,8 @@ sockets, write to a local database, and (the relay) keep a signing key on disk.
 Any small box with Docker. 1–2 GB RAM is plenty to start.
 
 ```bash
-git clone https://github.com/Hussman256/1btc.git
-cd 1btc
+git clone https://github.com/Hussman256/Bluey.git
+cd Bluey
 docker compose up -d          # builds + runs index (:8787) and relay (:8788)
 docker compose logs -f
 ```
@@ -34,8 +34,8 @@ Browsers on an HTTPS page can't open `ws://`. Put a reverse proxy in front:
 
 ```
 # Caddy — automatic HTTPS
-index.1btc.xyz  { reverse_proxy localhost:8787 }
-clubs.1btc.xyz  { reverse_proxy localhost:8788 }
+index.bluey.xyz  { reverse_proxy localhost:8787 }
+clubs.bluey.xyz  { reverse_proxy localhost:8788 }
 ```
 
 Both endpoints must speak `wss://` and the relay also serves its NIP-11 doc on
@@ -56,7 +56,7 @@ The repo root `vercel.json` already points Vercel at the workspace:
 ```
 Framework:         Vite (auto)
 Install Command:   npm install
-Build Command:     npm run build --workspace @1btc/web
+Build Command:     npm run build --workspace @bluey/web
 Output Directory:  packages/web/dist
 ```
 
@@ -64,8 +64,8 @@ Import the GitHub repo in Vercel, leave the Root Directory at the repo root, and
 set two environment variables:
 
 ```
-VITE_INDEX_URL   = wss://index.1btc.xyz
-VITE_CLUBS_RELAY = wss://clubs.1btc.xyz
+VITE_INDEX_URL   = wss://index.bluey.xyz
+VITE_CLUBS_RELAY = wss://clubs.bluey.xyz
 ```
 
 Redeploy. The client works without either service (falls back to public relays);

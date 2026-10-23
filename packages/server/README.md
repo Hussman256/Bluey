@@ -1,4 +1,4 @@
-# @1btc/server — index service
+# @bluey/server — index service
 
 The performance spine. Ingests the Nostr firehose from a relay set into SQLite,
 derives the follow graph, engagement edges, mentions and profiles, computes a
@@ -13,7 +13,7 @@ Notifications, and Search.
 ```bash
 npm run dev:server        # from repo root — tsx watch, :8787
 # or
-npm run start --workspace @1btc/server
+npm run start --workspace @bluey/server
 ```
 
 No build step and no native modules: uses Node's built-in `node:sqlite`
@@ -25,7 +25,7 @@ Health + stats: `GET http://localhost:8787/health`
 
 One WebSocket. Client sends `{ id, method, params }`, server replies with one
 `{ id, done: true, events? | counts? | notifications? | score?, error? }` frame.
-Types live in `@1btc/shared` (`api.ts`).
+Types live in `@bluey/shared` (`api.ts`).
 
 Methods: `feed` · `thread` · `profile` · `notes` · `notifications` · `search` ·
 `counts` · `wot`.

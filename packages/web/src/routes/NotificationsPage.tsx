@@ -1,4 +1,4 @@
-import type { NotificationItem } from '@1btc/shared';
+import type { NotificationItem } from '@bluey/shared';
 import { useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { Link } from 'react-router-dom';
 import { Avatar, DisplayName, RelativeTime } from '../components/primitives';
@@ -49,7 +49,7 @@ export function NotificationsPage() {
 
       {!indexUp && (
         <p className="px-4 py-10 text-center text-sm text-ink-soft">
-          Notifications need the 1btc index service. Start it with{' '}
+          Notifications need the Bluey index service. Start it with{' '}
           <code className="rounded bg-sunk px-1.5 py-0.5 font-mono text-xs">npm run dev:server</code>.
         </p>
       )}

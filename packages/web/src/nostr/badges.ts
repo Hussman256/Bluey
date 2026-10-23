@@ -1,4 +1,4 @@
-import { KIND } from '@1btc/shared';
+import { KIND } from '@bluey/shared';
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useSubscribe } from '@nostr-dev-kit/react';
 import { useMemo } from 'react';
@@ -14,7 +14,7 @@ export function badgeDefEvent(ndk: NDK, bootcamp: Bootcamp) {
   e.tags = [
     ['d', completionBadgeId(bootcamp.id)],
     ['name', `${bootcamp.title} — Completed`],
-    ['description', `Completed the ${bootcamp.title} bootcamp on 1btc.`],
+    ['description', `Completed the ${bootcamp.title} bootcamp on Bluey.`],
     ...(bootcamp.image ? [['image', bootcamp.image]] : []),
   ];
   return e;

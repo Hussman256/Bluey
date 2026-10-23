@@ -1,5 +1,5 @@
 {
-  "name": "1btc",
+  "name": "bluey",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,11 +15,11 @@
     "@testing-library/react": "16.3.3"
   },
   "scripts": {
-    "dev": "npm run dev --workspace @1btc/web",
-    "dev:server": "npm run dev --workspace @1btc/server",
-    "dev:relay": "npm run dev --workspace @1btc/relay",
-    "build": "npm run typecheck --workspaces --if-present && npm run build --workspace @1btc/web",
-    "lint": "npm run lint --workspace @1btc/web",
+    "dev": "npm run dev --workspace @bluey/web",
+    "dev:server": "npm run dev --workspace @bluey/server",
+    "dev:relay": "npm run dev --workspace @bluey/relay",
+    "build": "npm run typecheck --workspaces --if-present && npm run build --workspace @bluey/web",
+    "lint": "npm run lint --workspace @bluey/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "check": "npm run typecheck && npm run lint"
   }

@@ -1,4 +1,4 @@
-import { KIND } from '@1btc/shared';
+import { KIND } from '@bluey/shared';
 import NDK, { NDKEvent, NDKRelaySet, NDKRelayAuthPolicies } from '@nostr-dev-kit/ndk';
 import { useNDK } from '@nostr-dev-kit/react';
 import { useEffect, useMemo } from 'react';

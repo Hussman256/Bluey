@@ -9,7 +9,7 @@
 
 export type Script = 'latin' | 'cjk' | 'cyrillic' | 'arabic';
 
-const LS_KEY = '1btc:feed-langs';
+const LS_KEY = 'bluey:feed-langs';
 
 // CJK: hiragana, katakana, CJK ideographs (incl. Chinese hanzi), Hangul, halfwidth kana
 const CJK = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯ｦ-ﾟ]/u;
@@ -64,7 +64,7 @@ export function setFeedLangMode(mode: 'all' | 'mine') {
   } catch {
     /* ignore */
   }
-  window.dispatchEvent(new Event('1btc:feed-langs'));
+  window.dispatchEvent(new Event('bluey:feed-langs'));
 }
 
 /**

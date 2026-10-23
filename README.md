@@ -1,4 +1,4 @@
-# 1btc
+# Bluey
 
 A **Bitcoin social + learning app**, built on **Nostr** + **Lightning**. A place
 to learn Bitcoin, talk Bitcoin, and find your people — the feed is connective
@@ -16,7 +16,7 @@ tissue; learning and community are the spine. Execution modelled on Primal.
 - **Financial inclusion** is a real, un-hyped consequence — through literacy
   (Learning), a bank-free identity (a Lightning address for every key, no KYC),
   frictionless small zaps, a reputation graph that needs no credit bureau, and
-  nothing paywalled in v1. 1btc does not do on/off-ramp and does not claim to.
+  nothing paywalled in v1. Bluey does not do on/off-ramp and does not claim to.
 
 ## Monorepo
 
@@ -64,7 +64,7 @@ Club and **enrolment = joining that club (free)**. Live classes are NIP-53 event
 shown on the learner's profile.
 
 **Phase 5 — Reputation & the feed marketplace** (done):
-- **Ships** — proof-of-work posts (kind 1 + `1btc:ship`) with repo/demo links;
+- **Ships** — proof-of-work posts (kind 1 + `bluey:ship`) with repo/demo links;
   peers attest to them with NIP-32 `verified` labels (kind 1985).
 - **Builder score** — a 0–100 composite the *client* computes from four public,
   verifiable signals (sats received, web-of-trust, badges, verified ships),
@@ -106,6 +106,6 @@ one optional tab that only appears when the person has posted any.
 
 ## Wallet stance
 
-1btc custodies nothing. Users connect a wallet they control over NWC (Zeus,
+Bluey custodies nothing. Users connect a wallet they control over NWC (Zeus,
 Alby Hub), or pay zap invoices manually in any wallet. See the brief for the
 full rationale (Nigeria-based, non-custodial is the only safe option).

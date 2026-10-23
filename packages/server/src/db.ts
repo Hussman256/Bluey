@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { KIND, type NostrEventLike } from '@1btc/shared';
+import { KIND, type NostrEventLike } from '@bluey/shared';
 import { config } from './config.ts';
 
 mkdirSync(dirname(config.dbPath), { recursive: true });

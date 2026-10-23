@@ -6,7 +6,7 @@ import type {
   NotificationsParams,
   RequestMethod,
   SearchParams,
-} from '@1btc/shared';
+} from '@bluey/shared';
 import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useNDK } from '@nostr-dev-kit/react';
 import { useCallback, useEffect, useRef, useState } from 'react';

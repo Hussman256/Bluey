@@ -1,4 +1,4 @@
-import { KIND, TAG } from '@1btc/shared';
+import { KIND, TAG } from '@bluey/shared';
 import type { NDKEvent, NDKFilter } from '@nostr-dev-kit/ndk';
 import { useNDK, useSubscribe } from '@nostr-dev-kit/react';
 import { useCallback, useMemo } from 'react';
