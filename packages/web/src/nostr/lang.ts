@@ -40,6 +40,11 @@ export function readableScripts(): Set<Script> {
   } catch {
     /* ignore */
   }
+  return localeScripts();
+}
+
+/** Scripts implied by the viewer's locales, ignoring the "show all languages" feed setting. */
+export function localeScripts(): Set<Script> {
   const set = new Set<Script>(['latin']);
   const locales =
     typeof navigator !== 'undefined' ? navigator.languages ?? [navigator.language] : [];

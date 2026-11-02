@@ -11,6 +11,7 @@ import { isShip } from '../nostr/ships';
 import { SourceTitle } from '../nostr/sourceTitle';
 import {
   isAutoTranslateEnabled,
+  looksForeign,
   setAutoTranslateEnabled,
   translateText,
 } from '../nostr/translate';
@@ -152,14 +153,13 @@ export function NoteBody({
     let cancelled = false;
     if (autoEnabled && canTranslate && !translated) {
       Promise.resolve().then(async () => {
-        if (cancelled) return;
+        if (cancelled || !(await looksForeign(cleanText)) || cancelled) return;
         setLoading(true);
         try {
           const res = await translateText(content);
           if (cancelled) return;
-          if (res.text.trim().toLowerCase() === content.trim().toLowerCase()) {
-            setError('Same language');
-          } else {
+          // not worth an error on a feed: the post simply stays as written
+          if (res.text.trim().toLowerCase() !== content.trim().toLowerCase()) {
             setTranslated(res.text);
             if (res.sourceLang) setSourceLang(res.sourceLang);
           }
@@ -173,7 +173,7 @@ export function NoteBody({
     return () => {
       cancelled = true;
     };
-  }, [autoEnabled, canTranslate, translated, content]);
+  }, [autoEnabled, canTranslate, translated, content, cleanText]);
 
   const activeContent = translated && !showOriginal ? translated : content;
 

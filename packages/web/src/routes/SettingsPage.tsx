@@ -332,7 +332,8 @@ export function SettingsPage() {
           <div>
             <div className="text-xs font-semibold text-ink">Auto-translate posts</div>
             <p className="text-xs text-ink-faint">
-              Translate foreign language posts into {targetLang.toUpperCase()} using on-device AI or translation service.
+              Translate posts in other languages into {targetLang.toUpperCase()}. Your browser's on-device translator is
+              used when it has one. Otherwise the post's text is sent to Google Translate.
             </p>
           </div>
           <button

@@ -8,6 +8,8 @@
  * 4. User preference for automatic translation of non-primary language posts
  */
 
+import { inReadableScript, localeScripts } from './lang';
+
 const LS_AUTO_KEY = 'bluey:auto-translate';
 const LS_CACHE_KEY = 'bluey:translations-cache';
 
@@ -81,32 +83,128 @@ interface NativeTranslator {
 }
 
 interface TranslatorGlobal {
-  availability(options: { sourceLanguage?: string; targetLanguage: string }): Promise<string>;
-  create(options: { sourceLanguage?: string; targetLanguage: string }): Promise<NativeTranslator>;
+  availability(options: { sourceLanguage: string; targetLanguage: string }): Promise<string>;
+  create(options: { sourceLanguage: string; targetLanguage: string }): Promise<NativeTranslator>;
 }
 
-async function tryNativeTranslate(text: string, targetLang: string): Promise<string | null> {
+interface NativeDetector {
+  detect(text: string): Promise<{ detectedLanguage?: string; confidence?: number }[]>;
+}
+
+interface DetectorGlobal {
+  availability(): Promise<string>;
+  create(): Promise<NativeDetector>;
+}
+
+const baseLang = (lang: string) => lang.toLowerCase().split('-')[0];
+
+let detector: Promise<NativeDetector | null> | null = null;
+
+/** The browser's on-device language guess, or null if it has no confident one. */
+async function detectLanguage(text: string): Promise<string | null> {
   if (typeof window === 'undefined') return null;
-  const translatorApi = (window as unknown as { Translator?: TranslatorGlobal }).Translator;
-  if (!translatorApi) return null;
-
+  const api = (window as unknown as { LanguageDetector?: DetectorGlobal }).LanguageDetector;
+  if (!api) return null;
   try {
-    const status = await translatorApi.availability({ targetLanguage: targetLang });
-    if (status === 'available') {
-      const translator = await translatorApi.create({ targetLanguage: targetLang });
-      return await translator.translate(text);
-    }
+    detector ??= api.availability().then((s) => (s === 'available' ? api.create() : null));
+    const d = await detector;
+    const top = (await d?.detect(text))?.[0];
+    return top?.detectedLanguage && (top.confidence ?? 0) >= 0.6 ? baseLang(top.detectedLanguage) : null;
   } catch {
-    // Fall back to HTTP translation endpoint
+    return null;
   }
-  return null;
 }
 
-async function remoteTranslate(
+/**
+ * Whether auto-translate should touch this post. Most posts on a feed are already
+ * in the viewer's language, and those must never leave the device: when we can't
+ * tell (Latin-script text with no on-device detector), the answer is no and the
+ * "Translate post" button is still there.
+ */
+export async function looksForeign(text: string, targetLang = getUserTargetLang()): Promise<boolean> {
+  const source = await detectLanguage(text);
+  if (source) return source !== baseLang(targetLang);
+  return !inReadableScript(text, localeScripts());
+}
+
+const nativeTranslators = new Map<string, Promise<NativeTranslator | null>>();
+
+async function tryNativeTranslate(text: string, source: string, targetLang: string): Promise<string | null> {
+  if (typeof window === 'undefined' || source === targetLang) return null;
+  const api = (window as unknown as { Translator?: TranslatorGlobal }).Translator;
+  if (!api) return null;
+
+  const options = { sourceLanguage: source, targetLanguage: targetLang };
+  const key = `${source}:${targetLang}`;
+  try {
+    let translator = nativeTranslators.get(key);
+    if (!translator) {
+      translator = api.availability(options).then((s) => (s === 'available' ? api.create(options) : null));
+      nativeTranslators.set(key, translator);
+    }
+    return (await (await translator)?.translate(text)) ?? null;
+  } catch {
+    return null; // fall back to the remote endpoint
+  }
+}
+
+/** Longest `q` value per request, URL-encoded. Past this, servers may refuse the GET. */
+const MAX_ENCODED_CHUNK = 6000;
+
+/** Split long text into URL-safe pieces, at sentence or line ends where possible. */
+function chunkForUrl(text: string): string[] {
+  const size = (s: string) => encodeURIComponent(s).length;
+  if (size(text) <= MAX_ENCODED_CHUNK) return [text];
+
+  const chunks: string[] = [];
+  let current = '';
+  for (const piece of text.split(/(?<=[.!?。！？\n])/u)) {
+    if (size(current + piece) <= MAX_ENCODED_CHUNK) {
+      current += piece;
+      continue;
+    }
+    if (current) chunks.push(current);
+    current = '';
+    if (size(piece) <= MAX_ENCODED_CHUNK) {
+      current = piece;
+      continue;
+    }
+    // one enormous sentence: cut by character
+    for (const ch of piece) {
+      if (size(current + ch) > MAX_ENCODED_CHUNK) {
+        chunks.push(current);
+        current = '';
+      }
+      current += ch;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+/** One request at a time: a feed full of foreign posts shouldn't fire dozens at once. */
+let remoteQueue: Promise<unknown> = Promise.resolve();
+
+function remoteTranslate(text: string, targetLang: string): Promise<{ text: string; sourceLang?: string }> {
+  const run = async () => {
+    let sourceLang: string | undefined;
+    let translated = '';
+    for (const chunk of chunkForUrl(text)) {
+      const res = await remoteTranslateChunk(chunk, targetLang);
+      translated += res.text;
+      sourceLang ??= res.sourceLang;
+    }
+    return { text: translated, sourceLang };
+  };
+  const result = remoteQueue.then(run, run);
+  remoteQueue = result.catch(() => undefined);
+  return result;
+}
+
+async function remoteTranslateChunk(
   text: string,
   targetLang: string,
 ): Promise<{ text: string; sourceLang?: string }> {
-  // Use public single query translation endpoint with fallback
   const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(
     targetLang,
   )}&dt=t&q=${encodeURIComponent(text)}`;
@@ -141,12 +239,13 @@ export async function translateText(
     return { text: cached.translated, sourceLang: cached.sourceLang };
   }
 
-  // 1. Try native on-device Translator API
-  const native = await tryNativeTranslate(trimmed, targetLang);
+  // 1. Try the on-device Translator API, which needs to be told the source language
+  const source = await detectLanguage(trimmed);
+  const native = source ? await tryNativeTranslate(trimmed, source, targetLang) : null;
   if (native) {
-    memoryCache.set(cacheKey, { translated: native, ts: Date.now() });
+    memoryCache.set(cacheKey, { translated: native, sourceLang: source ?? undefined, ts: Date.now() });
     persistCache();
-    return { text: native };
+    return { text: native, sourceLang: source ?? undefined };
   }
 
   // 2. Try remote API

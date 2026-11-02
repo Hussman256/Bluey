@@ -101,18 +101,32 @@ export function feed(params: FeedParams): NostrEventLike[] {
     const hours = timeframeHours[params.timeframe ?? '24h'] ?? 24;
     const since = until - hours * 3600;
 
+    // Pick the 500 candidates by trust, then engagement, across the whole window.
+    // Taking the newest 500 would shrink 24h and 7d to the last few hours on a busy index.
     const candidates = q
       .all<Row & { wot: number; zap_sats: number; replies: number; reactions: number; reposts: number }>(
         `SELECT e.*, COALESCE(w.score, 0) AS wot,
-                (SELECT COALESCE(SUM(CASE WHEN kind=${KIND.ZapReceipt} THEN sats ELSE 0 END), 0)
-                 FROM edges WHERE target_id = e.id) AS zap_sats,
-                (SELECT COUNT(*) FROM edges WHERE target_id = e.id AND kind=${KIND.Text}) AS replies,
-                (SELECT COUNT(*) FROM edges WHERE target_id = e.id AND kind=${KIND.Reaction}) AS reactions,
-                (SELECT COUNT(*) FROM edges WHERE target_id = e.id AND kind IN (${KIND.Repost}, ${KIND.GenericRepost})) AS reposts
+                COALESCE(g.zap_sats, 0) AS zap_sats,
+                COALESCE(g.replies, 0) AS replies,
+                COALESCE(g.reactions, 0) AS reactions,
+                COALESCE(g.reposts, 0) AS reposts
          FROM events e
          LEFT JOIN wot w ON w.pubkey = e.pubkey
+         LEFT JOIN (
+           SELECT target_id,
+                  SUM(CASE WHEN kind=${KIND.ZapReceipt} THEN sats ELSE 0 END) AS zap_sats,
+                  SUM(kind=${KIND.Text}) AS replies,
+                  SUM(kind=${KIND.Reaction}) AS reactions,
+                  SUM(kind IN (${KIND.Repost}, ${KIND.GenericRepost})) AS reposts
+           FROM edges WHERE created_at >= ? GROUP BY target_id
+         ) g ON g.target_id = e.id
          WHERE e.kind IN (${KIND.Text}, ${KIND.Repost}) AND e.is_reply = 0 AND e.created_at >= ? AND e.created_at < ?
-         ORDER BY e.created_at DESC LIMIT 500`,
+         ORDER BY COALESCE(w.score, 0) > 0 DESC,
+                  COALESCE(g.zap_sats, 0) / 250.0 + COALESCE(g.replies, 0) * 3
+                    + COALESCE(g.reposts, 0) * 2.5 + COALESCE(g.reactions, 0) DESC,
+                  e.created_at DESC
+         LIMIT 500`,
+        since,
         since,
         until,
       )

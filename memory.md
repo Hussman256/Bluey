@@ -24,8 +24,6 @@ A running record of where the project stands, what was decided, and what happene
   - Basic "Trending" in the right rail (just the top 5 Discover posts).
 
 ### Not built yet
-- [ ] Auto-translate posts
-- [ ] Real time-windowed "Trending now" (current panel is not time-windowed)
 - [ ] Highlights on Reads articles (lessons only today)
 - [ ] Granular notification controls
 - [ ] Clubs tab on profiles
@@ -42,8 +40,8 @@ A running record of where the project stands, what was decided, and what happene
 ### Suggested next order
 0. **Blocker:** persistent hosting for the index (key backups + names now live there)
 1. Persistent backend hosting (Render free tier ephemeral DB resolution)
-2. Time-windowed Trending
-3. Auto-translate
+2. Test the publishing flows with a throwaway account on a relay set that excludes public relays
+3. Try passkeys on a real device
 
 ---
 
@@ -58,6 +56,20 @@ A running record of where the project stands, what was decided, and what happene
 ---
 
 ## Checkpoint log
+
+### 2026-11-02: first browser walkthrough, Trending and auto-translate fixes
+- **Walked through, phone width, read-only:** Feed, Learn, Clubs, board, profile (You), `/ship/new`, `/teach`, `/ships`, Alerts, Settings, and `/@name` for an unknown name. All render with sensible empty states and no sideways overflow. Trending and the status dots were also seen working at desktop width. Checked by reading page text and the console through Vite's log, not visually: screenshots froze from low memory after the first desktop one.
+- **Fixed:**
+  - Trending rows nested a profile link inside a post link (invalid HTML, React error on every load).
+  - Trending picked candidates from the newest 500 posts, which shrank 24h and 7d. It now picks by trust, then engagement, across the whole window. In a test with 2,000 newer posts in the way, the old query missed a big 3-day-old post on 7d and the new one ranks it first, at the same speed.
+  - Auto-translate only sends posts that look foreign (on-device detector, else script). Latin-script text with no detector stays on the device; the manual button still works. On-device translation now gets `sourceLanguage`. Long posts split into pieces, requests run one at a time, and Settings says text may go to Google. Tested against the real endpoint from Node, including a 14,000-character post. The auto-translate UI and the browser's built-in translator were **not** exercised.
+- **Not tried yet, because they publish or need a person:** onboarding, passkey prompts, posting, Ship publishing, vouching, enrolling, quizzes, clubs chat, live classes, zaps. These need a test account on a relay set that excludes public relays.
+- Known leftovers: Settings says the manual zap flow "lands in a later build"; Trending quietly shows Discover posts when a window is empty; there's still no 12h button; the unofficial Google endpoint remains.
+- These changes are uncommitted on `feat/mobile-rebuild`.
+
+### 2026-11-02: all work committed to a branch
+- Everything since the rename is in one commit, `f3bcedd`, on `feat/mobile-rebuild`, pushed to origin. It isn't merged to `main`. The changed files were scanned for secrets first and none were found.
+- That commit includes time-windowed Trending and auto-translate, which were previously held back on purpose (see 2026-10-23). They should be checked before merging.
 
 ### 2026-11-02: link previews for /@name
 - `api/og.ts` (Vercel edge function, repo root) returns a small HTML page with Open Graph and Twitter tags. A `vercel.json` rewrite sends `/@:handle` there only for crawler user agents (WhatsApp, X, Facebook/iMessage, Telegram, Slack, Discord, LinkedIn and others); people still get the SPA. It's typechecked through `packages/web/tsconfig.node.json`.

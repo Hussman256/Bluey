@@ -18,16 +18,17 @@ function TrendingRow({ event, rank }: { event: NDKEvent; rank: number }) {
   const text = snippet(event.content);
   if (!text) return null;
   return (
-    <Link to={`/e/${event.encode()}`} className="flex items-start gap-2.5 py-3 first:pt-0 group">
+    <div className="flex items-start gap-2.5 py-3 first:pt-0 group">
       <span className="font-mono text-xs font-bold text-ink-faint w-4 pt-1 text-center shrink-0 group-hover:text-ink">
         {rank}
       </span>
+      {/* Avatar is its own link to the profile, so it can't sit inside the post link */}
       <Avatar pubkey={event.pubkey} size={28} />
-      <div className="min-w-0 flex-1">
+      <Link to={`/e/${event.encode()}`} className="min-w-0 flex-1">
         <div className="truncate text-[13px] font-semibold">{name}</div>
         <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-ink-soft group-hover:text-ink">{text}</p>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
