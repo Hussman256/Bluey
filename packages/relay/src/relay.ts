@@ -9,6 +9,7 @@ import { handleGroupEvent, isRelayGenerated } from './groups.ts';
 import { queryFilter, storeEvent } from './store.ts';
 
 const GROUP_KINDS = new Set<number>([
+  KIND.Text, // club-only Ships: a kind 1 with an `h` tag
   KIND.GroupChatMessage,
   KIND.GroupChatReply,
   KIND.GroupThread,

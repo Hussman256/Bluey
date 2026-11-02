@@ -1,38 +1,48 @@
 @import 'tailwindcss';
 
 /*
- * Bluey — "warm ledger" theme (design direction B).
- * Primal's restraint — hairlines, whitespace, one accent — on a warm paper
- * ground. Bitcoin orange is the only accent; everything else is ink on paper.
+ * Bluey — "cobalt" theme (see the design prototype linked in memory.md).
+ * Cool mist ground, white cards, ink text. Cobalt is the action colour;
+ * Bitcoin orange (`zap`) appears only where sats move: zaps, wallet, prices.
  */
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --color-bg: #fdfbf7;
-  --color-surface: #f6f0e4;
-  --color-sunk: #f0e9d8;
-  --color-line: #eee4d2;
-  --color-line-strong: #ddd0b5;
-  --color-ink: #1c1a16;
-  --color-ink-soft: #6b5f4a;
-  --color-ink-faint: #a89d87;
+  --color-bg: #f3f6fa;
+  --color-surface: #ffffff;
+  --color-sunk: #e9eef5;
+  --color-line: #dce3ec;
+  --color-line-strong: #c3cedb;
+  --color-ink: #0d1726;
+  --color-ink-soft: #3b4757;
+  --color-ink-faint: #5a6778;
 
-  /* the dark ticker strip + inverted panels (Vouched card, code blocks) */
-  --color-slab: #1c1a16;
-  --color-slab-line: #332e26;
-  --color-slab-ink: #c9bfa8;
+  /* dark panels: Continue card, on-air rooms, Vouched card, code blocks */
+  --color-slab: #0d1726;
+  --color-slab-line: #24344d;
+  --color-slab-ink: #aebbcb;
 
+  --color-brand: #1f4fe0;
+  --color-brand-soft: #e6edff;
+  --color-brand-ink: #163baa;
+  --color-brand-bright: #5b83ff; /* on slab */
+
+  /* sats only */
   --color-zap: #f7931a;
-  --color-zap-soft: #fdeecb;
-  --color-zap-ink: #8a5a10;
+  --color-zap-soft: #fff1e3;
+  --color-zap-ink: #9a4a06;
 
-  /* secondary — avatar fallbacks, muted marks; never competes with the accent */
-  --color-proto: #b6704f;
-  --color-proto-soft: #f4e6dc;
+  /* live rooms */
+  --color-live: #ff6b3d;
+  --color-live-ink: #a3360f;
 
-  --color-good: #1f8a63;
+  /* secondary tint for avatar fallbacks and tiles */
+  --color-proto: #0b5a3e;
+  --color-proto-soft: #c9f2e0;
+
+  --color-good: #0f8a5f;
   --color-danger: #c0392b;
 }
 
@@ -55,11 +65,11 @@
     color: inherit;
   }
   ::selection {
-    background: var(--color-zap);
+    background: var(--color-brand);
     color: #ffffff;
   }
   :focus-visible {
-    outline: 2px solid var(--color-zap);
+    outline: 2px solid var(--color-brand);
     outline-offset: 2px;
     border-radius: 3px;
   }

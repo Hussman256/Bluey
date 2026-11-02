@@ -2,8 +2,10 @@ import {
   KIND,
   isSpamContent,
   type EngagementCount,
+  type FeedParams,
   type NostrEventLike,
   type NotificationItem,
+  type TrendingTimeframe,
 } from '@bluey/shared';
 import { ftsAvailable, q } from './db.ts';
 
@@ -71,12 +73,7 @@ function trustSet(pubkey: string): Set<string> {
 }
 
 // ---------- feed ----------
-export function feed(params: {
-  scope: 'discover' | 'following';
-  pubkey?: string;
-  limit?: number;
-  until?: number;
-}): NostrEventLike[] {
+export function feed(params: FeedParams): NostrEventLike[] {
   const limit = Math.min(params.limit ?? 60, 150);
   const until = params.until ?? Math.floor(Date.now() / 1000) + 60;
 
@@ -92,6 +89,68 @@ export function feed(params: {
         limit,
       )
       .map(toEvent);
+  }
+
+  if (params.scope === 'trending') {
+    const timeframeHours: Record<TrendingTimeframe, number> = {
+      '4h': 4,
+      '12h': 12,
+      '24h': 24,
+      '7d': 168,
+    };
+    const hours = timeframeHours[params.timeframe ?? '24h'] ?? 24;
+    const since = until - hours * 3600;
+
+    const candidates = q
+      .all<Row & { wot: number; zap_sats: number; replies: number; reactions: number; reposts: number }>(
+        `SELECT e.*, COALESCE(w.score, 0) AS wot,
+                (SELECT COALESCE(SUM(CASE WHEN kind=${KIND.ZapReceipt} THEN sats ELSE 0 END), 0)
+                 FROM edges WHERE target_id = e.id) AS zap_sats,
+                (SELECT COUNT(*) FROM edges WHERE target_id = e.id AND kind=${KIND.Text}) AS replies,
+                (SELECT COUNT(*) FROM edges WHERE target_id = e.id AND kind=${KIND.Reaction}) AS reactions,
+                (SELECT COUNT(*) FROM edges WHERE target_id = e.id AND kind IN (${KIND.Repost}, ${KIND.GenericRepost})) AS reposts
+         FROM events e
+         LEFT JOIN wot w ON w.pubkey = e.pubkey
+         WHERE e.kind IN (${KIND.Text}, ${KIND.Repost}) AND e.is_reply = 0 AND e.created_at >= ? AND e.created_at < ?
+         ORDER BY e.created_at DESC LIMIT 500`,
+        since,
+        until,
+      )
+      .filter((r) => r.kind !== KIND.Text || !isSpamContent(r.content));
+
+    const trusted = params.pubkey ? trustSet(params.pubkey) : new Set<string>();
+    const now = Date.now() / 1000;
+
+    const reported = new Set(
+      q
+        .all<{ target: string }>(
+          `SELECT r.target
+           FROM reports r
+           LEFT JOIN wot w ON w.pubkey = r.reporter
+           GROUP BY r.target
+           HAVING COALESCE(SUM(w.score), 0) >= 0.10
+               OR SUM(CASE WHEN w.score > 0 THEN 1 ELSE 0 END) >= 3`,
+        )
+        .map((r) => r.target),
+    );
+    const flagged = (r: Row) => reported.has(r.id) || reported.has(r.pubkey);
+
+    const rankTrending = (minWot: number) =>
+      candidates
+        .filter((r) => !flagged(r) && (trusted.has(r.pubkey) || r.wot >= minWot))
+        .map((r) => {
+          const ageH = Math.max(0.1, (now - r.created_at) / 3600);
+          const engPoints = (r.zap_sats / 250) + (r.replies * 3) + (r.reposts * 2.5) + (r.reactions * 1);
+          const velocity = (engPoints + 0.5) / Math.pow(ageH + 1, 1.25);
+          const trustBoost = trusted.has(r.pubkey) ? 1.5 : Math.max(0.05, r.wot);
+          return { r, score: velocity * trustBoost };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+
+    let ranked = rankTrending(trusted.size < 15 ? 0.05 : 0.01);
+    if (ranked.length < 5) ranked = rankTrending(0);
+    return ranked.map((x) => toEvent(x.r));
   }
 
   const candidates = q
@@ -324,3 +383,213 @@ export function wotScore(pubkey: string, from?: string): number {
   if (from && trustSet(from).has(pubkey)) return 1;
   return q.get<{ score: number }>(`SELECT score FROM wot WHERE pubkey = ?`, pubkey)?.score ?? 0;
 }
+
+// ---------- accounts: passkey key backups, names, onboarding suggestions ----------
+
+export interface KeyBackup {
+  pubkey: string;
+  blob: string;
+}
+
+export function keyBackup(credentialId: string): KeyBackup | undefined {
+  return q.get<KeyBackup>(
+    `SELECT pubkey, blob FROM key_backups WHERE credential_id = ?`,
+    credentialId,
+  );
+}
+
+/** Store a backup; an existing credential id can only be rewritten by the same pubkey. */
+export function saveKeyBackup(credentialId: string, pubkey: string, blob: string): boolean {
+  const prev = keyBackup(credentialId);
+  if (prev && prev.pubkey !== pubkey) return false;
+  const now = Math.floor(Date.now() / 1000);
+  q.run(
+    `INSERT INTO key_backups (credential_id, pubkey, blob, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(credential_id) DO UPDATE SET blob = excluded.blob, updated_at = excluded.updated_at`,
+    credentialId,
+    pubkey,
+    blob,
+    now,
+    now,
+  );
+  return true;
+}
+
+export interface NameRow {
+  name: string;
+  pubkey: string;
+  ln_target: string | null;
+}
+
+export const nameByName = (name: string) =>
+  q.get<NameRow>(`SELECT name, pubkey, ln_target FROM names WHERE name = ?`, name);
+
+export const nameByPubkey = (pubkey: string) =>
+  q.get<NameRow>(`SELECT name, pubkey, ln_target FROM names WHERE pubkey = ?`, pubkey);
+
+export const profileCard = (pubkey: string) =>
+  q.get<{ name: string | null; display_name: string | null; about: string | null; picture: string | null }>(
+    `SELECT name, display_name, about, picture FROM profiles WHERE pubkey = ?`,
+    pubkey,
+  );
+
+/**
+ * Claim (or rename to) `name` for `pubkey`, and set where its Lightning address
+ * forwards. Returns false when someone else holds the name.
+ */
+export function claimName(name: string, pubkey: string, lnTarget: string | null): boolean {
+  const taken = nameByName(name);
+  if (taken && taken.pubkey !== pubkey) return false;
+  const now = Math.floor(Date.now() / 1000);
+  q.run(`DELETE FROM names WHERE pubkey = ? AND name <> ?`, pubkey, name);
+  q.run(
+    `INSERT INTO names (name, pubkey, ln_target, created_at, updated_at) VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(name) DO UPDATE SET ln_target = excluded.ln_target, updated_at = excluded.updated_at`,
+    name,
+    pubkey,
+    lnTarget,
+    now,
+    now,
+  );
+  return true;
+}
+
+/** Words that mark a profile as being about a topic, for onboarding suggestions. */
+const TOPIC_WORDS: Record<string, string[]> = {
+  bitcoin: ['bitcoin', 'btc', 'sats'],
+  lightning: ['lightning', 'lnd', 'zap'],
+  nostr: ['nostr'],
+  code: ['developer', 'engineer', 'programmer', 'coder', 'dev '],
+  design: ['design', 'designer', 'ux', 'ui '],
+  business: ['founder', 'business', 'startup', 'entrepreneur'],
+};
+
+/**
+ * Well-trusted accounts for a set of interests: highest web-of-trust score among
+ * profiles whose bio mentions the topic, padded with the most trusted overall.
+ */
+export function suggestPubkeys(topics: string[], limit = 24): string[] {
+  const words = topics.flatMap((t) => TOPIC_WORDS[t] ?? []).slice(0, 24);
+  const out: string[] = [];
+  if (words.length) {
+    const where = words.map(() => `lower(coalesce(p.about, '') || ' ' || coalesce(p.name, '')) LIKE ?`).join(' OR ');
+    out.push(
+      ...q
+        .all<{ pubkey: string }>(
+          `SELECT w.pubkey FROM wot w JOIN profiles p ON p.pubkey = w.pubkey
+           WHERE p.name IS NOT NULL AND (${where})
+           ORDER BY w.score DESC LIMIT ?`,
+          ...words.map((w) => `%${w}%`),
+          limit,
+        )
+        .map((r) => r.pubkey),
+    );
+  }
+  if (out.length < limit) {
+    for (const r of q.all<{ pubkey: string }>(
+      `SELECT w.pubkey FROM wot w JOIN profiles p ON p.pubkey = w.pubkey
+       WHERE p.name IS NOT NULL ORDER BY w.score DESC LIMIT ?`,
+      limit * 2,
+    )) {
+      if (out.length >= limit) break;
+      if (!out.includes(r.pubkey)) out.push(r.pubkey);
+    }
+  }
+  return out;
+}
+
+// ---------- learning: quizzes, attempts, completion awards ----------
+
+export interface QuizQuestion {
+  q: string;
+  options: string[];
+  answer: number;
+  explain?: string;
+}
+
+export interface QuizRow {
+  lesson_addr: string;
+  bootcamp_addr: string;
+  bootcamp_title: string;
+  questions: QuizQuestion[];
+  pass_mark: number;
+}
+
+const toQuiz = (r: Omit<QuizRow, 'questions'> & { questions: string }): QuizRow => ({
+  ...r,
+  questions: JSON.parse(r.questions),
+});
+
+export function quizFor(lessonAddr: string): QuizRow | undefined {
+  const r = q.get<Omit<QuizRow, 'questions'> & { questions: string }>(
+    `SELECT lesson_addr, bootcamp_addr, bootcamp_title, questions, pass_mark FROM quizzes WHERE lesson_addr = ?`,
+    lessonAddr,
+  );
+  return r && toQuiz(r);
+}
+
+export const quizLessonsIn = (bootcampAddr: string) =>
+  q.all<{ lesson_addr: string }>(`SELECT lesson_addr FROM quizzes WHERE bootcamp_addr = ?`, bootcampAddr).map(
+    (r) => r.lesson_addr,
+  );
+
+export function saveQuiz(row: QuizRow) {
+  q.run(
+    `INSERT INTO quizzes (lesson_addr, bootcamp_addr, bootcamp_title, questions, pass_mark, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(lesson_addr) DO UPDATE SET bootcamp_addr = excluded.bootcamp_addr,
+       bootcamp_title = excluded.bootcamp_title, questions = excluded.questions,
+       pass_mark = excluded.pass_mark, updated_at = excluded.updated_at`,
+    row.lesson_addr,
+    row.bootcamp_addr,
+    row.bootcamp_title,
+    JSON.stringify(row.questions),
+    row.pass_mark,
+    Math.floor(Date.now() / 1000),
+  );
+}
+
+export const deleteQuiz = (lessonAddr: string) => q.run(`DELETE FROM quizzes WHERE lesson_addr = ?`, lessonAddr);
+
+/** Keep the learner's best attempt (a pass is never undone by a later, worse try). */
+export function recordAttempt(lessonAddr: string, pubkey: string, score: number, total: number, passed: boolean) {
+  q.run(
+    `INSERT INTO quiz_attempts (lesson_addr, pubkey, score, total, passed, updated_at) VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(lesson_addr, pubkey) DO UPDATE SET
+       score = max(score, excluded.score), total = excluded.total,
+       passed = max(passed, excluded.passed), updated_at = excluded.updated_at`,
+    lessonAddr,
+    pubkey,
+    score,
+    total,
+    passed ? 1 : 0,
+    Math.floor(Date.now() / 1000),
+  );
+}
+
+export function attemptsIn(bootcampAddr: string, pubkey: string) {
+  return q.all<{ lesson_addr: string; score: number; total: number; passed: number }>(
+    `SELECT a.lesson_addr, a.score, a.total, a.passed FROM quiz_attempts a
+     JOIN quizzes z ON z.lesson_addr = a.lesson_addr
+     WHERE z.bootcamp_addr = ? AND a.pubkey = ?`,
+    bootcampAddr,
+    pubkey,
+  );
+}
+
+export const awardFor = (bootcampAddr: string, pubkey: string) =>
+  q.get<{ award_id: string }>(
+    `SELECT award_id FROM quiz_awards WHERE bootcamp_addr = ? AND pubkey = ?`,
+    bootcampAddr,
+    pubkey,
+  )?.award_id;
+
+export const saveAward = (bootcampAddr: string, pubkey: string, awardId: string) =>
+  q.run(
+    `INSERT OR IGNORE INTO quiz_awards (bootcamp_addr, pubkey, award_id, created_at) VALUES (?, ?, ?, ?)`,
+    bootcampAddr,
+    pubkey,
+    awardId,
+    Math.floor(Date.now() / 1000),
+  );

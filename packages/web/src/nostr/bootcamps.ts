@@ -1,4 +1,4 @@
-import { KIND, TAG } from '@bluey/shared';
+import { BOOTCAMP_TOPICS, KIND, TAG, type BootcampTopic } from '@bluey/shared';
 import NDK, { NDKEvent, nip19 } from '@nostr-dev-kit/ndk';
 
 // ---------- addressable-event helpers ----------
@@ -34,6 +34,15 @@ export const slug = (s: string) =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 48) || Math.random().toString(36).slice(2, 10);
 
+export const TOPIC_LABEL: Record<BootcampTopic, string> = {
+  bitcoin: 'Bitcoin',
+  lightning: 'Lightning',
+  nostr: 'Nostr',
+  code: 'Code',
+  design: 'Design',
+  business: 'Business',
+};
+
 // ---------- parsers ----------
 const tag = (e: NDKEvent, n: string) => e.tags.find((t) => t[0] === n)?.[1];
 const dOf = (e: NDKEvent) => tag(e, 'd') ?? '';
@@ -45,6 +54,7 @@ export interface Bootcamp {
   description?: string;
   image?: string;
   cohortId?: string; // clubs-relay group id
+  topics: BootcampTopic[];
   lessons: Addr[]; // ordered
   created_at: number;
   addr: Addr;
@@ -60,6 +70,9 @@ export function parseBootcamp(e: NDKEvent): Bootcamp | null {
     description: tag(e, 'description'),
     image: tag(e, 'image'),
     cohortId: tag(e, 'cohort'),
+    topics: e.tags
+      .filter((t) => t[0] === 't' && (BOOTCAMP_TOPICS as readonly string[]).includes(t[1]))
+      .map((t) => t[1] as BootcampTopic),
     lessons: e.tags
       .filter((t) => t[0] === 'a')
       .map((t) => parseAddr(t[1]))
@@ -139,7 +152,15 @@ function base(ndk: NDK, kind: number, tags: string[][], content = '') {
 
 export function bootcampEvent(
   ndk: NDK,
-  b: { id: string; title: string; description?: string; image?: string; cohortId?: string; lessons: Addr[] },
+  b: {
+    id: string;
+    title: string;
+    description?: string;
+    image?: string;
+    cohortId?: string;
+    topics: BootcampTopic[];
+    lessons: Addr[];
+  },
 ) {
   return base(ndk, KIND.CurationSet, [
     ['d', b.id],
@@ -148,6 +169,7 @@ export function bootcampEvent(
     ...(b.image ? [['image', b.image]] : []),
     ...(b.cohortId ? [['cohort', b.cohortId]] : []),
     ['t', TAG.bootcamp],
+    ...b.topics.map((t) => ['t', t]),
     ['client', TAG.client],
     ...b.lessons.map((a) => ['a', addrString(a), '', 'lesson']),
   ]);

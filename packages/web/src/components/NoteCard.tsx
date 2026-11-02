@@ -1,24 +1,37 @@
 import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useEvent, useNDK, useNDKCurrentUser } from '@nostr-dev-kit/react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { parseAddr } from '../nostr/bootcamps';
 import { NoteContent } from '../nostr/content';
 import { useNoteStats } from '../nostr/engagement';
 import { KIND } from '../nostr/kinds';
 import { useMuteActions } from '../nostr/mutes';
+import { isShip } from '../nostr/ships';
 import { SourceTitle } from '../nostr/sourceTitle';
+import {
+  isAutoTranslateEnabled,
+  setAutoTranslateEnabled,
+  translateText,
+} from '../nostr/translate';
 import { Avatar, DisplayName, Handle, RelativeTime } from './primitives';
+import { ShipBadge, ShipBody } from './ShipBody';
 import { ZapButton } from './ZapButton';
 
-/** Per-note overflow: mute the author, or file a NIP-56 spam report. */
+/** Per-note overflow: mute the author, file a report, or toggle auto-translate. */
 function NoteMenu({ event }: { event: NDKEvent }) {
   const { ndk } = useNDK();
   const me = useNDKCurrentUser();
   const { mutePubkey } = useMuteActions();
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<string | null>(null);
-  if (!me || me.pubkey === event.pubkey) return null;
+  const [autoTranslate, setAutoTranslate] = useState(isAutoTranslateEnabled);
+
+  useEffect(() => {
+    const onAutoChange = () => setAutoTranslate(isAutoTranslateEnabled());
+    window.addEventListener('bluey:auto-translate-changed', onAutoChange);
+    return () => window.removeEventListener('bluey:auto-translate-changed', onAutoChange);
+  }, []);
 
   async function report() {
     if (!ndk) return;
@@ -45,7 +58,7 @@ function NoteMenu({ event }: { event: NDKEvent }) {
       </button>
       {open && (
         <div
-          className="absolute right-0 top-8 z-20 w-44 overflow-hidden rounded-xl border border-line bg-bg py-1 text-sm shadow-lg"
+          className="absolute right-0 top-8 z-20 w-48 overflow-hidden rounded-xl border border-line bg-bg py-1 text-xs shadow-lg"
           onMouseLeave={() => setOpen(false)}
         >
           {done ? (
@@ -55,22 +68,158 @@ function NoteMenu({ event }: { event: NDKEvent }) {
               <button
                 type="button"
                 onClick={() => {
-                  void mutePubkey(event.pubkey);
+                  setAutoTranslateEnabled(!autoTranslate);
                   setOpen(false);
                 }}
-                className="block w-full px-3 py-2 text-left hover:bg-surface"
+                className="block w-full px-3 py-2 text-left hover:bg-surface text-ink font-medium"
               >
-                Mute this account
+                {autoTranslate ? 'Disable auto-translate' : 'Enable auto-translate'}
               </button>
-              <button
-                type="button"
-                onClick={() => void report()}
-                className="block w-full px-3 py-2 text-left text-danger hover:bg-danger/10"
-              >
-                Report as spam
-              </button>
+              {me && me.pubkey !== event.pubkey && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void mutePubkey(event.pubkey);
+                      setOpen(false);
+                    }}
+                    className="block w-full px-3 py-2 text-left hover:bg-surface"
+                  >
+                    Mute this account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void report()}
+                    className="block w-full px-3 py-2 text-left text-danger hover:bg-danger/10"
+                  >
+                    Report as spam
+                  </button>
+                </>
+              )}
             </>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function NoteBody({
+  content,
+  sensitive,
+  sensitiveReason,
+}: {
+  content: string;
+  sensitive?: boolean;
+  sensitiveReason?: string;
+}) {
+  const [translated, setTranslated] = useState<string | null>(null);
+  const [sourceLang, setSourceLang] = useState<string | null>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [autoEnabled, setAutoEnabled] = useState(isAutoTranslateEnabled);
+
+  useEffect(() => {
+    const onAutoChange = () => setAutoEnabled(isAutoTranslateEnabled());
+    window.addEventListener('bluey:auto-translate-changed', onAutoChange);
+    return () => window.removeEventListener('bluey:auto-translate-changed', onAutoChange);
+  }, []);
+
+  const cleanText = content.replace(/https?:\/\/\S+/g, '').replace(/nostr:\S+/g, '').trim();
+  const canTranslate = cleanText.length > 6;
+
+  const handleTranslate = useCallback(async () => {
+    if (loading || translated) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await translateText(content);
+      if (res.text.trim().toLowerCase() === content.trim().toLowerCase()) {
+        setError('Same language');
+      } else {
+        setTranslated(res.text);
+        if (res.sourceLang) setSourceLang(res.sourceLang);
+      }
+    } catch {
+      setError('Translation unavailable');
+    } finally {
+      setLoading(false);
+    }
+  }, [content, loading, translated]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (autoEnabled && canTranslate && !translated) {
+      Promise.resolve().then(async () => {
+        if (cancelled) return;
+        setLoading(true);
+        try {
+          const res = await translateText(content);
+          if (cancelled) return;
+          if (res.text.trim().toLowerCase() === content.trim().toLowerCase()) {
+            setError('Same language');
+          } else {
+            setTranslated(res.text);
+            if (res.sourceLang) setSourceLang(res.sourceLang);
+          }
+        } catch {
+          if (!cancelled) setError('Translation unavailable');
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [autoEnabled, canTranslate, translated, content]);
+
+  const activeContent = translated && !showOriginal ? translated : content;
+
+  return (
+    <div className="mt-1">
+      <NoteContent
+        content={activeContent}
+        sensitive={sensitive}
+        sensitiveReason={sensitiveReason}
+      />
+      {canTranslate && (
+        <div className="mt-1 flex items-center gap-2 text-[12px] text-ink-faint">
+          {translated ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-ink-faint">
+                Translated {sourceLang ? `from ${sourceLang.toUpperCase()}` : ''}
+              </span>
+              <span>·</span>
+              <button
+                type="button"
+                onClick={() => setShowOriginal((v) => !v)}
+                className="hover:underline hover:text-ink cursor-pointer"
+              >
+                {showOriginal ? 'Show translation' : 'Show original'}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void handleTranslate()}
+              disabled={loading}
+              className="inline-flex items-center gap-1 hover:text-ink hover:underline cursor-pointer disabled:opacity-50"
+            >
+              {loading ? (
+                <span className="text-[11px]">Translating…</span>
+              ) : (
+                <>
+                  <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6" />
+                  </svg>
+                  <span className="text-[11px]">Translate post</span>
+                </>
+              )}
+            </button>
+          )}
+          {error && <span className="text-danger text-[11px]">{error}</span>}
         </div>
       )}
     </div>
@@ -119,7 +268,7 @@ function HighlightCard({ event }: { event: NDKEvent }) {
             <RelativeTime ts={event.created_at} />
           </Link>
         </div>
-        <blockquote className="mt-2 border-l-2 border-zap pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
+        <blockquote className="mt-2 border-l-2 border-brand pl-3 text-[0.95rem] leading-relaxed text-ink-soft">
           {event.content}
         </blockquote>
         <p className="mt-2 text-xs text-ink-faint">
@@ -169,6 +318,7 @@ function PlainNote({ event, bare = false }: { event: NDKEvent; bare?: boolean })
   const stats = useNoteStats(event.id);
   const [reacted, setReacted] = useState(false);
   const link = `/e/${event.encode()}`;
+  const ship = isShip(event);
 
   async function react() {
     if (!ndk || !me || reacted) return;
@@ -206,15 +356,18 @@ function PlainNote({ event, bare = false }: { event: NDKEvent; bare?: boolean })
           <Link to={link} className="shrink-0 hover:underline">
             <RelativeTime ts={event.created_at} />
           </Link>
+          {ship && <ShipBadge />}
         </div>
 
-        <div className="mt-1">
-          <NoteContent
+        {ship ? (
+          <ShipBody event={event} />
+        ) : (
+          <NoteBody
             content={event.content}
             sensitive={event.tags.some((t) => t[0] === 'content-warning')}
             sensitiveReason={event.tags.find((t) => t[0] === 'content-warning')?.[1]}
           />
-        </div>
+        )}
 
         <div className="mt-2.5 flex items-center gap-1 text-ink-faint">
           <Link

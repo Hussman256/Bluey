@@ -188,7 +188,7 @@ export function HighlightPopover({
                 <p className="mb-2 font-mono text-[11px] uppercase tracking-wide text-ink-faint">
                   Highlight
                 </p>
-                <blockquote className="max-h-40 overflow-y-auto border-l-2 border-zap pl-3 text-sm text-ink-soft">
+                <blockquote className="max-h-40 overflow-y-auto border-l-2 border-brand pl-3 text-sm text-ink-soft">
                   {sheet.text}
                 </blockquote>
                 <textarea
@@ -196,7 +196,7 @@ export function HighlightPopover({
                   onChange={(e) => setNote(e.target.value)}
                   rows={3}
                   placeholder="Add your take — this posts it to the feed (optional)"
-                  className="mt-3 w-full resize-none rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-zap placeholder:text-ink-faint"
+                  className="mt-3 w-full resize-none rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-brand placeholder:text-ink-faint"
                 />
                 {err && <p className="mt-1 text-xs text-danger">{err}</p>}
                 <div className="mt-3 flex items-center justify-end gap-2">
@@ -212,7 +212,7 @@ export function HighlightPopover({
                     type="button"
                     onClick={post}
                     disabled={busy}
-                    className="rounded-full bg-zap px-4 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
+                    className="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
                   >
                     {busy ? '…' : note.trim() ? 'Post highlight' : 'Save highlight'}
                   </button>

@@ -99,6 +99,36 @@ export const TAG = {
 export const SHIP_LABEL_NS = 'bluey.ship';
 export const SHIP_LABEL_VERIFIED = 'verified';
 
+/**
+ * NIP-32 namespace the author uses to self-label a Ship's kind of work, so
+ * relays can filter on it (`#L` / `#l`).
+ */
+export const SHIP_CATEGORY_NS = 'bluey.ship.category';
+export const SHIP_CATEGORIES = [
+  'app',
+  'website',
+  'tool',
+  'ai-agent',
+  'design',
+  'writing',
+  'video',
+  'other',
+] as const;
+export type ShipCategory = (typeof SHIP_CATEGORIES)[number];
+
+/** Marker in a Ship's `p` tag (4th element) for people credited on the work. */
+export const SHIP_COLLABORATOR = 'collaborator';
+
+/** Topics a bootcamp can be filed under, written as plain `t` tags. */
+export const BOOTCAMP_TOPICS = ['bitcoin', 'lightning', 'nostr', 'code', 'design', 'business'] as const;
+export type BootcampTopic = (typeof BOOTCAMP_TOPICS)[number];
+
+/**
+ * `d` tag of the NIP-51 follow set (kind 30000) the Bluey curator account
+ * publishes to list approved tutors. Only their bootcamps reach the catalogue.
+ */
+export const TUTOR_LIST_D = 'bluey-tutors';
+
 /** Kinds the index service ingests from the relay firehose. */
 export const INGEST_KINDS: number[] = [
   KIND.Metadata,

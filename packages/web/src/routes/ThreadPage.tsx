@@ -2,9 +2,8 @@ import { useEvent, useSubscribe } from '@nostr-dev-kit/react';
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Composer } from '../components/Composer';
-import { NoteCard } from '../components/NoteCard';
+import { NoteCard, NoteBody } from '../components/NoteCard';
 import { Avatar, DisplayName, Handle, RelativeTime } from '../components/primitives';
-import { NoteContent } from '../nostr/content';
 import { EngagementScope } from '../nostr/engagement';
 import { eventIdFrom } from '../nostr/ids';
 import { KIND } from '../nostr/kinds';
@@ -60,7 +59,7 @@ export function ThreadPage() {
             </div>
           </div>
           <div className="mt-3 text-[1.02rem]">
-            <NoteContent
+            <NoteBody
               content={root.content}
               sensitive={root.tags.some((t) => t[0] === 'content-warning')}
               sensitiveReason={root.tags.find((t) => t[0] === 'content-warning')?.[1]}

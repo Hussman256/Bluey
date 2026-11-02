@@ -1,4 +1,4 @@
-import { KIND, TAG } from '@bluey/shared';
+import { KIND, TAG, type BootcampTopic } from '@bluey/shared';
 import type { NDKEvent, NDKFilter } from '@nostr-dev-kit/ndk';
 import { useNDK, useSubscribe } from '@nostr-dev-kit/react';
 import { useCallback, useMemo } from 'react';
@@ -17,6 +17,7 @@ import {
   type Lesson,
   type LiveClass,
 } from './bootcamps';
+import { useNow } from '../components/useNow';
 import { useClubActions } from './useClubs';
 
 function newestByD<T extends { pubkey: string }>(events: NDKEvent[], parse: (e: NDKEvent) => T | null) {
@@ -106,6 +107,23 @@ export function useLiveClasses(bootcampAddr?: Addr): LiveClass[] {
   );
 }
 
+/** Bluey live classes that are on air right now, newest first. */
+export function useLiveNow(): LiveClass[] {
+  const { events } = useSubscribe(
+    [{ kinds: [KIND.LiveEvent], '#t': [TAG.liveClass], limit: 100 }] as unknown as NDKFilter[],
+    { closeOnEose: false },
+    [],
+  );
+  const now = useNow(60_000);
+  return useMemo(() => {
+    // a class left "live" by a host who never ended it shouldn't haunt the strip
+    const stale = now - 12 * 3600;
+    return newestByD(events, parseLiveClass)
+      .filter((l) => l.status === 'live' && l.created_at > stale)
+      .sort((a, b) => b.created_at - a.created_at);
+  }, [events, now]);
+}
+
 export function useLiveClass(pubkey?: string, id?: string): LiveClass | null {
   const { events } = useSubscribe(
     pubkey && id
@@ -136,12 +154,16 @@ export function useBootcampActions() {
   const clubs = useClubActions();
 
   const create = useCallback(
-    async (title: string, description?: string): Promise<{ id: string; pubkey: string }> => {
+    async (
+      title: string,
+      description?: string,
+      topics: BootcampTopic[] = [],
+    ): Promise<{ id: string; pubkey: string }> => {
       if (!ndk?.signer) throw new Error('sign in first');
       const me = await ndk.signer.user();
       const cohortId = await clubs.create(`${title} — cohort`, description);
       const id = slug(title);
-      await bootcampEvent(ndk, { id, title, description, cohortId, lessons: [] }).publish();
+      await bootcampEvent(ndk, { id, title, description, cohortId, topics, lessons: [] }).publish();
       return { id, pubkey: me.pubkey };
     },
     [ndk, clubs],
@@ -163,6 +185,7 @@ export function useBootcampActions() {
         description: bootcamp.description,
         image: bootcamp.image,
         cohortId: bootcamp.cohortId,
+        topics: bootcamp.topics,
         lessons: [...bootcamp.lessons, lessonAddr],
       }).publish();
     },

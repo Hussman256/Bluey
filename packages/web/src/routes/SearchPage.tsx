@@ -36,7 +36,7 @@ export function SearchPage() {
             defaultValue={q}
             autoComplete="off"
             placeholder="Search notes…"
-            className="w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-zap"
+            className="w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2 text-sm outline-none focus:border-brand"
           />
         </form>
       </header>

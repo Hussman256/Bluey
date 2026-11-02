@@ -1,88 +1,63 @@
-import type { ReactNode } from 'react';
 import { useVouched } from '../nostr/reputation';
+import { VerifiedMark } from './learn';
 
 const fmtSats = (n: number) =>
-  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n.toLocaleString();
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 10_000 ? `${Math.round(n / 1000)}k` : n.toLocaleString();
 
-function Row({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+function Fact({ n, label }: { n: string; label: string }) {
   return (
-    <div className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-      <span className="shrink-0 text-zap" aria-hidden="true">
-        {icon}
-      </span>
-      <span className="text-[13px] leading-snug">{children}</span>
+    <div className="flex flex-col gap-0.5 rounded-xl bg-bg p-2.5">
+      <span className="font-display text-[22px] font-extrabold leading-tight">{n}</span>
+      <span className="text-xs leading-snug text-ink-soft">{label}</span>
     </div>
   );
 }
 
-const N = ({ children }: { children: ReactNode }) => (
-  <span className="font-display font-bold text-white">{children}</span>
-);
-
-export function VouchedCard({ pubkey }: { pubkey: string }) {
+/**
+ * "Vouched": public, re-derivable facts about a person. Not a rating; any
+ * client can check every number from Nostr events.
+ */
+export function VouchedCard({
+  pubkey,
+  ships,
+  vouchedShips,
+}: {
+  pubkey: string;
+  ships: number;
+  vouchedShips: number;
+}) {
   const v = useVouched(pubkey);
   if (!v) return null;
 
-  const hasMutual = v.mutualFollows != null && v.mutualFollows > 0;
-  const hasSats = v.satsReceived != null && v.satsReceived > 0;
-  const hasCourses = v.courses.length > 0;
-  if (!hasMutual && !hasSats && !hasCourses) return null;
+  const facts: { n: string; label: string }[] = [
+    { n: String(ships), label: ships ? `Ship${ships === 1 ? '' : 's'}, ${vouchedShips} vouched` : 'Ships yet' },
+    { n: String(v.courses.length), label: `bootcamp${v.courses.length === 1 ? '' : 's'} finished` },
+  ];
+  if (v.mutualFollows != null) facts.push({ n: String(v.mutualFollows), label: 'people you follow follow them' });
+  else if (v.satsReceived != null) facts.push({ n: fmtSats(v.satsReceived), label: 'sats received' });
 
   return (
-    <div className="mt-4 rounded-2xl bg-slab p-5 text-slab-ink">
-      <div className="font-mono text-[10px] tracking-[0.06em] text-ink-faint">VOUCHED</div>
-      <p className="mt-2 text-[12.5px] leading-relaxed">
-        Public signals, not a rating. Any client can check these.
-      </p>
-
-      <div className="mt-4 divide-y divide-slab-line">
-        {hasMutual && (
-          <Row
-            icon={
-              <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path
-                  d="M9 7a3 3 0 100-6 3 3 0 000 6zM17 8a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM2 20a7 7 0 0114 0M15 20c0-2.5 1.5-4.5 4-5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            }
-          >
-            <N>{v.mutualFollows}</N> {v.mutualFollows === 1 ? 'person' : 'people'} you follow follow
-            them
-          </Row>
-        )}
-
-        {hasSats && (
-          <Row
-            icon={
-              <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="currentColor">
-                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />
-              </svg>
-            }
-          >
-            <N>{fmtSats(v.satsReceived as number)}</N> sats received
-          </Row>
-        )}
-
-        {hasCourses && (
-          <Row
-            icon={
-              <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M12 3 2 8l10 5 10-5-10-5zM4 10v6l8 4 8-4v-6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            }
-          >
-            Completed{' '}
-            {v.courses.map((c, i) => (
-              <span key={c}>
-                {i > 0 && ', '}
-                <span className="font-semibold text-white">{c}</span>
-              </span>
-            ))}
-          </Row>
-        )}
+    <section aria-label="Vouched" className="mt-4 flex flex-col gap-2.5 rounded-[20px] border border-line bg-surface p-3.5">
+      <h2 className="flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-[0.08em] text-ink-faint">
+        <VerifiedMark size={16} />
+        Vouched
+      </h2>
+      <div className={`grid gap-2 ${facts.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        {facts.map((f) => (
+          <Fact key={f.label} {...f} />
+        ))}
       </div>
-    </div>
+      {v.courses.length > 0 && (
+        <p className="text-xs text-ink-soft">
+          Finished{' '}
+          {v.courses.map((c, i) => (
+            <span key={c}>
+              {i > 0 && ', '}
+              <span className="font-semibold text-ink">{c}</span>
+            </span>
+          ))}
+        </p>
+      )}
+    </section>
   );
 }

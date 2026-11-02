@@ -21,6 +21,16 @@ export const config = {
   /** Recompute web-of-trust scores this often. */
   wotIntervalMs: Number(process.env.WOT_INTERVAL_MS ?? 10 * 60 * 1000),
 
+  /** Domain users claim names on (name@domain for NIP-05 and Lightning addresses). */
+  nameDomain: process.env.NAME_DOMAIN ?? 'bluey.xyz',
+
+  /**
+   * Key that signs automatic completion badges (NIP-58). From EXAMINER_SECRET_KEY
+   * (hex), else generated into this file. Changing it splits issued badges across two issuers.
+   */
+  examinerKeyPath:
+    process.env.EXAMINER_KEY_PATH ?? fileURLToPath(new URL('../data/examiner.key', import.meta.url)),
+
   /** Prune old events this often. */
   pruneIntervalMs: 60 * 60 * 1000,
 };

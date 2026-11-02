@@ -35,6 +35,63 @@ export function useClubList(): { clubs: ClubMeta[]; loading: boolean } {
   return { clubs, loading: !eose && clubs.length === 0 };
 }
 
+export interface ClubRoster {
+  members: string[];
+  admins: string[];
+}
+
+/** Members and admins of every club, keyed by club id (newest relay-signed lists). */
+export function useClubRosters(): Map<string, ClubRoster> {
+  const relaySet = useClubsRelaySet();
+  const { events } = useSubscribe(
+    relaySet ? [{ kinds: [KIND.GroupMembers, KIND.GroupAdmins], limit: 1000 }] : false,
+    { relaySet: relaySet ?? undefined, closeOnEose: false },
+    [!!relaySet],
+  );
+  return useMemo(() => {
+    const latest = new Map<string, NDKEvent>();
+    for (const e of events) {
+      const key = `${e.kind}:${e.dTag ?? ''}`;
+      const prev = latest.get(key);
+      if (!prev || (e.created_at ?? 0) > (prev.created_at ?? 0)) latest.set(key, e);
+    }
+    const out = new Map<string, ClubRoster>();
+    for (const e of latest.values()) {
+      const id = e.dTag ?? '';
+      const r = out.get(id) ?? { members: [], admins: [] };
+      if (e.kind === KIND.GroupMembers) r.members = parsePubkeyList(e);
+      else r.admins = parsePubkeyList(e);
+      out.set(id, r);
+    }
+    return out;
+  }, [events]);
+}
+
+/** Clubs the signed-in user belongs to, from the relay-signed member lists. */
+export function useMyClubs(): ClubMeta[] {
+  const relaySet = useClubsRelaySet();
+  const me = useNDKCurrentUser();
+  const { clubs } = useClubList();
+  const { events } = useSubscribe(
+    relaySet && me ? [{ kinds: [KIND.GroupMembers], '#p': [me.pubkey] }] : false,
+    { relaySet: relaySet ?? undefined, closeOnEose: false },
+    [!!relaySet, me?.pubkey],
+  );
+  return useMemo(() => {
+    // member lists are replaceable: only the newest one per club counts
+    const latest = new Map<string, NDKEvent>();
+    for (const e of events) {
+      const d = e.dTag ?? '';
+      const prev = latest.get(d);
+      if (!prev || (e.created_at ?? 0) > (prev.created_at ?? 0)) latest.set(d, e);
+    }
+    const ids = new Set(
+      [...latest].filter(([, e]) => parsePubkeyList(e).includes(me?.pubkey ?? '')).map(([d]) => d),
+    );
+    return clubs.filter((c) => ids.has(c.id));
+  }, [events, clubs, me?.pubkey]);
+}
+
 export function useClub(id: string | undefined) {
   const relaySet = useClubsRelaySet();
   const me = useNDKCurrentUser();
@@ -64,7 +121,7 @@ export function useClub(id: string | undefined) {
 export function useClubChat(id: string | undefined): NDKEvent[] {
   const relaySet = useClubsRelaySet();
   const { events } = useSubscribe(
-    relaySet && id ? [{ kinds: [KIND.GroupChatMessage], '#h': [id], limit: 300 }] : false,
+    relaySet && id ? [{ kinds: [KIND.GroupChatMessage, KIND.Text], '#h': [id], limit: 300 }] : false,
     { relaySet: relaySet ?? undefined, closeOnEose: false },
     [id, !!relaySet],
   );

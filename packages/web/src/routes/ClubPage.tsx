@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { NoteContent } from '../nostr/content';
 import { Avatar, DisplayName, RelativeTime } from '../components/primitives';
+import { ShipBadge, ShipBody } from '../components/ShipBody';
+import { isShip } from '../nostr/ships';
 import { useClub, useClubActions, useClubChat } from '../nostr/useClubs';
 
 export function ClubPage() {
@@ -56,7 +58,7 @@ export function ClubPage() {
         {meta?.picture ? (
           <img src={meta.picture} alt="" className="h-9 w-9 rounded-lg object-cover" />
         ) : (
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-zap-soft font-display text-xs font-bold text-zap-ink">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-soft font-display text-xs font-bold text-brand-ink">
             {(meta?.name ?? '··').slice(0, 2).toUpperCase()}
           </div>
         )}
@@ -116,10 +118,17 @@ export function ClubPage() {
                     <div className="flex items-baseline gap-2 text-xs">
                       <DisplayName pubkey={m.pubkey} className="text-[13px]" />
                       <RelativeTime ts={m.created_at} />
+                      {isShip(m) && <ShipBadge />}
                     </div>
-                    <div className="text-sm">
-                      <NoteContent content={m.content} small />
-                    </div>
+                    {isShip(m) ? (
+                      <div className="mt-1 rounded-2xl border border-line bg-surface p-3">
+                        <ShipBody event={m} />
+                      </div>
+                    ) : (
+                      <div className="text-sm">
+                        <NoteContent content={m.content} small />
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}
@@ -132,12 +141,12 @@ export function ClubPage() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={`Message ${meta?.name ?? 'the club'}…`}
-              className="flex-1 rounded-full border border-line-strong bg-surface px-4 py-2 text-sm outline-none focus:border-zap"
+              className="flex-1 rounded-full border border-line-strong bg-surface px-4 py-2 text-sm outline-none focus:border-brand"
             />
             <button
               type="submit"
               disabled={!text.trim()}
-              className="rounded-full bg-zap px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
+              className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Send
             </button>

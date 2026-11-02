@@ -17,7 +17,7 @@ function MentionName({ pubkey }: { pubkey: string }) {
   const p = useProfileValue(pubkey);
   const name = p?.displayName || p?.name || shortNpub(pubkey);
   return (
-    <Link to={`/p/${npubOf(pubkey)}`} className="text-zap-ink hover:underline">
+    <Link to={`/p/${npubOf(pubkey)}`} className="text-brand-ink hover:underline">
       @{name}
     </Link>
   );
@@ -57,7 +57,7 @@ function HighlightQuote({ ev }: { ev: { content: string; tags: string[][] } }) {
         </svg>
         Highlight from <SourceTitle source={src ? parseAddr(src) : null} />
       </p>
-      <blockquote className="border-l-2 border-zap pl-3 text-sm leading-relaxed text-ink-soft">
+      <blockquote className="border-l-2 border-brand pl-3 text-sm leading-relaxed text-ink-soft">
         {ev.content}
       </blockquote>
     </div>
@@ -139,7 +139,7 @@ export function NoteContent({
             href={piece}
             target="_blank"
             rel="noreferrer noopener"
-            className="text-zap-ink hover:underline"
+            className="text-brand-ink hover:underline"
           >
             {piece.replace(/^https?:\/\//, '').slice(0, 60)}
           </a>,
@@ -181,7 +181,7 @@ export function NoteContent({
 
     if (piece.startsWith('#') && piece.length > 1) {
       inline.push(
-        <span key={`h${i}`} className="text-zap-ink/80">
+        <span key={`h${i}`} className="text-brand-ink/80">
           {piece}
         </span>,
       );

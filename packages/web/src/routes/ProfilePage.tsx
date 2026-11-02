@@ -1,7 +1,10 @@
 import { useFollows, useNDKCurrentUser, useProfileValue, useSubscribe } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { EditProfile } from '../components/EditProfile';
+import { VerifiedMark } from '../components/learn';
+import { ModePanel } from '../components/ModePanel';
+import { PublicPageLink } from '../components/PublicPageLink';
 import { NoteCard } from '../components/NoteCard';
 import { VouchedCard } from '../components/VouchedCard';
 import { useProfileBadges } from '../nostr/badges';
@@ -9,7 +12,9 @@ import { EngagementScope } from '../nostr/engagement';
 import { npubOf, pubkeyFrom } from '../nostr/ids';
 import { KIND } from '../nostr/kinds';
 import { isJunkNote, subjectId } from '../nostr/notes';
-import { useShipFeed } from '../nostr/useShips';
+import { useApprovedTutors, useTutorAdmin } from '../nostr/tutors';
+import { useShipFeed, useShipVerifications } from '../nostr/useShips';
+import { useWallet } from '../wallet/WalletProvider';
 import { ZapButton } from '../components/ZapButton';
 
 type Tab = 'notes' | 'replies' | 'badges' | 'ships';
@@ -71,6 +76,13 @@ export function ProfilePage() {
     [pubkey],
   );
   const ships = useShipFeed(pubkey ?? undefined, !!pubkey);
+  const shipIds = useMemo(() => ships.map((e) => e.id), [ships]);
+  const shipVerifs = useShipVerifications(shipIds);
+  const vouchedShips = shipIds.filter((id) => (shipVerifs.get(id)?.size ?? 0) > 0).length;
+  const tutors = useApprovedTutors();
+  const { isCurator, setApproved } = useTutorAdmin();
+  const [approving, setApproving] = useState(false);
+  const { wallet } = useWallet();
 
   const followingCount = useMemo(
     () => contactList[0]?.tags.filter((t) => t[0] === 'p').length ?? 0,
@@ -119,11 +131,12 @@ export function ProfilePage() {
   if (!pubkey) return <p className="p-8 text-center text-sm text-ink-soft">Unknown profile.</p>;
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'notes', label: 'Notes' },
+    ...(ships.length > 0 || isMe ? [{ id: 'ships' as const, label: 'Ships' }] : []),
+    { id: 'notes', label: 'Posts' },
     { id: 'replies', label: 'Replies' },
     { id: 'badges', label: 'Badges' },
-    ...(ships.length > 0 ? [{ id: 'ships' as const, label: 'Ships' }] : []),
   ];
+  const approvedTutor = tutors.isApproved(pubkey);
 
   return (
     <div>
@@ -140,16 +153,27 @@ export function ProfilePage() {
               className="h-20 w-20 rounded-full border-4 border-bg bg-sunk object-cover"
             />
           ) : (
-            <div className="h-20 w-20 rounded-full border-4 border-bg bg-zap-soft" />
+            <div className="h-20 w-20 rounded-full border-4 border-bg bg-brand-soft" />
           )}
           {isMe && (
-            <button
-              type="button"
-              onClick={() => setEditing(true)}
-              className="mb-1 rounded-full border border-line-strong px-5 py-1.5 text-sm font-bold transition hover:border-zap hover:text-zap-ink"
-            >
-              Edit profile
-            </button>
+            <div className="mb-1 flex items-center gap-2">
+              <Link
+                to="/settings"
+                className="flex min-h-9 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 font-mono text-xs font-semibold text-zap-ink"
+              >
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                  <path d="M13 2L4 14h7l-1 8 9-12h-7z" className="fill-zap" />
+                </svg>
+                {wallet ? 'Wallet linked' : 'Link wallet'}
+              </Link>
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="min-h-9 rounded-full border border-line-strong px-4 text-sm font-bold transition hover:border-brand hover:text-brand-ink"
+              >
+                Edit profile
+              </button>
+            </div>
           )}
           {!isMe && me && (
             <div className="mb-1 flex items-center gap-2">
@@ -161,7 +185,7 @@ export function ProfilePage() {
                 className={`rounded-full px-5 py-1.5 text-sm font-bold transition disabled:opacity-50 ${
                   following
                     ? 'border border-line-strong hover:border-danger hover:text-danger'
-                    : 'bg-zap text-white hover:opacity-90'
+                    : 'bg-brand text-white hover:opacity-90'
                 }`}
               >
                 {following ? 'Following' : 'Follow'}
@@ -170,8 +194,9 @@ export function ProfilePage() {
           )}
         </div>
 
-        <h1 className="mt-3 font-display text-[22px] font-extrabold">
+        <h1 className="mt-3 flex items-center gap-1.5 font-display text-[24px] font-extrabold">
           {profile?.displayName || profile?.name || 'Anonymous'}
+          {approvedTutor && <VerifiedMark size={20} />}
         </h1>
         <p className="mt-0.5 font-mono text-[11px] text-ink-faint">
           {profile?.nip05 ? `${profile.nip05.replace(/^_@/, '')} · ` : ''}
@@ -193,7 +218,29 @@ export function ProfilePage() {
           )}
         </div>
 
-        <VouchedCard pubkey={pubkey} />
+        {isCurator && !isMe && (
+          <button
+            type="button"
+            disabled={approving}
+            onClick={async () => {
+              setApproving(true);
+              try {
+                await setApproved(pubkey, !approvedTutor);
+              } finally {
+                setApproving(false);
+              }
+            }}
+            className={`mt-3 min-h-9 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${
+              approvedTutor ? 'border border-line-strong hover:border-danger hover:text-danger' : 'bg-slab text-white'
+            }`}
+          >
+            {approving ? '…' : approvedTutor ? 'Remove from verified tutors' : 'Approve as verified tutor'}
+          </button>
+        )}
+
+        <VouchedCard pubkey={pubkey} ships={ships.length} vouchedShips={vouchedShips} />
+        {isMe && <PublicPageLink pubkey={pubkey} nip05={profile?.nip05} />}
+        {isMe && <ModePanel pubkey={pubkey} />}
       </div>
 
       <div className="mt-5 flex gap-7 border-b border-line px-5">
@@ -203,7 +250,7 @@ export function ProfilePage() {
             type="button"
             onClick={() => setTab(t.id)}
             className={`-mb-px border-b-2 pb-3 text-[13px] font-semibold transition ${
-              tab === t.id ? 'border-zap text-ink' : 'border-transparent text-ink-faint hover:text-ink-soft'
+              tab === t.id ? 'border-brand text-ink' : 'border-transparent text-ink-faint hover:text-ink-soft'
             }`}
           >
             {t.label}

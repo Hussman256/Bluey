@@ -1,21 +1,26 @@
-import { KIND, SHIP_LABEL_NS, TAG } from '@bluey/shared';
+import { KIND, SHIP_COLLABORATOR, SHIP_LABEL_NS, TAG } from '@bluey/shared';
 import type { NDKEvent, NDKFilter } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
 import { useCallback, useMemo } from 'react';
+import { useClubsRelaySet } from './clubs';
 import { isJunkNote } from './notes';
-import { shipEvent, verifiersOf, verifyShipEvent } from './ships';
+import { shipEvent, verifiersOf, verifyShipEvent, type ShipDraft } from './ships';
 import { useWebOfTrust } from './useWebOfTrust';
 
-/** Ship notes (kind 1 tagged proof-of-work), newest first, WoT-filtered. */
+/**
+ * Ship notes (kind 1 tagged proof-of-work), newest first, WoT-filtered.
+ * Scoped to a pubkey, it also returns Ships that credit them as a collaborator.
+ */
 export function useShipFeed(scopePubkey?: string, enabled = true) {
   const wot = useWebOfTrust();
   const { events } = useSubscribe(
     enabled
-      ? [
-          scopePubkey
-            ? { kinds: [KIND.Text], authors: [scopePubkey], '#t': [TAG.ship], limit: 100 }
-            : { kinds: [KIND.Text], '#t': [TAG.ship], limit: 200 },
-        ]
+      ? scopePubkey
+        ? [
+            { kinds: [KIND.Text], authors: [scopePubkey], '#t': [TAG.ship], limit: 100 },
+            { kinds: [KIND.Text], '#p': [scopePubkey], '#t': [TAG.ship], limit: 100 },
+          ]
+        : [{ kinds: [KIND.Text], '#t': [TAG.ship], limit: 200 }]
       : false,
     { closeOnEose: false },
     [scopePubkey, enabled],
@@ -23,14 +28,21 @@ export function useShipFeed(scopePubkey?: string, enabled = true) {
 
   return useMemo(() => {
     let list = events.filter((e) => !isJunkNote(e));
-    if (!scopePubkey && wot.size > 0) list = list.filter((e) => wot.isTrusted(e.pubkey));
+    if (scopePubkey) {
+      list = list.filter(
+        (e) =>
+          e.pubkey === scopePubkey ||
+          e.tags.some((t) => t[0] === 'p' && t[1] === scopePubkey && t[3] === SHIP_COLLABORATOR),
+      );
+    } else if (wot.size > 0) {
+      list = list.filter((e) => wot.isTrusted(e.pubkey));
+    }
     return list
       .slice()
       .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
       .slice(0, 120);
   }, [events, wot, scopePubkey]);
 }
-
 /** Verification labels for a set of ship ids. */
 export function useShipVerifications(shipIds: string[]) {
   const key = useMemo(() => shipIds.slice().sort().join(','), [shipIds]);
@@ -63,13 +75,22 @@ export function useVerifiedShipCount(pubkey?: string): number {
 export function useShipActions() {
   const { ndk } = useNDK();
   const me = useNDKCurrentUser();
+  const clubsRelay = useClubsRelaySet();
 
+  /** Publishes a Ship and returns its event, so callers can link to it. */
   const post = useCallback(
-    async (description: string, links: string[]) => {
+    async (draft: ShipDraft): Promise<NDKEvent> => {
       if (!ndk) throw new Error('not ready');
-      await shipEvent(ndk, description, links).publish();
+      const ev = shipEvent(ndk, draft);
+      if (draft.club) {
+        if (!clubsRelay) throw new Error('The clubs relay is not connected');
+        await ev.publish(clubsRelay);
+      } else {
+        await ev.publish();
+      }
+      return ev;
     },
-    [ndk],
+    [ndk, clubsRelay],
   );
 
   const verify = useCallback(

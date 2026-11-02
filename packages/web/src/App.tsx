@@ -5,7 +5,13 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { Mark } from './components/primitives';
 import { PwaPrompt } from './components/PwaPrompt';
+import { LS } from './nostr/config';
 import { LoginScreen } from './session/LoginScreen';
+
+const PublicProfilePage = lazy(() =>
+  import('./routes/PublicProfilePage').then((m) => ({ default: m.PublicProfilePage })),
+);
+const Onboarding = lazy(() => import('./session/Onboarding').then((m) => ({ default: m.Onboarding })));
 
 const FeedPage = lazy(() => import('./routes/FeedPage').then((m) => ({ default: m.FeedPage })));
 const ReadsPage = lazy(() => import('./routes/ReadsPage').then((m) => ({ default: m.ReadsPage })));
@@ -29,6 +35,11 @@ const LiveClassPage = lazy(() =>
   import('./routes/LiveClassPage').then((m) => ({ default: m.LiveClassPage })),
 );
 const ShipsPage = lazy(() => import('./routes/ShipsPage').then((m) => ({ default: m.ShipsPage })));
+const TeachPage = lazy(() => import('./routes/TeachPage').then((m) => ({ default: m.TeachPage })));
+const BoardPage = lazy(() => import('./routes/BoardPage').then((m) => ({ default: m.BoardPage })));
+const ShipNewPage = lazy(() =>
+  import('./routes/ShipNewPage').then((m) => ({ default: m.ShipNewPage })),
+);
 const ProfilePage = lazy(() =>
   import('./routes/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
@@ -62,6 +73,7 @@ export function App() {
   const location = useLocation();
   const [hydrationTimedOut, setHydrationTimedOut] = useState(false);
   const [expectSession] = useState(sessionPending);
+  const [, setOnboarded] = useState(0);
 
   // bound how long we wait for a stored session to hydrate before showing login
   useEffect(() => {
@@ -72,7 +84,18 @@ export function App() {
 
   const hydrating = expectSession && !me && !hydrationTimedOut;
 
-  if (!ndk || hydrating) return <Splash />;
+  if (!ndk) return <Splash />;
+
+  // public proof-of-work pages (/@name) are open to everyone, signed in or not
+  if (location.pathname.startsWith('/@') && location.pathname.length > 2) {
+    return (
+      <Suspense fallback={<Splash />}>
+        <PublicProfilePage handle={location.pathname.slice(2)} />
+      </Suspense>
+    );
+  }
+
+  if (hydrating) return <Splash />;
   if (!me)
     return (
       <>
@@ -80,6 +103,15 @@ export function App() {
         <PwaPrompt />
       </>
     );
+
+  // set by LoginScreen to the pubkey of an account it just created
+  if (localStorage.getItem(LS.onboarding) === me.pubkey) {
+    return (
+      <Suspense fallback={<Splash />}>
+        <Onboarding onDone={() => setOnboarded((n) => n + 1)} />
+      </Suspense>
+    );
+  }
 
   return (
     <Layout>
@@ -93,9 +125,12 @@ export function App() {
           <Routes>
             <Route path="/" element={<FeedPage />} />
             <Route path="/ships" element={<ShipsPage />} />
+            <Route path="/ship/new" element={<ShipNewPage />} />
             <Route path="/clubs" element={<ClubsPage />} />
             <Route path="/clubs/:id" element={<ClubPage />} />
             <Route path="/learn" element={<BootcampsPage />} />
+            <Route path="/teach" element={<TeachPage />} />
+            <Route path="/board" element={<BoardPage />} />
             <Route path="/learn/:naddr" element={<BootcampPage />} />
             <Route path="/lesson/:naddr" element={<LessonPage />} />
             <Route path="/live/:naddr" element={<LiveClassPage />} />

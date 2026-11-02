@@ -3,35 +3,16 @@ import { Link } from 'react-router-dom';
 import { npubOf, shortNpub } from '../nostr/ids';
 import { useNow } from './useNow';
 
-/** The Bluey mark: a lightning bolt cut out of a bitcoin-orange disc. */
+/** The Bluey mark: a speech bubble with a lightning bolt cut through it. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
-    <span
-      className="relative block shrink-0 overflow-hidden rounded-full bg-zap"
-      style={{ width: size, height: size }}
-      aria-hidden="true"
-    >
-      <span
-        className="absolute bg-bg"
-        style={{
-          width: size * 0.1,
-          height: size * 1.4,
-          left: size * 0.46,
-          top: -size * 0.2,
-          transform: 'rotate(24deg)',
-        }}
+    <svg width={size} height={size} viewBox="0 0 32 32" className="block shrink-0" aria-hidden="true">
+      <path
+        d="M7 3h18a5 5 0 0 1 5 5v12a5 5 0 0 1-5 5H14l-7 5v-5a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z"
+        className="fill-brand"
       />
-      <span
-        className="absolute bg-bg"
-        style={{
-          width: size * 0.1,
-          height: size * 1.4,
-          left: size * 0.68,
-          top: -size * 0.2,
-          transform: 'rotate(24deg)',
-        }}
-      />
-    </span>
+      <path d="M18 7l-7 9h5l-2 6 7-9h-5z" fill="#fff" />
+    </svg>
   );
 }
 
@@ -52,7 +33,7 @@ export function Avatar({ pubkey, size = 40 }: { pubkey: string; size?: number })
         />
       ) : (
         <span
-          className="grid place-items-center rounded-full bg-zap-soft font-mono text-xs text-zap-ink"
+          className="grid place-items-center rounded-full bg-brand-soft font-mono text-xs text-brand-ink"
           style={{ width: size, height: size }}
           aria-hidden="true"
         >

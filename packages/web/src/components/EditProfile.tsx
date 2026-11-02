@@ -123,7 +123,7 @@ export function EditProfile({ pubkey, onClose }: { pubkey: string; onClose: () =
             {f.picture ? (
               <img src={f.picture} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
             ) : (
-              <span className="h-12 w-12 shrink-0 rounded-full bg-zap-soft" />
+              <span className="h-12 w-12 shrink-0 rounded-full bg-brand-soft" />
             )}
             <input className={inputCls} value={f.picture} onChange={(e) => set('picture')(e.target.value)} placeholder="https://… or upload" />
             <button type="button" onClick={() => picRef.current?.click()} disabled={uploading} className={uploadBtnCls}>
@@ -155,7 +155,7 @@ export function EditProfile({ pubkey, onClose }: { pubkey: string; onClose: () =
           <button type="button" onClick={onClose} disabled={busy} className="rounded-full px-4 py-2 text-sm font-semibold text-ink-faint hover:text-ink disabled:opacity-40">
             Cancel
           </button>
-          <button type="button" onClick={save} disabled={busy || !ndk?.signer} className="rounded-full bg-zap px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40">
+          <button type="button" onClick={save} disabled={busy || !ndk?.signer} className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40">
             {busy ? 'Saving…' : 'Save'}
           </button>
         </div>
@@ -165,9 +165,9 @@ export function EditProfile({ pubkey, onClose }: { pubkey: string; onClose: () =
 }
 
 const inputCls =
-  'min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-zap placeholder:text-ink-faint';
+  'min-w-0 flex-1 rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-brand placeholder:text-ink-faint';
 const uploadBtnCls =
-  'shrink-0 rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-ink-soft hover:border-zap hover:text-zap-ink disabled:opacity-40';
+  'shrink-0 rounded-lg border border-line-strong px-3 py-2 text-xs font-semibold text-ink-soft hover:border-brand hover:text-brand-ink disabled:opacity-40';
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (

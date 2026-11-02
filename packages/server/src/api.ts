@@ -8,6 +8,7 @@ import type {
   ProfileParams,
   Request,
   SearchParams,
+  SuggestParams,
   ThreadParams,
   WotParams,
 } from '@bluey/shared';
@@ -15,6 +16,8 @@ import { WebSocketServer } from 'ws';
 import { config } from './config.ts';
 import { stats } from './db.ts';
 import * as q from './queries.ts';
+import { handleAccountsHttp } from './accounts.ts';
+import { handleLearningHttp } from './learning.ts';
 import { relayStats } from './relays.ts';
 
 function handle(req: Request): Frame {
@@ -47,6 +50,11 @@ function handle(req: Request): Frame {
         const p = req.params as WotParams;
         return { ...base, score: q.wotScore(p.pubkey, p.from) };
       }
+      case 'suggest': {
+        const p = req.params as SuggestParams;
+        const topics = Array.isArray(p.topics) ? p.topics.map(String).slice(0, 10) : [];
+        return { ...base, pubkeys: q.suggestPubkeys(topics, Math.min(Number(p.limit) || 24, 60)) };
+      }
       default:
         return { ...base, error: `unknown method: ${req.method}` };
     }
@@ -62,7 +70,13 @@ export function startApi() {
       res.end(JSON.stringify({ ok: true, db: stats(), relays: relayStats() }));
       return;
     }
-    res.writeHead(404).end();
+    void (async () => {
+      if (await handleLearningHttp(httpReq, res)) return;
+      if (!(await handleAccountsHttp(httpReq, res))) res.writeHead(404).end();
+    })().catch((e) => {
+      console.error('[http]', e);
+      if (!res.headersSent) res.writeHead(500).end();
+    });
   });
 
   const wss = new WebSocketServer({ server: http });

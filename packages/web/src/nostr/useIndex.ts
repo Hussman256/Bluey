@@ -100,7 +100,7 @@ export function useIndexFeed(params: Omit<FeedParams, 'scope'> & { scope: FeedPa
     'feed',
     params,
     (f) => toNDK(ndk, f.events),
-    [params.scope, params.pubkey, params.until, ndk],
+    [params.scope, params.pubkey, params.until, params.timeframe, ndk],
   );
 }
 

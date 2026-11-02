@@ -25,7 +25,7 @@ export function SourceTitle({ source }: { source: Addr | null }) {
   if (!article) return <span className="text-ink-faint">a source</span>;
 
   return (
-    <Link to={`/lesson/${naddrOf(source)}`} className="text-zap-ink hover:underline">
+    <Link to={`/lesson/${naddrOf(source)}`} className="text-brand-ink hover:underline">
       {title ?? 'the lesson'}
     </Link>
   );

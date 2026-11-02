@@ -1,8 +1,11 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { useFollows, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Composer } from '../components/Composer';
 import { NoteCard } from '../components/NoteCard';
+import { BoardCard, OnAirStrip } from '../components/OnAir';
+import { Mark } from '../components/primitives';
 import { LS } from '../nostr/config';
 import { EngagementScope } from '../nostr/engagement';
 import { BUILTIN_FEEDS, addDvmFeed, loadDvmFeeds, removeDvmFeed, type FeedRef } from '../nostr/feeds';
@@ -137,7 +140,30 @@ export function FeedPage() {
   return (
     <div>
       <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
-        <h1 className="px-5 pb-2 pt-4 font-display text-xl font-extrabold tracking-tight">Feed</h1>
+        <div className="flex items-center gap-2.5 px-4 pb-2 pt-3.5 sm:px-5">
+          <span className="sm:hidden">
+            <Mark size={30} />
+          </span>
+          <h1 className="flex-1 font-display text-2xl font-extrabold tracking-tight sm:text-xl">Feed</h1>
+          <Link
+            to="/search"
+            aria-label="Search"
+            className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface sm:hidden"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" strokeLinecap="round" />
+            </svg>
+          </Link>
+          <Link
+            to="/notifications"
+            aria-label="Alerts"
+            className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface sm:hidden"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        </div>
         <div className="flex items-center gap-1.5 overflow-x-auto px-4 pb-2.5">
           {allFeeds.map((f) => (
             <button
@@ -171,7 +197,7 @@ export function FeedPage() {
           <button
             type="button"
             onClick={() => setAddOpen((v) => !v)}
-            className="shrink-0 rounded-full border border-line-strong px-2.5 py-1.5 text-sm font-semibold text-ink-faint hover:border-zap hover:text-zap-ink"
+            className="shrink-0 rounded-full border border-line-strong px-2.5 py-1.5 text-sm font-semibold text-ink-faint hover:border-brand hover:text-brand-ink"
           >
             +
           </button>
@@ -186,13 +212,13 @@ export function FeedPage() {
               value={dvmInput}
               onChange={(e) => setDvmInput(e.target.value)}
               placeholder="npub1… (the DVM)"
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-zap"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-brand"
             />
             <input
               value={dvmName}
               onChange={(e) => setDvmName(e.target.value)}
               placeholder="Name it"
-              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-zap"
+              className="rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-brand"
             />
             <button
               type="submit"
@@ -205,7 +231,15 @@ export function FeedPage() {
         )}
       </header>
 
-      {me && builtin !== 'ships' && <Composer />}
+      <OnAirStrip />
+
+      {me && builtin !== 'ships' && (
+        <div className="hidden sm:block">
+          <Composer />
+        </div>
+      )}
+
+      {(builtin === 'following' || builtin === 'ships') && <BoardCard />}
 
       <p className="px-4 py-2 text-center font-mono text-[11px] text-ink-faint">
         {feed.kind === 'dvm'
@@ -242,7 +276,7 @@ export function FeedPage() {
               <button
                 type="button"
                 onClick={() => pick('latest')}
-                className="font-semibold text-zap-ink hover:underline"
+                className="font-semibold text-brand-ink hover:underline"
               >
                 Browse Latest
               </button>{' '}

@@ -1,20 +1,28 @@
-import { useMemo, useRef } from 'react';
+import { useNDKCurrentUser } from '@nostr-dev-kit/react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { HighlightPopover } from '../components/HighlightPopover';
 import { Markdown } from '../components/Markdown';
 import { Avatar, DisplayName, RelativeTime } from '../components/primitives';
+import { QuizCard, QuizEditor } from '../components/Quiz';
 import { addrFromNaddr, naddrOf, type Addr } from '../nostr/bootcamps';
 import { npubOf } from '../nostr/ids';
 import { useLessonHighlights } from '../nostr/highlights';
+import { markLessonRead } from '../nostr/progress';
 import { useBootcamp, useLesson, useLessons } from '../nostr/useBootcamps';
 
 export function LessonPage() {
   const { naddr } = useParams();
   const addr = naddr ? addrFromNaddr(naddr) : null;
   const lesson = useLesson(addr?.pubkey, addr?.identifier);
+  const me = useNDKCurrentUser();
   const articleRef = useRef<HTMLDivElement>(null);
 
   const bootcamp = useBootcamp(lesson?.bootcampAddr?.pubkey, lesson?.bootcampAddr?.identifier);
+
+  useEffect(() => {
+    if (lesson?.bootcampAddr) markLessonRead(lesson.bootcampAddr, lesson.id);
+  }, [lesson?.bootcampAddr, lesson?.id]);
   const siblings = useLessons(bootcamp);
 
   const idx = useMemo(
@@ -65,9 +73,15 @@ export function LessonPage() {
 
         <LessonHighlights source={lesson.addr} />
 
+        {me?.pubkey === lesson.pubkey && bootcamp ? (
+          <QuizEditor lesson={lesson.addr} bootcamp={bootcamp.addr} bootcampTitle={bootcamp.title} />
+        ) : (
+          <QuizCard key={lesson.id} lesson={lesson.addr} bootcampTitle={bootcamp?.title} />
+        )}
+
         <nav className="mt-10 flex justify-between gap-3 border-t border-line pt-4 text-sm">
           {prev ? (
-            <Link to={`/lesson/${naddrOf(prev.addr)}`} className="text-zap-ink hover:underline">
+            <Link to={`/lesson/${naddrOf(prev.addr)}`} className="text-brand-ink hover:underline">
               ← {prev.title}
             </Link>
           ) : (
@@ -76,7 +90,7 @@ export function LessonPage() {
           {next ? (
             <Link
               to={`/lesson/${naddrOf(next.addr)}`}
-              className="text-right text-zap-ink hover:underline"
+              className="text-right text-brand-ink hover:underline"
             >
               {next.title} →
             </Link>
@@ -109,7 +123,7 @@ function LessonHighlights({ source }: { source: Addr }) {
       <ul className="mt-3 space-y-3">
         {highlights.map((h) => (
           <li key={h.id} className="rounded-xl border border-line bg-surface/40 px-3.5 py-3">
-            <blockquote className="border-l-2 border-zap pl-3 text-sm text-ink-soft">
+            <blockquote className="border-l-2 border-brand pl-3 text-sm text-ink-soft">
               {h.text}
             </blockquote>
             <div className="mt-2 flex items-center gap-2 text-xs text-ink-faint">

@@ -25,11 +25,15 @@ export type RequestMethod =
   | 'notifications' // mentions / reactions / reposts / zaps touching a pubkey
   | 'search' // full-text over note content
   | 'counts' // engagement counts for a set of event ids
-  | 'wot'; // web-of-trust score for a pubkey (0..1)
+  | 'wot' // web-of-trust score for a pubkey (0..1)
+  | 'suggest'; // well-trusted accounts to follow for a set of interests (onboarding)
+
+export type TrendingTimeframe = '4h' | '12h' | '24h' | '7d';
 
 export interface FeedParams {
-  scope: 'discover' | 'following';
+  scope: 'discover' | 'following' | 'trending';
   pubkey?: string; // viewer, for WoT weighting + following set
+  timeframe?: TrendingTimeframe; // for scope='trending' (default '24h')
   limit?: number;
   until?: number; // paginate: created_at cursor
 }
@@ -62,6 +66,10 @@ export interface WotParams {
   pubkey: string;
   from?: string; // seed viewer
 }
+export interface SuggestParams {
+  topics: string[]; // BOOTCAMP_TOPICS values
+  limit?: number;
+}
 
 export interface Request {
   id: string;
@@ -74,7 +82,8 @@ export interface Request {
     | NotificationsParams
     | SearchParams
     | CountsParams
-    | WotParams;
+    | WotParams
+    | SuggestParams;
 }
 
 export interface EngagementCount {
@@ -102,6 +111,7 @@ export interface Frame {
   counts?: EngagementCount[];
   notifications?: NotificationItem[];
   score?: number;
+  pubkeys?: string[];
   error?: string;
   done: boolean;
 }

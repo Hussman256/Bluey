@@ -1,11 +1,18 @@
 import { NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useEffect, useState } from 'react';
+import { NameClaim } from '../components/NameClaim';
 import { CLUBS_RELAY } from '../nostr/clubs';
 import { DEFAULT_RELAYS, INDEX_URL, loadRelayList, saveExtraRelays } from '../nostr/config';
 import { npubOf } from '../nostr/ids';
 import { feedLangMode, setFeedLangMode } from '../nostr/lang';
+import {
+  getUserTargetLang,
+  isAutoTranslateEnabled,
+  setAutoTranslateEnabled,
+} from '../nostr/translate';
 import { useMuteActions } from '../nostr/mutes';
+import { useRawProfile } from '../nostr/profile';
 import { useServiceStatus } from '../nostr/useServiceStatus';
 import { useWallet } from '../wallet/WalletProvider';
 
@@ -45,6 +52,10 @@ export function SettingsPage() {
   const { mutes, addWord, removeWord, unmutePubkey } = useMuteActions();
   const [newMute, setNewMute] = useState('');
   const [langMode, setLangMode] = useState(feedLangMode);
+  const [autoTranslate, setAutoTranslate] = useState(isAutoTranslateEnabled);
+  const targetLang = getUserTargetLang();
+  const rawProfile = useRawProfile(me?.pubkey);
+  const [nameSaved, setNameSaved] = useState(false);
 
   // repaint connection dots periodically
   useEffect(() => {
@@ -101,6 +112,11 @@ export function SettingsPage() {
         Settings
       </header>
 
+      <Section title="Your Bluey name">
+        <NameClaim base={rawProfile} onDone={() => setNameSaved(true)} />
+        {nameSaved && <p className="mt-2 text-sm text-good">Saved. It can take a minute to show everywhere.</p>}
+      </Section>
+
       <Section title="Lightning wallet">
         {wallet ? (
           <div className="space-y-3 text-sm">
@@ -115,7 +131,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={refreshBalance}
-                  className="rounded-lg border border-line-strong px-2.5 py-1 text-xs hover:border-zap"
+                  className="rounded-lg border border-line-strong px-2.5 py-1 text-xs hover:border-brand"
                 >
                   Refresh
                 </button>
@@ -137,7 +153,7 @@ export function SettingsPage() {
                   value={amt}
                   min={1}
                   onChange={(e) => setAmt(Number(e.target.value))}
-                  className="w-28 rounded-lg border border-line-strong bg-surface px-2.5 py-1.5 font-mono text-xs outline-none focus:border-zap"
+                  className="w-28 rounded-lg border border-line-strong bg-surface px-2.5 py-1.5 font-mono text-xs outline-none focus:border-brand"
                 />
                 <button
                   type="button"
@@ -170,13 +186,13 @@ export function SettingsPage() {
               onChange={(e) => setUri(e.target.value)}
               rows={3}
               placeholder="nostr+walletconnect://…"
-              className="w-full resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-3 font-mono text-xs outline-none focus:border-zap"
+              className="w-full resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-3 font-mono text-xs outline-none focus:border-brand"
             />
             <button
               type="button"
               onClick={() => connectNwc(uri)}
               disabled={status === 'connecting' || !uri.trim()}
-              className="rounded-xl bg-zap px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
               {status === 'connecting' ? 'Connecting…' : 'Connect wallet'}
             </button>
@@ -200,12 +216,12 @@ export function SettingsPage() {
               <div>
                 <div className="text-xs text-ink-faint">Secret key</div>
                 {showNsec ? (
-                  <div className="font-mono text-xs break-all text-zap">{nsec}</div>
+                  <div className="font-mono text-xs break-all text-brand">{nsec}</div>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setShowNsec(true)}
-                    className="rounded-lg border border-line-strong px-2.5 py-1 text-xs hover:border-zap hover:text-zap"
+                    className="rounded-lg border border-line-strong px-2.5 py-1 text-xs hover:border-brand hover:text-brand"
                   >
                     Reveal — back it up
                   </button>
@@ -273,7 +289,7 @@ export function SettingsPage() {
             value={newRelay}
             onChange={(e) => setNewRelay(e.target.value)}
             placeholder="wss://relay.example.com"
-            className="flex-1 rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-zap"
+            className="flex-1 rounded-lg border border-line-strong bg-surface px-3 py-1.5 font-mono text-xs outline-none focus:border-brand"
           />
           <button
             type="submit"
@@ -286,13 +302,13 @@ export function SettingsPage() {
         {relayErr && <p className="mt-1 text-xs text-danger">{relayErr}</p>}
       </Section>
 
-      <Section title="Feed language">
+      <Section title="Language & Translation">
         <p className="mb-3 text-xs text-ink-faint">
           Discover and Latest lean on recency until your follow graph fills in, which floods
           the feed with the busiest corners of Nostr. Keep it to scripts your device reads,
           or show everything.
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-4">
           {(['mine', 'all'] as const).map((m) => (
             <button
               key={m}
@@ -310,6 +326,33 @@ export function SettingsPage() {
               {m === 'mine' ? 'Scripts I read' : 'Everything'}
             </button>
           ))}
+        </div>
+
+        <div className="pt-4 border-t border-line flex items-center justify-between gap-4">
+          <div>
+            <div className="text-xs font-semibold text-ink">Auto-translate posts</div>
+            <p className="text-xs text-ink-faint">
+              Translate foreign language posts into {targetLang.toUpperCase()} using on-device AI or translation service.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !autoTranslate;
+              setAutoTranslateEnabled(next);
+              setAutoTranslate(next);
+            }}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              autoTranslate ? 'bg-brand' : 'bg-line-strong'
+            }`}
+            aria-label="Toggle auto-translate"
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                autoTranslate ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
         </div>
       </Section>
 
@@ -348,7 +391,7 @@ export function SettingsPage() {
             value={newMute}
             onChange={(e) => setNewMute(e.target.value)}
             placeholder="word or #hashtag"
-            className="flex-1 rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-zap"
+            className="flex-1 rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-brand"
           />
           <button
             type="submit"
@@ -368,7 +411,7 @@ export function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => unmutePubkey(pk)}
-                    className="shrink-0 text-xs text-ink-faint hover:text-zap-ink"
+                    className="shrink-0 text-xs text-ink-faint hover:text-brand-ink"
                   >
                     unmute
                   </button>

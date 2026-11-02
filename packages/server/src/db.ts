@@ -83,6 +83,58 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS ix_reports_target ON reports (target);
 
   CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT NOT NULL);
+
+  -- passkey-encrypted Nostr keys (the server can't decrypt them) for restoring
+  -- an account on a new device. Lost on an ephemeral disk: needs a real volume.
+  CREATE TABLE IF NOT EXISTS key_backups (
+    credential_id TEXT PRIMARY KEY,
+    pubkey        TEXT NOT NULL,
+    blob          TEXT NOT NULL,
+    created_at    INTEGER NOT NULL,
+    updated_at    INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS ix_key_backups_pubkey ON key_backups (pubkey);
+
+  -- lesson quizzes: questions are public, answers never leave the server
+  CREATE TABLE IF NOT EXISTS quizzes (
+    lesson_addr    TEXT PRIMARY KEY,   -- 30023:<tutor>:<d>
+    bootcamp_addr  TEXT NOT NULL,      -- 30004:<tutor>:<d>
+    bootcamp_title TEXT NOT NULL,
+    questions      TEXT NOT NULL,      -- JSON, with answers
+    pass_mark      REAL NOT NULL,
+    updated_at     INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS ix_quizzes_bootcamp ON quizzes (bootcamp_addr);
+
+  -- each learner's best attempt per quiz
+  CREATE TABLE IF NOT EXISTS quiz_attempts (
+    lesson_addr TEXT NOT NULL,
+    pubkey      TEXT NOT NULL,
+    score       INTEGER NOT NULL,
+    total       INTEGER NOT NULL,
+    passed      INTEGER NOT NULL,
+    updated_at  INTEGER NOT NULL,
+    PRIMARY KEY (lesson_addr, pubkey)
+  );
+
+  -- completion badges the examiner key has issued
+  CREATE TABLE IF NOT EXISTS quiz_awards (
+    bootcamp_addr TEXT NOT NULL,
+    pubkey        TEXT NOT NULL,
+    award_id      TEXT NOT NULL,
+    created_at    INTEGER NOT NULL,
+    PRIMARY KEY (bootcamp_addr, pubkey)
+  );
+
+  -- name@NAME_DOMAIN: NIP-05 identity, plus a Lightning address that forwards
+  -- to the owner's own wallet address (ln_target). One name per pubkey.
+  CREATE TABLE IF NOT EXISTS names (
+    name       TEXT PRIMARY KEY,
+    pubkey     TEXT NOT NULL UNIQUE,
+    ln_target  TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
 `);
 
 // ---- typed query helpers with a prepared-statement cache ----
@@ -100,6 +152,7 @@ export const q = {
   all: <T>(sql: string, ...p: SqlParam[]): T[] => prep(sql).all(...p) as unknown as T[],
   get: <T>(sql: string, ...p: SqlParam[]): T | undefined =>
     prep(sql).get(...p) as unknown as T | undefined,
+  run: (sql: string, ...p: SqlParam[]) => prep(sql).run(...p),
 };
 
 /** FTS5 is optional — fall back to LIKE search if the build lacks it. */

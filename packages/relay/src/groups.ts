@@ -5,6 +5,7 @@ import { q } from './db.ts';
 import { relaySecretKey } from './key.ts';
 
 const MEMBER_WRITE = new Set<number>([
+  KIND.Text, // club-only Ships
   KIND.GroupChatMessage,
   KIND.GroupChatReply,
   KIND.GroupThread,

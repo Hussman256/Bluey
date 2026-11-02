@@ -16,7 +16,7 @@ function verb(n: NotificationItem): { text: string; color: string } {
     case KIND.GenericRepost:
       return { text: 'reposted your note', color: 'text-good' };
     default:
-      return { text: n.contentPreview ? 'mentioned you' : 'replied to your note', color: 'text-zap-ink' };
+      return { text: n.contentPreview ? 'mentioned you' : 'replied to your note', color: 'text-brand-ink' };
   }
 }
 

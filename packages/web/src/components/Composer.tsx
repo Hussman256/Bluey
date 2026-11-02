@@ -111,7 +111,7 @@ export function Composer({
             type="button"
             onClick={publish}
             disabled={!text.trim() || busy}
-            className="rounded-full bg-zap px-4 py-1.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
+            className="rounded-full bg-brand px-4 py-1.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
           >
             {busy ? '…' : replyTo ? 'Reply' : 'Post'}
           </button>

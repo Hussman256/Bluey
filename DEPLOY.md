@@ -71,6 +71,11 @@ VITE_CLUBS_RELAY = wss://clubs.bluey.xyz
 Redeploy. The client works without either service (falls back to public relays);
 they just make Discover ranking, Notifications, Search and Clubs possible.
 
+Link previews for `/@name` come from an edge function (`api/og.ts`) that asks the
+index for the person's name, bio and photo. It defaults to
+`https://index.bluey.xyz`; set `INDEX_HTTP_URL` if the index lives elsewhere.
+Without the index, shared links show a generic Bluey preview.
+
 ### CLI
 
 ```bash

@@ -1,3 +1,5 @@
+import { pubkeyFrom } from './ids';
+
 /**
  * Relay + service configuration for Bluey.
  *
@@ -34,6 +36,14 @@ export const BLOSSOM_FALLBACK = 'https://blossom.band';
 export const APP_NAME = 'Bluey';
 export const APP_TAGLINE = 'Learn Bitcoin. Find your people.';
 
+/**
+ * Hex pubkey of the Bluey curator account (VITE_BLUEY_CURATOR, npub or hex), or
+ * null when unset. It owns the approved-tutor list and receives applications.
+ */
+export const CURATOR_PUBKEY: string | null = pubkeyFrom(
+  (import.meta.env.VITE_BLUEY_CURATOR as string | undefined)?.trim(),
+);
+
 /** The index service URL actually in effect (honours VITE_INDEX_URL). */
 export const INDEX_URL = (import.meta.env.VITE_INDEX_URL as string | undefined) || 'ws://localhost:8787';
 
@@ -43,6 +53,10 @@ export const LS = {
   relays: 'bluey:relays',
   feedTab: 'bluey:feed-tab',
   dvmFeeds: 'bluey:dvm-feeds',
+  shipDraft: 'bluey:ship-draft',
+  lessonsRead: 'bluey:lessons-read',
+  passkeys: 'bluey:passkeys',
+  onboarding: 'bluey:onboarding',
 } as const;
 
 /** The relay set to boot with: user-added relays (if any) merged over the defaults. */
