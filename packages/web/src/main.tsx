@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
-import { loadRelayList } from './nostr/config';
+import { loadRelayList, RELAYS_OVERRIDDEN } from './nostr/config';
 import { WalletProvider } from './wallet/WalletProvider';
 
 createRoot(document.getElementById('root')!).render(
@@ -14,7 +14,8 @@ createRoot(document.getElementById('root')!).render(
       ndk={{
         explicitRelayUrls: loadRelayList(),
         clientName: 'Bluey',
-        autoConnectUserRelays: true,
+        autoConnectUserRelays: !RELAYS_OVERRIDDEN,
+        ...(RELAYS_OVERRIDDEN ? { enableOutboxModel: false } : {}),
       }}
       session={{
         storage: new NDKSessionLocalStorage(),

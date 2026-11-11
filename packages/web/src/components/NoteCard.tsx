@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { parseAddr } from '../nostr/bootcamps';
 import { NoteContent } from '../nostr/content';
+import { deleteEvent, useIsDeleted } from '../nostr/deletions';
 import { useNoteStats } from '../nostr/engagement';
 import { KIND } from '../nostr/kinds';
 import { useMuteActions } from '../nostr/mutes';
@@ -27,6 +28,19 @@ function NoteMenu({ event }: { event: NDKEvent }) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [autoTranslate, setAutoTranslate] = useState(isAutoTranslateEnabled);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function remove() {
+    if (!ndk || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteEvent(ndk, event); // the card disappears on success
+    } catch {
+      setDone("Couldn't delete. Try again.");
+      setDeleting(false);
+    }
+  }
 
   useEffect(() => {
     const onAutoChange = () => setAutoTranslate(isAutoTranslateEnabled());
@@ -59,11 +73,37 @@ function NoteMenu({ event }: { event: NDKEvent }) {
       </button>
       {open && (
         <div
-          className="absolute right-0 top-8 z-20 w-48 overflow-hidden rounded-xl border border-line bg-bg py-1 text-xs shadow-lg"
-          onMouseLeave={() => setOpen(false)}
+          className="absolute right-0 top-8 z-20 w-56 overflow-hidden rounded-xl border border-line bg-bg py-1 text-xs shadow-lg"
+          onMouseLeave={() => {
+            setOpen(false);
+            setConfirmDelete(false);
+          }}
         >
           {done ? (
             <span className="block px-3 py-2 text-xs text-ink-faint">{done}</span>
+          ) : confirmDelete ? (
+            <div className="flex flex-col gap-2 px-3 py-2.5">
+              <p className="leading-relaxed text-ink-soft">
+                Delete this post? Relays and other apps are asked to remove it, but some may keep a copy.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void remove()}
+                  disabled={deleting}
+                  className="min-h-9 flex-1 rounded-lg bg-danger font-semibold text-white disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting…' : 'Delete'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  className="min-h-9 flex-1 rounded-lg border border-line-strong font-semibold"
+                >
+                  Keep
+                </button>
+              </div>
+            </div>
           ) : (
             <>
               <button
@@ -76,6 +116,15 @@ function NoteMenu({ event }: { event: NDKEvent }) {
               >
                 {autoTranslate ? 'Disable auto-translate' : 'Enable auto-translate'}
               </button>
+              {me && me.pubkey === event.pubkey && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(true)}
+                  className="block w-full px-3 py-2 text-left text-danger hover:bg-danger/10"
+                >
+                  Delete this post
+                </button>
+              )}
               {me && me.pubkey !== event.pubkey && (
                 <>
                   <button
@@ -243,6 +292,8 @@ function ActionIcon({ path, filled = false }: { path: string; filled?: boolean }
 
 /** A repost (kind 6) wraps another note — unwrap and render that. */
 export function NoteCard({ event }: { event: NDKEvent }) {
+  const deleted = useIsDeleted(event.id);
+  if (deleted) return null;
   if (event.kind === KIND.Repost || event.kind === KIND.GenericRepost) {
     return <RepostCard event={event} />;
   }
@@ -281,6 +332,7 @@ function HighlightCard({ event }: { event: NDKEvent }) {
 
 function RepostCard({ event }: { event: NDKEvent }) {
   const { ndk } = useNDK();
+  const me = useNDKCurrentUser();
   const taggedId = event.tags.find((t) => t[0] === 'e')?.[1];
 
   const inner = useMemo(() => {
@@ -302,6 +354,15 @@ function RepostCard({ event }: { event: NDKEvent }) {
       <div className="flex items-center gap-2 px-4 pt-2.5 text-xs text-ink-faint">
         <ActionIcon path="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3" />
         <DisplayName pubkey={event.pubkey} className="text-xs" /> reposted
+        {me?.pubkey === event.pubkey && ndk && (
+          <button
+            type="button"
+            onClick={() => void deleteEvent(ndk, event).catch(() => undefined)}
+            className="ml-auto font-semibold hover:text-ink hover:underline"
+          >
+            Undo
+          </button>
+        )}
       </div>
       {note ? (
         <PlainNote event={note} bare />

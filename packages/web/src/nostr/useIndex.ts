@@ -40,6 +40,8 @@ function useIndexQuery<T>(
     counts?: EngagementCount[];
     notifications?: NotificationItem[];
     score?: number;
+    pubkeys?: string[];
+    total?: number;
   }) => T,
   deps: unknown[],
 ): QueryState<T> {
@@ -110,6 +112,15 @@ export function useIndexNotifications(params: NotificationsParams) {
     params,
     (f) => f.notifications ?? [],
     [params.pubkey, params.since],
+  );
+}
+
+export function useIndexFollowers(pubkey: string | null, limit = 200) {
+  return useIndexQuery(
+    'followers',
+    { pubkey: pubkey ?? '', limit },
+    (f) => ({ total: f.total ?? 0, pubkeys: f.pubkeys ?? [] }),
+    [pubkey, limit],
   );
 }
 

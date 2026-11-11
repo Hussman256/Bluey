@@ -2,9 +2,11 @@ import { createServer } from 'node:http';
 import type {
   CountsParams,
   FeedParams,
+  FollowersParams,
   Frame,
   NotesParams,
   NotificationsParams,
+  PeopleParams,
   ProfileParams,
   Request,
   SearchParams,
@@ -54,6 +56,14 @@ function handle(req: Request): Frame {
         const p = req.params as SuggestParams;
         const topics = Array.isArray(p.topics) ? p.topics.map(String).slice(0, 10) : [];
         return { ...base, pubkeys: q.suggestPubkeys(topics, Math.min(Number(p.limit) || 24, 60)) };
+      }
+      case 'people': {
+        const p = req.params as PeopleParams;
+        return { ...base, people: q.people(String(p.q ?? ''), Number(p.limit) || 8) };
+      }
+      case 'followers': {
+        const p = req.params as FollowersParams;
+        return { ...base, ...q.followers(p.pubkey, Number(p.limit) || 200) };
       }
       default:
         return { ...base, error: `unknown method: ${req.method}` };

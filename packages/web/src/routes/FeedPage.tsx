@@ -3,10 +3,12 @@ import { useFollows, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/reac
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Composer } from '../components/Composer';
+import { LoadMore } from '../components/LoadMore';
 import { NoteCard } from '../components/NoteCard';
 import { BoardCard, OnAirStrip } from '../components/OnAir';
 import { Mark } from '../components/primitives';
 import { LS } from '../nostr/config';
+import { useDeletedIds } from '../nostr/deletions';
 import { EngagementScope } from '../nostr/engagement';
 import { BUILTIN_FEEDS, addDvmFeed, loadDvmFeeds, removeDvmFeed, type FeedRef } from '../nostr/feeds';
 import { KIND } from '../nostr/kinds';
@@ -15,6 +17,7 @@ import { isMuted, useMutes } from '../nostr/mutes';
 import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
 import { useDvmFeed, useEventsByIds } from '../nostr/useDvmFeed';
 import { useIndexFeed } from '../nostr/useIndex';
+import { useOlderNotes } from '../nostr/useOlderNotes';
 import { useShipFeed } from '../nostr/useShips';
 import { useWebOfTrust } from '../nostr/useWebOfTrust';
 
@@ -94,15 +97,35 @@ export function FeedPage() {
   const dvm = useDvmFeed(feed.kind === 'dvm' ? feed.id : null);
   const dvmEvents = useEventsByIds(dvm.refIds);
 
+  // ----- older posts, for the feeds that have a history to page through -----
+  const pagedScope = builtin === 'following' || builtin === 'discover' ? builtin : undefined;
+  const baseNotes =
+    builtin === 'latest'
+      ? relayDiscover
+      : idx.fromIndex && idx.data
+        ? idx.data
+        : builtin === 'following'
+          ? relayFollowing
+          : relayDiscover;
+  const older = useOlderNotes({
+    feedKey: `${feed.id}:${me?.pubkey ?? ''}`,
+    enabled: pagedScope !== undefined || builtin === 'latest',
+    base: baseNotes,
+    scope: builtin === 'latest' ? undefined : pagedScope,
+    pubkey: me?.pubkey,
+    fromIndex: builtin !== 'latest' && idx.fromIndex,
+    authors: builtin === 'following' ? followAuthors : undefined,
+  });
+
   const notes = useMemo(() => {
     let source: NDKEvent[] = [];
     if (feed.kind === 'dvm') source = dvmEvents;
     else if (builtin === 'ships') source = ships;
     else if (builtin === 'latest')
-      source = relayDiscover.filter((e) => !isReplyNote(e));
+      source = [...relayDiscover, ...older.notes].filter((e) => !isReplyNote(e));
     else {
       const relaySrc = builtin === 'following' ? relayFollowing : relayDiscover;
-      let list = (idx.fromIndex && idx.data ? idx.data : relaySrc).filter(
+      let list = [...(idx.fromIndex && idx.data ? idx.data : relaySrc), ...older.notes].filter(
         (e) => !isReplyNote(e),
       );
       if (builtin === 'discover' && !idx.fromIndex) {
@@ -132,10 +155,14 @@ export function FeedPage() {
         seen.add(s);
         return true;
       })
-      .slice(0, 120);
-  }, [feed.kind, builtin, dvmEvents, ships, relayFollowing, relayDiscover, idx, wot, mutes, langMode, scripts]);
+      // a cap keeps a busy live feed from growing without end; once history runs out, show it all
+      .slice(0, older.done ? undefined : 120 + older.notes.length);
+  }, [feed.kind, builtin, dvmEvents, ships, relayFollowing, relayDiscover, older.notes, older.done, idx, wot, mutes, langMode, scripts]);
 
-  const engagementIds = useMemo(() => notes.map(subjectId), [notes]);
+  const deleted = useDeletedIds(notes);
+  const visible = useMemo(() => notes.filter((e) => !deleted.has(e.id)), [notes, deleted]);
+  // the newest few hundred only: relays cap filter size, and older cards can do without live counts
+  const engagementIds = useMemo(() => visible.slice(0, 300).map(subjectId), [visible]);
 
   return (
     <div>
@@ -260,12 +287,14 @@ export function FeedPage() {
       </p>
 
       <EngagementScope ids={engagementIds}>
-        {notes.map((e) => (
+        {visible.map((e) => (
           <NoteCard key={e.id} event={e} />
         ))}
       </EngagementScope>
 
-      {notes.length === 0 && (
+      {older.enabled && visible.length > 0 && <LoadMore {...older} />}
+
+      {visible.length === 0 && (
         <div className="px-6 py-12 text-center">
           {feed.kind === 'dvm' && dvm.status === 'error' ? (
             <p className="font-mono text-xs text-ink-faint">no results</p>

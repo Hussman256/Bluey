@@ -3,6 +3,7 @@ import type { NDKEvent, NDKFilter } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser, useSubscribe } from '@nostr-dev-kit/react';
 import { useCallback, useMemo } from 'react';
 import { useClubsRelaySet } from './clubs';
+import { useDeletedIds } from './deletions';
 import { isJunkNote } from './notes';
 import { shipEvent, verifiersOf, verifyShipEvent, type ShipDraft } from './ships';
 import { useWebOfTrust } from './useWebOfTrust';
@@ -26,8 +27,10 @@ export function useShipFeed(scopePubkey?: string, enabled = true) {
     [scopePubkey, enabled],
   );
 
+  const deleted = useDeletedIds(events);
+
   return useMemo(() => {
-    let list = events.filter((e) => !isJunkNote(e));
+    let list = events.filter((e) => !isJunkNote(e) && !deleted.has(e.id));
     if (scopePubkey) {
       list = list.filter(
         (e) =>
@@ -41,7 +44,7 @@ export function useShipFeed(scopePubkey?: string, enabled = true) {
       .slice()
       .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
       .slice(0, 120);
-  }, [events, wot, scopePubkey]);
+  }, [events, deleted, wot, scopePubkey]);
 }
 /** Verification labels for a set of ship ids. */
 export function useShipVerifications(shipIds: string[]) {

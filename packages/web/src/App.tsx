@@ -6,6 +6,7 @@ import { Layout } from './components/Layout';
 import { Mark } from './components/primitives';
 import { PwaPrompt } from './components/PwaPrompt';
 import { LS } from './nostr/config';
+import { useRelayListSync } from './nostr/relayList';
 import { LoginScreen } from './session/LoginScreen';
 
 const PublicProfilePage = lazy(() =>
@@ -46,6 +47,9 @@ const ProfilePage = lazy(() =>
 const MyProfileRedirect = lazy(() =>
   import('./routes/ProfilePage').then((m) => ({ default: m.MyProfileRedirect })),
 );
+const FollowListPage = lazy(() =>
+  import('./routes/FollowListPage').then((m) => ({ default: m.FollowListPage })),
+);
 const SettingsPage = lazy(() =>
   import('./routes/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
@@ -81,6 +85,8 @@ export function App() {
     const t = setTimeout(() => setHydrationTimedOut(true), 2500);
     return () => clearTimeout(t);
   }, [expectSession]);
+
+  useRelayListSync();
 
   const hydrating = expectSession && !me && !hydrationTimedOut;
 
@@ -139,6 +145,8 @@ export function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/e/:id" element={<ThreadPage />} />
             <Route path="/p/:npub" element={<ProfilePage />} />
+            <Route path="/p/:npub/following" element={<FollowListPage list="following" />} />
+            <Route path="/p/:npub/followers" element={<FollowListPage list="followers" />} />
             <Route path="/me" element={<MyProfileRedirect />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

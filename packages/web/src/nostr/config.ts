@@ -8,23 +8,35 @@ import { pubkeyFrom } from './ids';
  * degrade gracefully): the index service (nostr/indexClient.ts) and the clubs
  * relay (nostr/clubs.ts).
  */
-export const DEFAULT_RELAYS = [
-  'wss://relay.damus.io',
-  'wss://relay.primal.net',
-  'wss://nos.lol',
-  'wss://relay.nostr.band',
-  'wss://nostr.wine',
-  'wss://relay.snort.social',
-];
+
+/** VITE_RELAYS replaces every public relay, so a test account can't reach them. */
+const RELAYS_OVERRIDE = ((import.meta.env.VITE_RELAYS as string | undefined) ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+export const RELAYS_OVERRIDDEN = RELAYS_OVERRIDE.length > 0;
+
+export const DEFAULT_RELAYS = RELAYS_OVERRIDDEN
+  ? RELAYS_OVERRIDE
+  : [
+      'wss://relay.damus.io',
+      'wss://relay.primal.net',
+      'wss://nos.lol',
+      'wss://relay.nostr.band',
+      'wss://nostr.wine',
+      'wss://relay.snort.social',
+    ];
 
 /** Relays that reliably carry NIP-23 long-form articles. */
-export const READS_RELAYS = [
-  'wss://relay.damus.io',
-  'wss://relay.primal.net',
-  'wss://nos.lol',
-  'wss://relay.nostr.band',
-  'wss://nostr.wine',
-];
+export const READS_RELAYS = RELAYS_OVERRIDDEN
+  ? RELAYS_OVERRIDE
+  : [
+      'wss://relay.damus.io',
+      'wss://relay.primal.net',
+      'wss://nos.lol',
+      'wss://relay.nostr.band',
+      'wss://nostr.wine',
+    ];
 
 /** Fallback zap/relay hints for NWC pairing discovery. */
 export const NWC_RELAY_HINTS = ['wss://relay.getalby.com/v1', 'wss://relay.primal.net'];
@@ -57,6 +69,8 @@ export const LS = {
   lessonsRead: 'bluey:lessons-read',
   passkeys: 'bluey:passkeys',
   onboarding: 'bluey:onboarding',
+  deleted: 'bluey:deleted',
+  relayListSynced: 'bluey:relay-list-synced',
 } as const;
 
 /** The relay set to boot with: user-added relays (if any) merged over the defaults. */

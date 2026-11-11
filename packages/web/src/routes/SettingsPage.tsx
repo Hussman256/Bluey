@@ -11,6 +11,7 @@ import {
   isAutoTranslateEnabled,
   setAutoTranslateEnabled,
 } from '../nostr/translate';
+import { updateRelayList } from '../nostr/relayList';
 import { useMuteActions } from '../nostr/mutes';
 import { useRawProfile } from '../nostr/profile';
 import { useServiceStatus } from '../nostr/useServiceStatus';
@@ -95,6 +96,7 @@ export function SettingsPage() {
     const next = [...relays, url];
     setRelays(next);
     saveExtraRelays(next);
+    if (ndk && me) void updateRelayList(ndk, me.pubkey, { add: url });
     setNewRelay('');
   }
 
@@ -104,6 +106,7 @@ export function SettingsPage() {
     const next = relays.filter((r) => r !== url);
     setRelays(next);
     saveExtraRelays(next);
+    if (ndk && me) void updateRelayList(ndk, me.pubkey, { remove: url });
   }
 
   return (

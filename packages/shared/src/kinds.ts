@@ -7,6 +7,7 @@ export const KIND = {
   Text: 1,
   RecommendRelay: 2,
   Contacts: 3, // NIP-02 follow list
+  Deletion: 5, // NIP-09
 
   // engagement
   Repost: 6, // NIP-18
@@ -134,6 +135,7 @@ export const INGEST_KINDS: number[] = [
   KIND.Metadata,
   KIND.Text,
   KIND.Contacts,
+  KIND.Deletion,
   KIND.Repost,
   KIND.Reaction,
   KIND.GenericRepost,

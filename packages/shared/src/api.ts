@@ -26,7 +26,9 @@ export type RequestMethod =
   | 'search' // full-text over note content
   | 'counts' // engagement counts for a set of event ids
   | 'wot' // web-of-trust score for a pubkey (0..1)
-  | 'suggest'; // well-trusted accounts to follow for a set of interests (onboarding)
+  | 'suggest' // well-trusted accounts to follow for a set of interests (onboarding)
+  | 'people' // profiles matching a name, for @mentions
+  | 'followers'; // who follows a pubkey, most trusted first
 
 export type TrendingTimeframe = '4h' | '12h' | '24h' | '7d';
 
@@ -71,6 +73,23 @@ export interface SuggestParams {
   limit?: number;
 }
 
+export interface PeopleParams {
+  q: string;
+  limit?: number;
+}
+export interface FollowersParams {
+  pubkey: string;
+  limit?: number;
+}
+
+export interface PersonCard {
+  pubkey: string;
+  name: string | null;
+  displayName: string | null;
+  picture: string | null;
+  nip05: string | null;
+}
+
 export interface Request {
   id: string;
   method: RequestMethod;
@@ -83,7 +102,9 @@ export interface Request {
     | SearchParams
     | CountsParams
     | WotParams
-    | SuggestParams;
+    | SuggestParams
+    | PeopleParams
+    | FollowersParams;
 }
 
 export interface EngagementCount {
@@ -112,6 +133,8 @@ export interface Frame {
   notifications?: NotificationItem[];
   score?: number;
   pubkeys?: string[];
+  total?: number;
+  people?: PersonCard[];
   error?: string;
   done: boolean;
 }

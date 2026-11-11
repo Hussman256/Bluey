@@ -66,6 +66,14 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS ix_mentions_pubkey ON mentions (pubkey, created_at DESC);
 
+  -- NIP-09: ids their authors deleted, so a copy from another relay can't bring them back
+  CREATE TABLE IF NOT EXISTS deletions (
+    id         TEXT NOT NULL,
+    pubkey     TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (id, pubkey)
+  );
+
   CREATE TABLE IF NOT EXISTS wot (
     pubkey     TEXT PRIMARY KEY,
     score      REAL NOT NULL,
@@ -195,7 +203,30 @@ const insReport = db.prepare(`
 const getFollowTs = db.prepare(`SELECT v FROM meta WHERE k = ?`);
 const setFollowTs = db.prepare(`INSERT OR REPLACE INTO meta (k, v) VALUES (?, ?)`);
 
+const insDeletion = db.prepare(`INSERT OR IGNORE INTO deletions (id, pubkey, created_at) VALUES (?, ?, ?)`);
+const getDeletion = db.prepare(`SELECT 1 FROM deletions WHERE id = ? AND pubkey = ?`);
+const delEvent = db.prepare(`DELETE FROM events WHERE id = ? AND pubkey = ?`);
+const delEdgesFrom = db.prepare(`DELETE FROM edges WHERE src_id = ?`);
+const delMentionsFrom = db.prepare(`DELETE FROM mentions WHERE event_id = ?`);
+const delFts = ftsAvailable ? db.prepare(`DELETE FROM note_fts WHERE id = ?`) : null;
+
 const REPLY_TAGS = new Set(['e', 'a', 'q']);
+
+/**
+ * NIP-09. A deletion only counts against events by the same pubkey, so nobody
+ * can remove someone else's post, even if the deletion arrives first.
+ */
+function applyDeletion(ev: NostrEventLike) {
+  for (const t of ev.tags) {
+    if (t[0] !== 'e' || !/^[0-9a-f]{64}$/.test(t[1] ?? '')) continue;
+    insDeletion.run(t[1], ev.pubkey, ev.created_at);
+    if (delEvent.run(t[1], ev.pubkey).changes) {
+      delEdgesFrom.run(t[1]);
+      delMentionsFrom.run(t[1]);
+      delFts?.run(t[1]);
+    }
+  }
+}
 
 function bolt11Sats(tags: string[][]): number {
   // amount tag (millisats) is the reliable one for a zap receipt
@@ -206,6 +237,12 @@ function bolt11Sats(tags: string[][]): number {
 
 /** Store one validated event and derive graph/edge/profile rows from it. */
 export function ingest(ev: NostrEventLike): boolean {
+  if (ev.kind === KIND.Deletion) {
+    applyDeletion(ev);
+    return true;
+  }
+  if (getDeletion.get(ev.id, ev.pubkey)) return false;
+
   const isReply =
     ev.kind === KIND.Text && ev.tags.some((t) => REPLY_TAGS.has(t[0])) ? 1 : 0;
 
@@ -302,6 +339,7 @@ export function pruneOld(): number {
   db.prepare(`DELETE FROM edges WHERE created_at < ?`).run(cutoff);
   db.prepare(`DELETE FROM mentions WHERE created_at < ?`).run(cutoff);
   db.prepare(`DELETE FROM reports WHERE created_at < ?`).run(cutoff);
+  db.prepare(`DELETE FROM deletions WHERE created_at < ?`).run(cutoff);
   if (ftsAvailable) {
     db.exec(
       `DELETE FROM note_fts WHERE id NOT IN (SELECT id FROM events WHERE kind = ${KIND.Text})`,

@@ -42,7 +42,7 @@ Four packages:
 
 ### Key cross-package patterns
 
-- **Index protocol**: the client sends `{ id, method, params }` and the server replies with frames ending in `done: true` (types in `shared/src/api.ts`). Methods: `feed`, `thread`, `profile`, `notes`, `notifications`, `search`, `counts`, `wot`. To add a method, update the shared types, the server handler (`api.ts`/`queries.ts`), and the client hook (`web/src/nostr/useIndex.ts`).
+- **Index protocol**: the client sends `{ id, method, params }` and the server replies with frames ending in `done: true` (types in `shared/src/api.ts`). Methods: `feed`, `thread`, `profile`, `notes`, `notifications`, `search`, `counts`, `wot`, `suggest`, `people`, `followers`. To add a method, update the shared types, the server handler (`api.ts`/`queries.ts`), and the client hook (`web/src/nostr/useIndex.ts`).
 - **Graceful degradation is a hard requirement.** The client must work with neither backend running. `IndexClient` (`indexClient.ts`) auto-reconnects. `useIndex*` hooks return `fromIndex: false` when the index is offline or errors, and callers then fall back to querying relays directly through NDK. Keep this fallback path whenever you touch index-backed features.
 - **Feed filtering is layered.** `isSpamContent` (shared) runs server-side at ingest (`server/src/relays.ts`) and again client-side (`web/src/nostr/notes.ts` `isJunkNote`). The client then applies mute words/reports (`mutes.ts`, NIP-51/NIP-56), a script-based language filter (`lang.ts`), and NIP-36 sensitive-media blur. Spam heuristics are deliberately conservative: a normal post with a few hashtags and a link must never be caught.
 - **Reputation is computed client-side from public signals** (`reputation.ts` `useVouched`) and shown as facts, not a stored score. The older 0–100 Builder score is being replaced by the "Vouched" block.
@@ -51,7 +51,7 @@ Four packages:
 
 ### Config
 
-- Client: `VITE_INDEX_URL`, `VITE_CLUBS_RELAY` (default `ws://localhost:8787` / `:8788`). Default relays, Blossom servers, and localStorage keys (`LS`) are in `web/src/nostr/config.ts`.
+- Client: `VITE_INDEX_URL`, `VITE_CLUBS_RELAY` (default `ws://localhost:8787` / `:8788`). `VITE_RELAYS` (dev only) replaces every public relay, so a test account can post without reaching the real network. Default relays, Blossom servers, and localStorage keys (`LS`) are in `web/src/nostr/config.ts`.
 - Server: `PORT`, `DB_PATH`, `RELAYS`, `RETENTION_DAYS`, `WOT_INTERVAL_MS` (see `packages/server/.env.example`).
 - Relay: `PORT`, `DB_PATH`, `KEY_PATH`, `RELAY_SECRET_KEY`, `RELAY_NAME`.
 

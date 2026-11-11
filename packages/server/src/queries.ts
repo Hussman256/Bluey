@@ -5,6 +5,7 @@ import {
   type FeedParams,
   type NostrEventLike,
   type NotificationItem,
+  type PersonCard,
   type TrendingTimeframe,
 } from '@bluey/shared';
 import { ftsAvailable, q } from './db.ts';
@@ -270,6 +271,46 @@ export function profile(pubkey: string): {
       },
     ],
   };
+}
+
+// ---------- people ----------
+export function people(raw: string, limit = 8): PersonCard[] {
+  const term = raw.trim().replace(/^@/, '').slice(0, 40);
+  if (!term) return [];
+  const like = term.replace(/[\\%_]/g, '\\$&');
+  return q
+    .all<{ pubkey: string; name: string | null; display_name: string | null; picture: string | null; nip05: string | null }>(
+      `SELECT p.pubkey, p.name, p.display_name, p.picture, p.nip05
+       FROM profiles p LEFT JOIN wot w ON w.pubkey = p.pubkey
+       WHERE p.name LIKE ? ESCAPE '\\' OR p.display_name LIKE ? ESCAPE '\\'
+          OR p.display_name LIKE ? ESCAPE '\\' OR p.nip05 LIKE ? ESCAPE '\\'
+       ORDER BY COALESCE(w.score, 0) DESC LIMIT ?`,
+      `${like}%`,
+      `${like}%`,
+      `% ${like}%`,
+      `${like}%`,
+      Math.min(limit, 20),
+    )
+    .map((r) => ({
+      pubkey: r.pubkey,
+      name: r.name,
+      displayName: r.display_name,
+      picture: r.picture,
+      nip05: r.nip05,
+    }));
+}
+
+export function followers(pubkey: string, limit = 200): { total: number; pubkeys: string[] } {
+  const total = q.get<{ n: number }>(`SELECT COUNT(*) n FROM follows WHERE followee = ?`, pubkey)?.n ?? 0;
+  const pubkeys = q
+    .all<{ follower: string }>(
+      `SELECT f.follower FROM follows f LEFT JOIN wot w ON w.pubkey = f.follower
+       WHERE f.followee = ? ORDER BY COALESCE(w.score, 0) DESC LIMIT ?`,
+      pubkey,
+      Math.min(limit, 500),
+    )
+    .map((r) => r.follower);
+  return { total, pubkeys };
 }
 
 // ---------- long-form ----------

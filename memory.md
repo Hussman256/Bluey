@@ -40,8 +40,9 @@ A running record of where the project stands, what was decided, and what happene
 ### Suggested next order
 0. **Blocker:** persistent hosting for the index (key backups + names now live there)
 1. Persistent backend hosting (Render free tier ephemeral DB resolution)
-2. Test the publishing flows with a throwaway account on a relay set that excludes public relays
-3. Try passkeys on a real device
+2. Direct messages
+3. Test the remaining publishing flows (Ships, vouches, bootcamps, quizzes, clubs) using `VITE_RELAYS`
+4. Try passkeys on a real device
 
 ---
 
@@ -56,6 +57,22 @@ A running record of where the project stands, what was decided, and what happene
 ---
 
 ## Checkpoint log
+
+### 2026-11-12: five social basics committed
+- The 2026-11-02 work (older posts, delete, @mentions, followers, relay list, `VITE_RELAYS`) is committed on `feat/mobile-rebuild`. `npm run check` was clean and the changed files were scanned for secrets first. Not pushed or merged yet.
+
+### 2026-11-02: five social basics (older posts, delete, @mentions, followers, relay list)
+- **Older posts:** Following, Discover and Latest load more as you scroll (`useOlderNotes`, `LoadMore`). They use the index when it answers and relays when it doesn't, and Following continues on relays once the index's history runs out.
+- **Delete:** NIP-09 from the post menu, with a confirmation that says some relays may keep a copy; "Undo" on your own reposts (`nostr/deletions.ts`). The client hides what you deleted and honours deletions from a post's own author. The index now ingests kind 5 and keeps tombstones in a `deletions` table, so a copy from another relay can't bring a post back. Anyone else's deletion is ignored.
+- **@mentions:** suggestions in the Composer (`useMentionSearch`, new index method `people`). People you follow come from relays, so it works with the index offline. Publishes `nostr:npub…` plus a `p` tag. Only the main Composer has this; club chat and the Ship composer don't.
+- **Followers:** counts link to `/p/:npub/following` and `/followers` (`FollowListPage`, new index method `followers`), with Follow buttons. Followers need the index; the count is hidden and the list explains when it's offline. The count is only what the index has seen, and the page says so.
+- **Relay list:** NIP-65 kind 10002 published once, a few seconds after sign-in, only if the person has none (`nostr/relayList.ts`). Settings keeps it in step. An existing list is never overwritten at sign-in.
+- `collectEvents` replaces `fetchEvents` in new code: it doesn't wait on every relay and keeps partial results. `useDvmFeed.ts` still uses `fetchEvents`.
+- **New dev option:** `VITE_RELAYS` replaces all public relays and turns off NDK's outbox model, so test accounts can post safely.
+- **Tested end to end in the real app** with a throwaway account on a private relay that ignores deletions, a throwaway index and clubs relay. Separately, this was also the first real run of recovery-key sign-up, onboarding, posting and following. Verified: mention picked by keyboard and published correctly; 200 posts paged with no gaps or duplicates on Latest and Following; delete survives wiping local memory and reload; forged deletion ignored; follower counts and lists; follow from the list; and with the index stopped, Following, mentions and the offline followers message. `npm run check` is clean.
+- **Not tested:** Discover paging (too little trust data in the test world), Undo repost, adding or removing a relay in Settings, phone-width layout of the new screens, and anything against real public relays.
+- Noticed, not changed: "Translate post" shows on posts already in your language.
+- ⚠ With one relay answering and one down, NDK never reports end-of-results, so an empty page shows "Try again" after 8 seconds. Several healthy relays avoid this.
 
 ### 2026-11-02: first browser walkthrough, Trending and auto-translate fixes
 - **Walked through, phone width, read-only:** Feed, Learn, Clubs, board, profile (You), `/ship/new`, `/teach`, `/ships`, Alerts, Settings, and `/@name` for an unknown name. All render with sensible empty states and no sideways overflow. Trending and the status dots were also seen working at desktop width. Checked by reading page text and the console through Vite's log, not visually: screenshots froze from low memory after the first desktop one.

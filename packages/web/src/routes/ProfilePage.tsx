@@ -8,11 +8,13 @@ import { PublicPageLink } from '../components/PublicPageLink';
 import { NoteCard } from '../components/NoteCard';
 import { VouchedCard } from '../components/VouchedCard';
 import { useProfileBadges } from '../nostr/badges';
+import { useDeletedIds } from '../nostr/deletions';
 import { EngagementScope } from '../nostr/engagement';
 import { npubOf, pubkeyFrom } from '../nostr/ids';
 import { KIND } from '../nostr/kinds';
 import { isJunkNote, subjectId } from '../nostr/notes';
 import { useApprovedTutors, useTutorAdmin } from '../nostr/tutors';
+import { useIndexFollowers } from '../nostr/useIndex';
 import { useShipFeed, useShipVerifications } from '../nostr/useShips';
 import { useWallet } from '../wallet/WalletProvider';
 import { ZapButton } from '../components/ZapButton';
@@ -110,7 +112,9 @@ export function ProfilePage() {
     [notes],
   );
 
-  const shown = tab === 'replies' ? replyNotes : rootNotes;
+  const deleted = useDeletedIds(notes);
+  const shown = (tab === 'replies' ? replyNotes : rootNotes).filter((e) => !deleted.has(e.id));
+  const followers = useIndexFollowers(pubkey, 1);
   const engagementIds = useMemo(() => shown.map(subjectId), [shown]);
 
   async function toggleFollow() {
@@ -207,12 +211,20 @@ export function ProfilePage() {
         )}
 
         <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-ink-soft">
-          <span>
+          <Link to={`/p/${npub}/following`} className="hover:underline">
             <strong className="font-display tabular-nums text-ink">
               {followingCount.toLocaleString()}
             </strong>{' '}
             Following
-          </span>
+          </Link>
+          {followers.fromIndex && followers.data && (
+            <Link to={`/p/${npub}/followers`} className="hover:underline">
+              <strong className="font-display tabular-nums text-ink">
+                {followers.data.total.toLocaleString()}
+              </strong>{' '}
+              Followers
+            </Link>
+          )}
           {(profile?.lud16 || profile?.lud06) && (
             <span className="font-mono text-xs text-zap-ink">⚡ {profile.lud16 ?? 'lnurl'}</span>
           )}
