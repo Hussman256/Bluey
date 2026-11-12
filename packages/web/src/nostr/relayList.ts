@@ -3,6 +3,7 @@ import type NDK from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useEffect } from 'react';
 import { collectEvents } from './collectEvents';
+import { syncDmRelays } from './dms';
 import { LS, RELAYS_OVERRIDDEN, loadRelayList } from './config';
 import { KIND } from './kinds';
 
@@ -86,7 +87,10 @@ export function useRelayListSync() {
   useEffect(() => {
     if (!ndk || !pubkey) return;
     // give relays a moment to connect after sign-in
-    const t = setTimeout(() => void syncRelayList(ndk, pubkey).catch(() => undefined), 5000);
+    const t = setTimeout(() => {
+      void syncRelayList(ndk, pubkey).catch(() => undefined);
+      void syncDmRelays(ndk, pubkey).catch(() => undefined);
+    }, 5000);
     return () => clearTimeout(t);
   }, [ndk, pubkey]);
 }

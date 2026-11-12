@@ -40,7 +40,7 @@ A running record of where the project stands, what was decided, and what happene
 ### Suggested next order
 0. **Blocker:** persistent hosting for the index (key backups + names now live there)
 1. Persistent backend hosting (Render free tier ephemeral DB resolution)
-2. Direct messages
+2. ~~Direct messages~~ (built 2026-11-12, uncommitted)
 3. Test the remaining publishing flows (Ships, vouches, bootcamps, quizzes, clubs) using `VITE_RELAYS`
 4. Try passkeys on a real device
 
@@ -57,6 +57,14 @@ A running record of where the project stands, what was decided, and what happene
 ---
 
 ## Checkpoint log
+
+### 2026-11-12: direct messages (NIP-17)
+- **Built:** `/messages` (Chats + Requests) and `/messages/:npub` (comma-separated npubs for groups), a Message button on profiles, a rail item, and a Feed-header icon on phones. Logic is in `nostr/dms.ts`, pages in `routes/MessagesPage.tsx`. New kind `DMRelays: 10050` in shared.
+- **How it works:** kind 14 rumors, sealed and gift-wrapped by NDK's `giftWrap`/`giftUnwrap`, which verify that the seal's signer matches the sender. Each message is wrapped for every recipient plus a copy for yourself. It's sent to the recipient's 10050 inbox relays, or else their NIP-65 read relays plus ours. A 10050 list (first 3 public relays) is published once at sign-in, only if the person has none (`syncDmRelays`, run beside `syncRelayList`). With `VITE_RELAYS` set, everything stays on the test relays.
+- Requests are conversations with nobody you follow and no reply from you; replying moves them to Chats, and they can be muted. Muted people are hidden. Read markers are timestamps in localStorage (`LS.dmRead`); message text is never stored. Decrypted messages live in memory for the session, and unwrapping runs one at a time because extensions may prompt for each.
+- NDK's `giftWrap` doesn't actually check whether the signer supports NIP-44 (it skips awaiting an async result), so `useCanMessage` checks it and the pages explain when it's missing.
+- **Tested end to end** with the throwaway account on port 5174, `VITE_RELAYS` pointed at an in-memory relay, and a second account driven by nostr-tools' own NIP-17 code. Verified: the 10050 list was published at sign-in; B→A arrived under Requests with the right name and text; A's reply was read by nostr-tools; the request moved to Chats; after a reload the conversation rebuilt from the relay, including A's own copy; B couldn't open wraps addressed to A; with the relay down a send showed "Not sent. Retry" and Retry delivered once it was back; the profile Message button opened the conversation; at 390px wide, nothing scrolled sideways and the composer sat above the dock. `npm run check` is clean.
+- **Not built / not tested:** no unread badge in the nav (the inbox starts only when Messages opens, to avoid signer prompts on every launch); no persistent cache, so each session decrypts again, which is slow with bunkers and extensions; kind 15 file messages are ignored; groups can be received and replied to but not started; not tested with a NIP-07 extension, a bunker, or real public relays.
 
 ### 2026-11-12: five social basics committed
 - The 2026-11-02 work (older posts, delete, @mentions, followers, relay list, `VITE_RELAYS`) is committed on `feat/mobile-rebuild`. `npm run check` was clean and the changed files were scanned for secrets first. Not pushed or merged yet.

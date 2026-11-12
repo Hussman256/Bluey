@@ -50,6 +50,12 @@ const MyProfileRedirect = lazy(() =>
 const FollowListPage = lazy(() =>
   import('./routes/FollowListPage').then((m) => ({ default: m.FollowListPage })),
 );
+const MessagesPage = lazy(() =>
+  import('./routes/MessagesPage').then((m) => ({ default: m.MessagesPage })),
+);
+const ConversationPage = lazy(() =>
+  import('./routes/MessagesPage').then((m) => ({ default: m.ConversationPage })),
+);
 const SettingsPage = lazy(() =>
   import('./routes/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
@@ -143,6 +149,8 @@ export function App() {
             <Route path="/reads" element={<ReadsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
+            <Route path="/messages/:peers" element={<ConversationPage />} />
             <Route path="/e/:id" element={<ThreadPage />} />
             <Route path="/p/:npub" element={<ProfilePage />} />
             <Route path="/p/:npub/following" element={<FollowListPage list="following" />} />

@@ -182,6 +182,12 @@ export function ProfilePage() {
           {!isMe && me && (
             <div className="mb-1 flex items-center gap-2">
               <ZapButton pubkey={pubkey} totalSats={0} count={0} />
+              <Link
+                to={`/messages/${npubOf(pubkey)}`}
+                className="rounded-full border border-line-strong px-4 py-1.5 text-sm font-bold transition hover:border-brand hover:text-brand-ink"
+              >
+                Message
+              </Link>
               <button
                 type="button"
                 onClick={toggleFollow}

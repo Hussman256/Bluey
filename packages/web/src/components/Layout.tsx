@@ -29,6 +29,7 @@ const ICON = {
   ships: 'M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2M9 15l-3-3c1-4 4-8 9-9 2 0 3 1 3 3-1 5-5 8-9 9z',
   search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4',
   alerts: 'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',
+  messages: 'M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z',
   reads: 'M6 3h9l5 5v13H6zM14 3v6h6M9 13h8M9 17h6',
   settings: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM9 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
   plus: 'M12 5v14M5 12h14',
@@ -49,6 +50,7 @@ const rail = [
   { to: '/ships', label: 'Ships', icon: ICON.ships },
   { to: '/search', label: 'Search', icon: ICON.search },
   { to: '/notifications', label: 'Alerts', icon: ICON.alerts },
+  { to: '/messages', label: 'Messages', icon: ICON.messages },
   { to: '/reads', label: 'Reads', icon: ICON.reads },
   { to: '/settings', label: 'Settings', icon: ICON.settings },
 ];

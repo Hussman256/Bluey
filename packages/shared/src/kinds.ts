@@ -19,6 +19,7 @@ export const KIND = {
   SealedDM: 13, // NIP-17
   PrivateDM: 14, // NIP-17
   GiftWrap: 1059, // NIP-59
+  DMRelays: 10050, // NIP-17 inbox relays for private messages
 
   // long-form (ZeroNotes)
   Article: 30023, // NIP-23

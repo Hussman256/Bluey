@@ -182,6 +182,15 @@ export function FeedPage() {
             </svg>
           </Link>
           <Link
+            to="/messages"
+            aria-label="Messages"
+            className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface sm:hidden"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+          <Link
             to="/notifications"
             aria-label="Alerts"
             className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface sm:hidden"

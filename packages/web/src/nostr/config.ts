@@ -71,6 +71,9 @@ export const LS = {
   onboarding: 'bluey:onboarding',
   deleted: 'bluey:deleted',
   relayListSynced: 'bluey:relay-list-synced',
+  dmRelaysSynced: 'bluey:dm-relays-synced',
+  /** per-conversation "read up to" timestamps; never message content */
+  dmRead: 'bluey:dm-read',
 } as const;
 
 /** The relay set to boot with: user-added relays (if any) merged over the defaults. */
