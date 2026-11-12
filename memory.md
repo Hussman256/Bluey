@@ -40,7 +40,7 @@ A running record of where the project stands, what was decided, and what happene
 ### Suggested next order
 0. **Blocker:** persistent hosting for the index (key backups + names now live there)
 1. Persistent backend hosting (Render free tier ephemeral DB resolution)
-2. ~~Direct messages~~ (built 2026-11-12, uncommitted)
+2. ~~Direct messages~~ (built and committed 2026-11-12, 6705326)
 3. Test the remaining publishing flows (Ships, vouches, bootcamps, quizzes, clubs) using `VITE_RELAYS`
 4. Try passkeys on a real device
 
