@@ -12,7 +12,7 @@ import { isShip } from '../nostr/ships';
 import { SourceTitle } from '../nostr/sourceTitle';
 import {
   isAutoTranslateEnabled,
-  looksForeign,
+  languageGuess,
   setAutoTranslateEnabled,
   translateText,
 } from '../nostr/translate';
@@ -177,7 +177,19 @@ export function NoteBody({
   }, []);
 
   const cleanText = content.replace(/https?:\/\/\S+/g, '').replace(/nostr:\S+/g, '').trim();
-  const canTranslate = cleanText.length > 6;
+  const [guess, setGuess] = useState<{ text: string; lang: 'same' | 'foreign' | 'unknown' } | null>(null);
+  const lang = guess?.text === cleanText ? guess.lang : null;
+  // posts the browser can tell are already in your language get no button
+  const canTranslate = cleanText.length > 6 && lang !== 'same';
+
+  useEffect(() => {
+    if (cleanText.length <= 6) return;
+    let cancelled = false;
+    void languageGuess(cleanText).then((g) => !cancelled && setGuess({ text: cleanText, lang: g }));
+    return () => {
+      cancelled = true;
+    };
+  }, [cleanText]);
 
   const handleTranslate = useCallback(async () => {
     if (loading || translated) return;
@@ -200,9 +212,9 @@ export function NoteBody({
 
   useEffect(() => {
     let cancelled = false;
-    if (autoEnabled && canTranslate && !translated) {
+    if (autoEnabled && lang === 'foreign' && !translated) {
       Promise.resolve().then(async () => {
-        if (cancelled || !(await looksForeign(cleanText)) || cancelled) return;
+        if (cancelled) return;
         setLoading(true);
         try {
           const res = await translateText(content);
@@ -213,7 +225,7 @@ export function NoteBody({
             if (res.sourceLang) setSourceLang(res.sourceLang);
           }
         } catch {
-          if (!cancelled) setError('Translation unavailable');
+          // stay quiet on a feed: the post stays as written and the button still works
         } finally {
           if (!cancelled) setLoading(false);
         }
@@ -222,7 +234,7 @@ export function NoteBody({
     return () => {
       cancelled = true;
     };
-  }, [autoEnabled, canTranslate, translated, content, cleanText]);
+  }, [autoEnabled, lang, translated, content]);
 
   const activeContent = translated && !showOriginal ? translated : content;
 

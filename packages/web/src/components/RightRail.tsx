@@ -5,12 +5,13 @@ import type { TrendingTimeframe } from '@bluey/shared';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { feedLangMode, inReadableScript, readableScripts } from '../nostr/lang';
 import { isMuted, useMutes } from '../nostr/mutes';
+import { KIND } from '../nostr/kinds';
 import { isJunkNote } from '../nostr/notes';
 import { useIndexFeed } from '../nostr/useIndex';
 import { Avatar } from './primitives';
 
 const snippet = (s: string) =>
-  s.replace(/\s+/g, ' ').replace(/https?:\/\/\S+/g, '').trim().slice(0, 96);
+  s.replace(/https?:\/\/\S+|nostr:\S+/g, '').replace(/\s+/g, ' ').trim().slice(0, 96);
 
 function TrendingRow({ event, rank }: { event: NDKEvent; rank: number }) {
   const profile = useProfileValue(event.pubkey);
@@ -34,9 +35,17 @@ function TrendingRow({ event, rank }: { event: NDKEvent; rank: number }) {
 
 const TIMEFRAMES: { label: string; value: TrendingTimeframe }[] = [
   { label: '4h', value: '4h' },
+  { label: '12h', value: '12h' },
   { label: '24h', value: '24h' },
   { label: '7d', value: '7d' },
 ];
+
+const WINDOW_NAME: Record<TrendingTimeframe, string> = {
+  '4h': '4 hours',
+  '12h': '12 hours',
+  '24h': '24 hours',
+  '7d': '7 days',
+};
 
 export function RightRail() {
   const me = useNDKCurrentUser();
@@ -48,21 +57,13 @@ export function RightRail() {
     pubkey: me?.pubkey,
     limit: 20,
   });
-  // fallback feed if trending has few items
-  const { data: discoverData } = useIndexFeed({
-    scope: 'discover',
-    pubkey: me?.pubkey,
-    limit: 10,
-  });
-
   const langFilter = feedLangMode() === 'mine';
   const scripts = readableScripts();
 
-  const sourceList = (data && data.length > 0 ? data : (discoverData ?? []));
-
-  const trending = sourceList
+  const trending = (data ?? [])
     .filter(
       (e) =>
+        e.kind === KIND.Text &&
         !isJunkNote(e) &&
         !isMuted(e, mutes) &&
         snippet(e.content).length > 20 &&
@@ -84,7 +85,7 @@ export function RightRail() {
         Search
       </Link>
 
-      {fromIndex && trending.length > 0 && (
+      {fromIndex && (
         <div className="rounded-2xl border border-line bg-surface/50 p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-base font-extrabold">Trending</h2>
@@ -105,11 +106,17 @@ export function RightRail() {
               ))}
             </div>
           </div>
-          <div className="divide-y divide-line">
-            {trending.map((e, idx) => (
-              <TrendingRow key={e.id} event={e} rank={idx + 1} />
-            ))}
-          </div>
+          {trending.length > 0 ? (
+            <div className="divide-y divide-line">
+              {trending.map((e, idx) => (
+                <TrendingRow key={e.id} event={e} rank={idx + 1} />
+              ))}
+            </div>
+          ) : (
+            <p className="py-2 text-[13px] text-ink-faint">
+              {data ? `Nothing trending in the last ${WINDOW_NAME[timeframe]} yet.` : 'Loading…'}
+            </p>
+          )}
         </div>
       )}
     </aside>

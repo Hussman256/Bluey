@@ -20,6 +20,7 @@ interface CacheEntry {
 }
 
 const memoryCache = new Map<string, CacheEntry>();
+const MAX_PERSISTED_CHARS = 4000;
 
 // Load recent items from localStorage on startup
 function initCache() {
@@ -42,8 +43,11 @@ function persistCache() {
   if (typeof window === 'undefined') return;
   try {
     const obj: Record<string, CacheEntry> = {};
-    // Keep up to 100 most recent
-    const entries = Array.from(memoryCache.entries()).slice(-100);
+    // Keep up to 100 most recent, short ones only: a few long posts would fill
+    // localStorage and then nothing could be saved at all
+    const entries = Array.from(memoryCache.entries())
+      .filter(([k, v]) => k.length + v.translated.length <= MAX_PERSISTED_CHARS)
+      .slice(-100);
     for (const [k, v] of entries) {
       obj[k] = v;
     }
@@ -122,9 +126,42 @@ async function detectLanguage(text: string): Promise<string | null> {
  * "Translate post" button is still there.
  */
 export async function looksForeign(text: string, targetLang = getUserTargetLang()): Promise<boolean> {
+  return (await languageGuess(text, targetLang)) === 'foreign';
+}
+
+/**
+ * 'same' only when the on-device detector is confident the post is already in
+ * the reader's language; 'foreign' when it says otherwise or the script is one
+ * the reader doesn't use; 'unknown' when there's no way to tell.
+ */
+export async function languageGuess(
+  text: string,
+  targetLang = getUserTargetLang(),
+): Promise<'same' | 'foreign' | 'unknown'> {
   const source = await detectLanguage(text);
-  if (source) return source !== baseLang(targetLang);
-  return !inReadableScript(text, localeScripts());
+  if (source) return source === baseLang(targetLang) ? 'same' : 'foreign';
+  return inReadableScript(text, localeScripts()) ? 'unknown' : 'foreign';
+}
+
+/* Links and nostr: references are swapped for numbered placeholders before
+ * translating, so they're never sent off the device and can't be altered. */
+const PROTECTED = /https?:\/\/\S+|nostr:\S+/g;
+
+function mask(text: string): { masked: string; tokens: string[] } {
+  const tokens: string[] = [];
+  const masked = text.replace(PROTECTED, (t) => `[${tokens.push(t) - 1}]`);
+  return { masked, tokens };
+}
+
+/** Put the originals back, or null if any placeholder didn't survive intact. */
+function unmask(translated: string, tokens: string[]): string | null {
+  let out = translated;
+  for (let i = 0; i < tokens.length; i++) {
+    const ph = `[${i}]`;
+    if (out.split(ph).length !== 2) return null;
+    out = out.replace(ph, () => tokens[i]);
+  }
+  return out;
 }
 
 const nativeTranslators = new Map<string, Promise<NativeTranslator | null>>();
@@ -239,17 +276,22 @@ export async function translateText(
     return { text: cached.translated, sourceLang: cached.sourceLang };
   }
 
+  const { masked, tokens } = mask(trimmed);
+
   // 1. Try the on-device Translator API, which needs to be told the source language
   const source = await detectLanguage(trimmed);
-  const native = source ? await tryNativeTranslate(trimmed, source, targetLang) : null;
+  const nativeMasked = source ? await tryNativeTranslate(masked, source, targetLang) : null;
+  const native = nativeMasked != null ? unmask(nativeMasked, tokens) : null;
   if (native) {
     memoryCache.set(cacheKey, { translated: native, sourceLang: source ?? undefined, ts: Date.now() });
     persistCache();
     return { text: native, sourceLang: source ?? undefined };
   }
 
-  // 2. Try remote API
-  const res = await remoteTranslate(trimmed, targetLang);
+  // 2. Try remote API: masked first, the plain text only if a placeholder got mangled
+  const first = await remoteTranslate(masked, targetLang);
+  const restored = unmask(first.text, tokens);
+  const res = restored != null ? { ...first, text: restored } : await remoteTranslate(trimmed, targetLang);
   memoryCache.set(cacheKey, { translated: res.text, sourceLang: res.sourceLang, ts: Date.now() });
   persistCache();
   return res;

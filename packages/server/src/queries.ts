@@ -121,7 +121,7 @@ export function feed(params: FeedParams): NostrEventLike[] {
                   SUM(kind IN (${KIND.Repost}, ${KIND.GenericRepost})) AS reposts
            FROM edges WHERE created_at >= ? GROUP BY target_id
          ) g ON g.target_id = e.id
-         WHERE e.kind IN (${KIND.Text}, ${KIND.Repost}) AND e.is_reply = 0 AND e.created_at >= ? AND e.created_at < ?
+         WHERE e.kind = ${KIND.Text} AND e.is_reply = 0 AND e.created_at >= ? AND e.created_at < ?
          ORDER BY COALESCE(w.score, 0) > 0 DESC,
                   COALESCE(g.zap_sats, 0) / 250.0 + COALESCE(g.replies, 0) * 3
                     + COALESCE(g.reposts, 0) * 2.5 + COALESCE(g.reactions, 0) DESC,
@@ -154,7 +154,9 @@ export function feed(params: FeedParams): NostrEventLike[] {
       candidates
         .filter((r) => !flagged(r) && (trusted.has(r.pubkey) || r.wot >= minWot))
         .map((r) => {
-          const ageH = Math.max(0.1, (now - r.created_at) / 3600);
+          // age counts relative to the window: a 3-day-old post is "recent" on 7d,
+          // so 7d ranks the week's biggest posts rather than whatever is newest
+          const ageH = Math.max(0.1, (now - r.created_at) / 3600) * (24 / hours);
           const engPoints = (r.zap_sats / 250) + (r.replies * 3) + (r.reposts * 2.5) + (r.reactions * 1);
           const velocity = (engPoints + 0.5) / Math.pow(ageH + 1, 1.25);
           const trustBoost = trusted.has(r.pubkey) ? 1.5 : Math.max(0.05, r.wot);
