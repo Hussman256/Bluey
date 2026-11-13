@@ -14,7 +14,8 @@ COPY packages/server packages/server
 ENV NODE_ENV=production
 ENV PORT=8787
 ENV DB_PATH=/data/index.db
-VOLUME /data
+# keep the badge-signing key on the volume, or every redeploy makes a new issuer
+ENV EXAMINER_KEY_PATH=/data/examiner.key
 EXPOSE 8787
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

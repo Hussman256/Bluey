@@ -58,6 +58,13 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-13: chose Railway for the backends; deploy guide written
+- **Decision:** the index and clubs relay move from Render's free tier to Railway (Hobby plan), each with a volume at `/data`. Compared with Render paid, Fly.io and a VPS: Railway is the best value for low effort now. A VPS stays the plan once there are real users (the compose setup still works).
+- **Changes for Railway:** removed `VOLUME /data` from both Dockerfiles (Railway rejects it; compose mounts volumes explicitly anyway). Added `packages/server/railway.toml` and `packages/relay/railway.toml` (Dockerfile path, `/health` check, restart policy). `DEPLOY.md` section 1 is now the Railway guide; the VPS is section 2.
+- **Bug fixed:** the index Dockerfile didn't set `EXAMINER_KEY_PATH`, so the badge-signing key lived outside the volume and every redeploy would create a new badge issuer. It's now `/data/examiner.key`.
+- Docker isn't installed on this machine, so the images weren't built locally. Railway's first build is the real test.
+- Keep the relay's current `RELAY_SECRET_KEY` from Render, copied dashboard to dashboard (never through chat).
+
 ### 2026-11-12: Trending and auto-translate checked and fixed (ready to merge)
 - **Trending fixes:** age now counts relative to the window (`ageH * 24 / hours` in `queries.ts`), so 7d ranks the week's biggest posts instead of the newest ones (24h ranks exactly as before). Only kind 1 is a candidate: reposts carry the original post's JSON as content and would have shown up as raw JSON. The silent Discover fallback is gone, and an empty window says "Nothing trending in the last … yet." There's a 12h button now. Previews strip `nostr:` references as well as links.
 - **Translate fixes:** links and `nostr:` references are swapped for `[n]` placeholders before translating (on-device or Google), so they never leave the device and can't be altered. If a placeholder comes back damaged, the plain text is sent instead. "Translate post" is hidden when the on-device detector is confident the post is already in your language. Auto-translate failures are silent (no red error on the feed). Posts over 4,000 characters stay out of the localStorage cache.

@@ -14,7 +14,6 @@ ENV NODE_ENV=production
 ENV PORT=8788
 ENV DB_PATH=/data/relay.db
 ENV KEY_PATH=/data/relay.key
-VOLUME /data
 EXPOSE 8788
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

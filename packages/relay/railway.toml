@@ -1,0 +1,13 @@
+# Railway config for the Bluey clubs relay.
+# In the Railway service settings, set "Config file path" to /packages/relay/railway.toml
+# and leave Root Directory empty: the Dockerfile builds from the repo root.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "packages/relay/Dockerfile"
+watchPatterns = ["packages/relay/**", "packages/shared/**", "package-lock.json"]
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
