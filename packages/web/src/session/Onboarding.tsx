@@ -323,7 +323,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 'Your account is backed up to your passkey. Sign in on any device where that passkey is available.'}
               {backup === 'failed' && (
                 <span className="text-zap-ink">
-                  We couldn't reach Bluey to back up your account, so for now it only opens on this device. Save your
+                  We couldn't reach Blusat to back up your account, so for now it only opens on this device. Save your
                   recovery key below to be safe.
                 </span>
               )}

@@ -84,7 +84,7 @@ function CreateBootcamp() {
         </div>
       </fieldset>
       <p className="text-xs text-ink-faint">
-        Free to enrol. Bluey creates a cohort club for your learners. You add lessons and live classes next.
+        Free to enrol. Blusat creates a cohort club for your learners. You add lessons and live classes next.
       </p>
       {err && <p className="text-sm text-danger">{err}</p>}
       <button
@@ -113,7 +113,7 @@ function Apply() {
     try {
       await apply(
         [
-          'Bluey tutor application',
+          'Blusat tutor application',
           '',
           `What I know: ${skills.trim()}`,
           `The class I want to run: ${idea.trim()}`,
@@ -132,7 +132,7 @@ function Apply() {
       <div className="mx-4 flex flex-col gap-2 rounded-[22px] border border-line bg-surface p-5">
         <h2 className="font-display text-lg font-bold">Application sent</h2>
         <p className="text-sm leading-relaxed text-ink-soft">
-          It went to the Bluey team as a private Nostr message. When you're approved, a check appears next to
+          It went to the Blusat team as a private Nostr message. When you're approved, a check appears next to
           your name and you can create bootcamps from this page.
         </p>
       </div>
@@ -143,7 +143,7 @@ function Apply() {
     <div className="flex flex-col gap-5 px-4">
       <section className="flex flex-col gap-3 rounded-[22px] bg-slab p-5 text-white">
         <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-slab-line px-2.5 py-1 text-xs text-slab-ink">
-          <VerifiedMark size={13} /> Reviewed by the Bluey team
+          <VerifiedMark size={13} /> Reviewed by the Blusat team
         </span>
         <h2 className="font-display text-[26px] font-extrabold leading-tight">Teach what you know.</h2>
         <p className="text-sm leading-relaxed text-slab-ink">
@@ -156,7 +156,7 @@ function Apply() {
         {[
           ['A bootcamp page', 'Lessons, live classes and a completion badge'],
           ['A cohort club', 'Created for every bootcamp, for your learners to talk'],
-          ['Your verified check', 'Shown next to your name across Bluey'],
+          ['Your verified check', 'Shown next to your name across Blusat'],
         ].map(([t, d]) => (
           <li key={t} className="rounded-[18px] border border-line bg-surface px-4 py-3">
             <strong className="text-[15px]">{t}</strong>
@@ -186,7 +186,7 @@ function Apply() {
         >
           {state === 'sending' ? 'Sending…' : 'Send application'}
         </button>
-        <p className="text-xs text-ink-faint">Sent as an encrypted Nostr message. Only the Bluey team can read it.</p>
+        <p className="text-xs text-ink-faint">Sent as an encrypted Nostr message. Only the Blusat team can read it.</p>
       </form>
     </div>
   );
@@ -200,7 +200,7 @@ export function TeachPage() {
   if (!me) {
     return (
       <div className="flex flex-col gap-4 pb-8">
-        <BackHeader title="Teach on Bluey" />
+        <BackHeader title="Teach on Blusat" />
         <p className="px-4 text-sm text-ink-soft">Sign in to apply or create a bootcamp.</p>
       </div>
     );
@@ -210,7 +210,7 @@ export function TeachPage() {
 
   return (
     <div className="flex flex-col gap-5 pb-8">
-      <BackHeader title={canTeach ? 'New bootcamp' : 'Teach on Bluey'} />
+      <BackHeader title={canTeach ? 'New bootcamp' : 'Teach on Blusat'} />
       {tutors.loading ? (
         <p className="py-8 text-center font-mono text-xs text-ink-faint">loading…</p>
       ) : canTeach ? (

@@ -285,13 +285,13 @@ export function FeedPage() {
               ? 'the DVM didn’t answer'
               : `${feed.name} · via NIP-90`
           : builtin === 'discover' && idx.fromIndex
-            ? 'Bluey index · web-of-trust ranked'
+            ? 'Blusat index · web-of-trust ranked'
             : builtin === 'ships'
               ? 'proof of work'
               : builtin === 'latest'
                 ? 'everything, newest first'
                 : idx.fromIndex
-                  ? 'Bluey index'
+                  ? 'Blusat index'
                   : 'direct from relays'}
       </p>
 
@@ -310,7 +310,7 @@ export function FeedPage() {
           ) : builtin === 'discover' && !idx.fromIndex && wot.size === 0 ? (
             <p className="text-sm text-ink-soft">
               Discover ranks by web of trust — it fills in once you follow a few people, or
-              when the Bluey index is reachable.{' '}
+              when the Blusat index is reachable.{' '}
               <button
                 type="button"
                 onClick={() => pick('latest')}

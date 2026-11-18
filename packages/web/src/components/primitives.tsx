@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { npubOf, shortNpub } from '../nostr/ids';
 import { useNow } from './useNow';
 
-/** The Bluey mark: a speech bubble with a lightning bolt cut through it. */
+/** The Blusat mark: a speech bubble with a lightning bolt cut through it. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" className="block shrink-0" aria-hidden="true">

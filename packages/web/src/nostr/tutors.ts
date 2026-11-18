@@ -53,7 +53,7 @@ export function useTutorAdmin() {
       e.content = '';
       e.tags = [
         ['d', TUTOR_LIST_D],
-        ['title', 'Bluey approved tutors'],
+        ['title', 'Blusat approved tutors'],
         // keep anything else the list carries; only the p tags are rewritten
         ...(latest?.tags.filter((t) => !['d', 'title', 'p'].includes(t[0])) ?? []),
         ...[...next].map((pk) => ['p', pk]),
@@ -85,7 +85,7 @@ export function useApplyToTeach() {
         created_at: Math.floor(Date.now() / 1000),
         tags: [
           ['p', CURATOR_PUBKEY],
-          ['subject', 'Bluey tutor application'],
+          ['subject', 'Blusat tutor application'],
         ],
       });
       const wrapped = await giftWrap(rumor, new NDKUser({ pubkey: CURATOR_PUBKEY }), ndk.signer);

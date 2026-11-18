@@ -21,7 +21,7 @@ import * as q from './queries.ts';
 
 const NAME_RE = /^[a-z0-9][a-z0-9_.-]{1,29}$/;
 const RESERVED = new Set([
-  '_', 'admin', 'administrator', 'api', 'bluey', 'curator', 'help', 'mod', 'moderator',
+  '_', 'admin', 'administrator', 'api', 'bluey', 'blusat', 'curator', 'help', 'mod', 'moderator',
   'official', 'root', 'security', 'staff', 'support', 'team', 'www',
 ]);
 const LN_ADDRESS_RE = /^[a-z0-9._+-]{1,64}@[a-z0-9.-]+\.[a-z]{2,}$/i;

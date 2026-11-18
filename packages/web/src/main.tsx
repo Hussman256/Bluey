@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')!).render(
     <NDKHeadless
       ndk={{
         explicitRelayUrls: loadRelayList(),
-        clientName: 'Bluey',
+        clientName: 'Blusat',
         autoConnectUserRelays: !RELAYS_OVERRIDDEN,
         ...(RELAYS_OVERRIDDEN ? { enableOutboxModel: false } : {}),
       }}

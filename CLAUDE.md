@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Bluey is a Bitcoin social + learning app built on Nostr + Lightning (execution modelled on Primal). npm-workspaces monorepo, TypeScript throughout, Node 24+. See `README.md` for product positioning and the phase-by-phase feature history, and `DEPLOY.md` for deployment.
+Blusat (formerly Bluey) is a Bitcoin social + learning app built on Nostr + Lightning (execution modelled on Primal). User-visible text says **Blusat**; internal identifiers (`@bluey/*` packages, `bluey:` localStorage keys and window events, Nostr tag values like `bluey:ship`, passkey salts, Railway service names) keep `bluey` on purpose, because changing them would log people out, break passkeys or orphan published content. npm-workspaces monorepo, TypeScript throughout, Node 24+. See `README.md` for product positioning and the phase-by-phase feature history, and `DEPLOY.md` for deployment.
 
 ## Project log: `memory.md`
 

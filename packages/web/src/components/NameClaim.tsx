@@ -90,7 +90,7 @@ export function NameClaim({
   return (
     <div className="flex flex-col gap-4">
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-semibold">Your Bluey name</span>
+        <span className="text-sm font-semibold">Your Blusat name</span>
         <span className="flex items-center rounded-2xl border border-line-strong bg-surface pr-4 focus-within:border-brand">
           <input
             value={name}
@@ -137,7 +137,7 @@ export function NameClaim({
         />
         <span className="text-xs leading-relaxed text-ink-faint">
           Paste the Lightning address of a wallet you own (Wallet of Satoshi, Blink, Alby, Primal…). Payments to{' '}
-          <strong className="text-ink-soft">{n ? address : `name@${NAME_DOMAIN}`}</strong> go straight to it. Bluey never
+          <strong className="text-ink-soft">{n ? address : `name@${NAME_DOMAIN}`}</strong> go straight to it. Blusat never
           holds them. You can add this later.
         </span>
       </label>

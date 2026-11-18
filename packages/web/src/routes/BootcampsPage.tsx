@@ -81,7 +81,7 @@ export function BootcampsPage() {
           <h2 className="font-display text-lg font-bold">
             {tutors.configured ? 'Verified tutors' : 'Bootcamps'}
           </h2>
-          {tutors.configured && <span className="text-[13px] text-ink-faint">Reviewed by Bluey</span>}
+          {tutors.configured && <span className="text-[13px] text-ink-faint">Reviewed by Blusat</span>}
         </div>
 
         {(loading || tutors.loading) && catalogue.length === 0 && (
@@ -110,7 +110,7 @@ export function BootcampsPage() {
           <path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z" strokeLinejoin="round" />
         </svg>
         <span className="flex-1 text-sm">
-          <strong>Teach on Bluey</strong>
+          <strong>Teach on Blusat</strong>
           <br />
           <span className="text-ink-soft">
             {me && (tutors.isApproved(me.pubkey) || !tutors.configured)

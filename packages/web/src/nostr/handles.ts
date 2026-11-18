@@ -30,5 +30,5 @@ export async function resolveHandle(ndk: NDK, raw: string): Promise<string | nul
   return (await NDKUser.fromNip05(`${name}@${NAME_DOMAIN}`, ndk).catch(() => undefined))?.pubkey ?? null;
 }
 
-/** Public page URL for a Bluey name, e.g. https://bluey.xyz/@ada */
+/** Public page URL for a Blusat name, e.g. https://bluey.xyz/@ada */
 export const publicPageUrl = (name: string) => `${window.location.origin}/@${name}`;

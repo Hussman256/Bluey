@@ -115,7 +115,7 @@ export function startRelay() {
       return;
     }
     res.writeHead(200, { 'content-type': 'text/plain' });
-    res.end('Bluey clubs relay — connect over websocket\n');
+    res.end('Blusat clubs relay — connect over websocket\n');
   });
 
   const wss = new WebSocketServer({ server: http });

@@ -99,9 +99,9 @@ export function PublicProfilePage({ handle }: { handle: string }) {
 
   useEffect(() => {
     const name = profile?.displayName || profile?.name;
-    document.title = name ? `${name} · Bluey` : 'Bluey';
+    document.title = name ? `${name} · Blusat` : 'Blusat';
     return () => {
-      document.title = 'Bluey';
+      document.title = 'Blusat';
     };
   }, [profile]);
 
@@ -111,7 +111,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
   async function share() {
     const url = window.location.href;
     if (navigator.share) {
-      await navigator.share({ title: `${name} on Bluey`, url }).catch(() => undefined);
+      await navigator.share({ title: `${name} on Blusat`, url }).catch(() => undefined);
     } else {
       await navigator.clipboard?.writeText(url);
       setCopied(true);
@@ -123,20 +123,20 @@ export function PublicProfilePage({ handle }: { handle: string }) {
     <div className="min-h-dvh bg-bg">
       <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
-          <Link to="/" aria-label="Bluey home" className="flex items-center gap-2">
+          <Link to="/" aria-label="Blusat home" className="flex items-center gap-2">
             <Mark size={28} />
-            <span className="font-display text-lg font-extrabold">bluey</span>
+            <span className="font-display text-lg font-extrabold">blusat</span>
           </Link>
           <span className="flex-1" />
           {me ? (
             pubkey && (
               <Link to={`/p/${npubOf(pubkey)}`} className="min-h-10 rounded-xl border border-line-strong px-3.5 py-2 text-sm font-semibold">
-                Open in Bluey
+                Open in Blusat
               </Link>
             )
           ) : (
             <Link to="/" className="min-h-10 rounded-xl bg-brand px-3.5 py-2 text-sm font-semibold text-white">
-              Join Bluey
+              Join Blusat
             </Link>
           )}
         </div>
@@ -148,7 +148,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
           <div className="py-16 text-center">
             <h1 className="font-display text-2xl font-extrabold">No one here yet</h1>
             <p className="mt-2 text-sm text-ink-soft">
-              @{handle} isn't a Bluey name. Check the spelling, or claim it yourself.
+              @{handle} isn't a Blusat name. Check the spelling, or claim it yourself.
             </p>
           </div>
         )}
@@ -242,7 +242,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
 
             <footer className="rounded-[20px] bg-slab p-5 text-sm leading-relaxed text-slab-ink">
               <strong className="text-white">You can check all of this.</strong> Every Ship, vouch and badge here is a
-              signed Nostr event. Nothing is stored only by Bluey, so it can't be edited behind the scenes, and it goes
+              signed Nostr event. Nothing is stored only by Blusat, so it can't be edited behind the scenes, and it goes
               wherever {name} goes. Look them up in any Nostr app with{' '}
               <a href={`https://njump.me/${npubOf(pubkey)}`} target="_blank" rel="noreferrer noopener" className="break-all font-mono text-xs text-brand-bright underline">
                 {npubOf(pubkey)}

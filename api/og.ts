@@ -4,7 +4,7 @@
  * their user agents here; people still get the normal app.
  *
  * Any failure (index asleep or offline, unknown handle) still answers with a
- * valid generic Bluey preview, so a shared link never looks broken.
+ * valid generic Blusat preview, so a shared link never looks broken.
  */
 
 export const config = { runtime: 'edge' };
@@ -53,7 +53,7 @@ export default async function handler(req: Request): Promise<Response> {
   const card = handle ? await fetchCard(handle) : null;
 
   const name = card?.name ? clip(card.name, 70) : null;
-  const title = name ? `${name} on Bluey` : 'Bluey: learn Bitcoin, prove your work';
+  const title = name ? `${name} on Blusat` : 'Blusat: learn Bitcoin, prove your work';
   const description = card?.about ? clip(card.about, 200) : name ? `See what ${name} has shipped. ${TAGLINE}` : TAGLINE;
   const image = httpsOnly(card?.picture ?? null) ?? `${url.origin}/pwa-512x512.png`;
   const page = handle ? `${url.origin}/@${encodeURIComponent(handle).replace(/%40/g, '@')}` : url.origin;
@@ -66,7 +66,7 @@ export default async function handler(req: Request): Promise<Response> {
 <title>${t}</title>
 <meta name="description" content="${d}">
 <link rel="canonical" href="${p}">
-<meta property="og:site_name" content="Bluey">
+<meta property="og:site_name" content="Blusat">
 <meta property="og:type" content="profile">
 <meta property="og:url" content="${p}">
 <meta property="og:title" content="${t}">
@@ -77,7 +77,7 @@ export default async function handler(req: Request): Promise<Response> {
 <meta name="twitter:description" content="${d}">
 <meta name="twitter:image" content="${i}">
 </head>
-<body><h1>${t}</h1><p>${d}</p><p><a href="${p}">Open in Bluey</a></p></body>
+<body><h1>${t}</h1><p>${d}</p><p><a href="${p}">Open in Blusat</a></p></body>
 </html>
 `;
 

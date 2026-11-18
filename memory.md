@@ -58,6 +58,12 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-18: renamed to Blusat; entering the Dakar Bitcoin Hack
+- **Decision:** the product is now **Blusat** ("Bluey" clashes with the BBC children's show trademark). Rejected: Bluee (sounds identical), Ocean (OCEAN mining pool), Boo Boo (Yogi Bear character, and it means "mistake"). Domain to register: `blusats.com` (looked free); not bought yet. `NAME_DOMAIN` / `VITE_NAME_DOMAIN` still default to `bluey.xyz`, which isn't ours.
+- Only user-visible text changed. Internal `bluey` identifiers stay on purpose (see CLAUDE.md).
+- **Hackathon:** Dakar Bitcoin Hack by BTrust (dakar-bitcoin-hack-2026.devpost.com). Deadline 20 Nov 2026 (search says 8pm UTC; confirm). Needs a presentation, a public repo, and a testable MVP. Judged on usefulness/social impact, security by design, UX/UI, MVP, pitch. Pitch learning first. Say plainly that the project began 2 Sep, before the 26 Oct start.
+- Feed spam fix (single long machine token) is live.
+
 ### 2026-11-18: backends live on Railway; branch merged to main
 - **Railway project** (Hobby plan) runs `bluey-index` and `bluey-relay` from this repo, each with a volume at `/data`. Addresses: `https://bluey-index-production.up.railway.app` and `https://bluey-relay-production.up.railway.app`. Both `/health` checks pass, and the index kept its data across a restart.
 - **Gotcha:** Railway ignored the config-file path at first and built with Railpack ("No start command detected"). Fixed by setting `RAILWAY_DOCKERFILE_PATH` (`packages/server/Dockerfile` / `packages/relay/Dockerfile`) as a variable on each service. Both services first deployed from `feat/mobile-rebuild`; switch them to `main`.

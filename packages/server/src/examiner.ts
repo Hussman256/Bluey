@@ -8,7 +8,7 @@ import { bytesToHex, hexToBytes } from 'nostr-tools/utils';
 import { config } from './config.ts';
 
 /**
- * The Bluey examiner: the identity that grades lesson quizzes and issues the
+ * The Blusat examiner: the identity that grades lesson quizzes and issues the
  * automatic completion badge (NIP-58) when a learner passes every quiz in a
  * bootcamp. Tutors aren't online to sign each award, so the index signs it.
  */
@@ -53,7 +53,7 @@ export async function awardCompletion(bootcampAddr: string, bootcampTitle: strin
         ['d', d],
         // useVouched counts badges named "… — Completed" as finished bootcamps
         ['name', `${bootcampTitle} — Completed`],
-        ['description', `Passed every lesson quiz in ${bootcampTitle} on Bluey.`],
+        ['description', `Passed every lesson quiz in ${bootcampTitle} on Blusat.`],
         ['a', bootcampAddr],
       ],
     },

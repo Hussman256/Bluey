@@ -14,7 +14,7 @@ export function badgeDefEvent(ndk: NDK, bootcamp: Bootcamp) {
   e.tags = [
     ['d', completionBadgeId(bootcamp.id)],
     ['name', `${bootcamp.title} — Completed`],
-    ['description', `Completed the ${bootcamp.title} bootcamp on Bluey.`],
+    ['description', `Completed the ${bootcamp.title} bootcamp on Blusat.`],
     ...(bootcamp.image ? [['image', bootcamp.image]] : []),
   ];
   return e;

@@ -6,7 +6,7 @@ import { addrString, parseAddr, type Addr } from './bootcamps';
 
 /**
  * NIP-84 highlights (kind 9802). A highlight is a verbatim passage lifted from
- * a source — for Bluey, almost always a bootcamp lesson (a kind:30023 article).
+ * a source — for Blusat, almost always a bootcamp lesson (a kind:30023 article).
  * `.content` is the passage; an `a` tag points at the source and a `p` tag
  * credits its author. An optional `context` tag carries the surrounding text.
  *

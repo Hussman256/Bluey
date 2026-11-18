@@ -25,7 +25,7 @@ export function ZapButton({
     if (!wallet) return;
     setSending(true);
     setFlash(null);
-    const res = await wallet.sendZap({ pubkey, eventId }, sats, 'via Bluey');
+    const res = await wallet.sendZap({ pubkey, eventId }, sats, 'via Blusat');
     setSending(false);
     setOpen(false);
     if (res.ok) {

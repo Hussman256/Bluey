@@ -8,7 +8,7 @@ type Pending = {
 };
 
 /**
- * Thin client for the Bluey index service. One WebSocket, request/response by id.
+ * Thin client for the Blusat index service. One WebSocket, request/response by id.
  * Everything degrades gracefully: if the socket is down, callers fall back to
  * talking to relays directly (which the app already does).
  */

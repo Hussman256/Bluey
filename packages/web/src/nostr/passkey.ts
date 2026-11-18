@@ -101,10 +101,10 @@ async function evalPrf(credentialId?: BufferSource) {
  * Create a new Nostr account protected by a new passkey. Returns the signer and
  * whether the encrypted backup reached the index (needed to sign in elsewhere).
  */
-export async function createPasskeyAccount(ndk: NDK, label = 'Bluey account') {
+export async function createPasskeyAccount(ndk: NDK, label = 'Blusat account') {
   const cred = (await navigator.credentials.create({
     publicKey: {
-      rp: { name: 'Bluey', id: location.hostname },
+      rp: { name: 'Blusat', id: location.hostname },
       user: { id: random(16), name: label, displayName: label },
       challenge: random(32),
       pubKeyCredParams: [
@@ -152,7 +152,7 @@ export async function syncPasskeyBackups(ndk: NDK, signer: NDKPrivateKeySigner):
   return results.some((r) => r.status === 'fulfilled');
 }
 
-/** Sign in with any Bluey passkey on this device or synced to it. */
+/** Sign in with any Blusat passkey on this device or synced to it. */
 export async function signInWithPasskey(): Promise<NDKPrivateKeySigner> {
   const { credentialId, prf } = await evalPrf();
   let stored = loadStored().find((s) => s.credentialId === credentialId);
@@ -164,8 +164,8 @@ export async function signInWithPasskey(): Promise<NDKPrivateKeySigner> {
       const status = (e as { status?: number }).status;
       throw new Error(
         status === 404
-          ? "This passkey isn't linked to a Bluey account."
-          : "Couldn't reach Bluey to restore your account. Check your connection and try again.",
+          ? "This passkey isn't linked to a Blusat account."
+          : "Couldn't reach Blusat to restore your account. Check your connection and try again.",
       );
     }
   }
@@ -181,7 +181,7 @@ export function passkeyErrorMessage(e: unknown): string {
     return 'The passkey prompt was closed. Try again when you are ready.';
   }
   if (e instanceof DOMException && e.name === 'InvalidStateError') {
-    return 'This device already has a Bluey passkey. Sign in with it instead.';
+    return 'This device already has a Blusat passkey. Sign in with it instead.';
   }
   return e instanceof Error ? e.message : 'Something went wrong with the passkey';
 }

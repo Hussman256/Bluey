@@ -43,7 +43,7 @@ export function SearchPage() {
 
       {!indexUp && (
         <p className="px-4 py-10 text-center text-sm text-ink-soft">
-          Search needs the Bluey index service (
+          Search needs the Blusat index service (
           <code className="font-mono text-xs">npm run dev:server</code>).
         </p>
       )}

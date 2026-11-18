@@ -1,5 +1,5 @@
 /**
- * Bluey index-service wire protocol.
+ * Blusat index-service wire protocol.
  *
  * A thin request/response layer over one WebSocket. The client sends a Request;
  * the server streams zero or more Frames tagged with the same `id`, ending with

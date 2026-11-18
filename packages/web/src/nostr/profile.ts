@@ -5,7 +5,7 @@ import { KIND } from './kinds';
 
 export type RawProfile = Record<string, unknown>;
 
-/** The newest kind 0 as raw JSON, so fields Bluey doesn't know about survive a save. */
+/** The newest kind 0 as raw JSON, so fields Blusat doesn't know about survive a save. */
 export function useRawProfile(pubkey?: string): RawProfile | null {
   const { events } = useSubscribe(
     pubkey ? [{ kinds: [KIND.Metadata], authors: [pubkey], limit: 1 }] : false,

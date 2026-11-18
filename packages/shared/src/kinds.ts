@@ -1,5 +1,5 @@
 /**
- * Nostr event kinds used across Bluey (client + index service).
+ * Nostr event kinds used across Blusat (client + index service).
  */
 export const KIND = {
   // NIP-01 core
@@ -88,7 +88,7 @@ export const KIND = {
 
 export type Kind = (typeof KIND)[keyof typeof KIND];
 
-/** `t` tag markers so Bluey can find its own content among generic Nostr kinds. */
+/** `t` tag markers so Blusat can find its own content among generic Nostr kinds. */
 export const TAG = {
   client: 'bluey',
   bootcamp: 'bluey:bootcamp',
@@ -126,7 +126,7 @@ export const BOOTCAMP_TOPICS = ['bitcoin', 'lightning', 'nostr', 'code', 'design
 export type BootcampTopic = (typeof BOOTCAMP_TOPICS)[number];
 
 /**
- * `d` tag of the NIP-51 follow set (kind 30000) the Bluey curator account
+ * `d` tag of the NIP-51 follow set (kind 30000) the Blusat curator account
  * publishes to list approved tutors. Only their bootcamps reach the catalogue.
  */
 export const TUTOR_LIST_D = 'bluey-tutors';

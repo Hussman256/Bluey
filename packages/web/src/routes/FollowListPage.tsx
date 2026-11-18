@@ -113,13 +113,13 @@ export function FollowListPage({ list }: { list: 'following' | 'followers' }) {
 
       {list === 'followers' && !followers.loading && !followers.fromIndex ? (
         <p className="px-6 py-12 text-center text-sm text-ink-soft">
-          Followers come from Bluey's index, which isn't reachable right now. Try again in a moment.
+          Followers come from Blusat's index, which isn't reachable right now. Try again in a moment.
         </p>
       ) : (
         <>
           {list === 'followers' && followers.fromIndex && total > 0 && (
             <p className="px-4 py-2 font-mono text-[11px] text-ink-faint">
-              {total.toLocaleString()} found on the relays Bluey reads. The real number may be higher.
+              {total.toLocaleString()} found on the relays Blusat reads. The real number may be higher.
             </p>
           )}
           <ul>

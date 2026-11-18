@@ -70,7 +70,7 @@ export function SettingsPage() {
   async function makeInvoice() {
     if (!wallet) return;
     try {
-      setInvoice(await wallet.createInvoice(amt, 'Top up via Bluey'));
+      setInvoice(await wallet.createInvoice(amt, 'Top up via Blusat'));
     } catch (e) {
       setInvoice(`error: ${e instanceof Error ? e.message : e}`);
     }
@@ -115,7 +115,7 @@ export function SettingsPage() {
         Settings
       </header>
 
-      <Section title="Your Bluey name">
+      <Section title="Your Blusat name">
         <NameClaim base={rawProfile} onDone={() => setNameSaved(true)} />
         {nameSaved && <p className="mt-2 text-sm text-good">Saved. It can take a minute to show everywhere.</p>}
       </Section>
@@ -180,7 +180,7 @@ export function SettingsPage() {
         ) : (
           <div className="space-y-2.5 text-sm">
             <p className="text-ink-soft">
-              Bluey holds no funds. Connect a wallet you control with a{' '}
+              Blusat holds no funds. Connect a wallet you control with a{' '}
               <span className="font-mono text-zap-ink">nostr+walletconnect://</span> string — from
               Alby, Zeus, Coinos, or Alby Hub.
             </p>
@@ -243,7 +243,7 @@ export function SettingsPage() {
         )}
       </Section>
 
-      <Section title="Bluey services">
+      <Section title="Blusat services">
         <ul className="space-y-2 text-sm">
           <li className="flex items-center justify-between">
             <span className="flex items-center gap-2">

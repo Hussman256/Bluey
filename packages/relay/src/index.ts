@@ -3,7 +3,7 @@ import { q } from './db.ts';
 import { relayPubkey } from './key.ts';
 import { startRelay } from './relay.ts';
 
-console.log('Bluey clubs relay starting…');
+console.log('Blusat clubs relay starting…');
 console.log('  db:  ', config.dbPath);
 console.log('  key: ', relayPubkey);
 

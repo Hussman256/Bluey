@@ -9,7 +9,7 @@ import { KIND } from './kinds';
 
 /**
  * NIP-65: tells other Nostr apps where to find this person's posts. Without it,
- * apps that look people up this way can miss everything posted from Bluey.
+ * apps that look people up this way can miss everything posted from Blusat.
  */
 
 // a local ws:// relay means nothing to anyone else, except in a VITE_RELAYS test setup

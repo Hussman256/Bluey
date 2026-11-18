@@ -21,7 +21,7 @@ type Mode = 'choose' | 'more' | 'paste' | 'created';
 const points = [
   { t: 'Learn by building.', d: 'Bootcamps from verified tutors, with a cohort club for every one.' },
   { t: 'Proof that travels.', d: 'Your Ships, vouches and badges live on Nostr and go wherever you go.' },
-  { t: 'Sats, straight to you.', d: 'Zaps land in a wallet you control. Bluey never holds your money.' },
+  { t: 'Sats, straight to you.', d: 'Zaps land in a wallet you control. Blusat never holds your money.' },
 ];
 
 function Option({
@@ -142,7 +142,7 @@ export function LoginScreen() {
           Learn, build and get paid in Bitcoin.
         </h1>
         <p className="max-w-md text-[15px] leading-relaxed text-ink-soft">
-          Bluey is where builders learn in bootcamps, show what they shipped, and find their people. Your account is
+          Blusat is where builders learn in bootcamps, show what they shipped, and find their people. Your account is
           yours: it works in any Nostr app.
         </p>
         <div className="hidden flex-col gap-5 lg:flex">
@@ -272,7 +272,7 @@ export function LoginScreen() {
               <h2 className="font-display text-xl font-extrabold">Save your recovery key</h2>
               {notice && <p className="rounded-xl bg-zap-soft px-3.5 py-2.5 text-xs text-zap-ink">{notice}</p>}
               <p className="text-sm text-ink-soft">
-                This key is the only way back into your account. Bluey can't reset it. Save it in a password manager now.
+                This key is the only way back into your account. Blusat can't reset it. Save it in a password manager now.
               </p>
               <div className="rounded-xl border border-brand/40 bg-brand-soft px-3.5 py-3 font-mono text-xs break-all">
                 {createdNsec}

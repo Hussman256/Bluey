@@ -1,4 +1,6 @@
-# Bluey
+# Blusat
+
+*(formerly Bluey. Code, packages and services still use the `bluey` name internally.)*
 
 A **Bitcoin social + learning app**, built on **Nostr** + **Lightning**. A place
 to learn Bitcoin, talk Bitcoin, and find your people — the feed is connective

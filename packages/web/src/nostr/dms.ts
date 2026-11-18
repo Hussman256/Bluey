@@ -49,7 +49,7 @@ const inboxCache = new Map<string, Promise<string[]>>();
 
 /**
  * Where to deliver someone's messages: their kind 10050 list, else the relays
- * they read from (NIP-65) plus ours, so Bluey people without a list still get them.
+ * they read from (NIP-65) plus ours, so Blusat people without a list still get them.
  */
 export function inboxRelays(ndk: NDK, pubkey: string): Promise<string[]> {
   if (RELAYS_OVERRIDDEN) return Promise.resolve(DEFAULT_RELAYS);

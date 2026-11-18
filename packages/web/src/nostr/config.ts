@@ -1,10 +1,10 @@
 import { pubkeyFrom } from './ids';
 
 /**
- * Relay + service configuration for Bluey.
+ * Relay + service configuration for Blusat.
  *
  * DEFAULT_RELAYS is the public relay set NDK connects to directly. Two more
- * Bluey-operated services layer on top when reachable (both optional, both
+ * Blusat-operated services layer on top when reachable (both optional, both
  * degrade gracefully): the index service (nostr/indexClient.ts) and the clubs
  * relay (nostr/clubs.ts).
  */
@@ -45,11 +45,11 @@ export const NWC_RELAY_HINTS = ['wss://relay.getalby.com/v1', 'wss://relay.prima
 export const BLOSSOM_PRIMARY = 'https://blossom.primal.net';
 export const BLOSSOM_FALLBACK = 'https://blossom.band';
 
-export const APP_NAME = 'Bluey';
+export const APP_NAME = 'Blusat';
 export const APP_TAGLINE = 'Learn Bitcoin. Find your people.';
 
 /**
- * Hex pubkey of the Bluey curator account (VITE_BLUEY_CURATOR, npub or hex), or
+ * Hex pubkey of the Blusat curator account (VITE_BLUEY_CURATOR, npub or hex), or
  * null when unset. It owns the approved-tutor list and receives applications.
  */
 export const CURATOR_PUBKEY: string | null = pubkeyFrom(

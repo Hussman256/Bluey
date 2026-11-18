@@ -107,7 +107,7 @@ export function useLiveClasses(bootcampAddr?: Addr): LiveClass[] {
   );
 }
 
-/** Bluey live classes that are on air right now, newest first. */
+/** Blusat live classes that are on air right now, newest first. */
 export function useLiveNow(): LiveClass[] {
   const { events } = useSubscribe(
     [{ kinds: [KIND.LiveEvent], '#t': [TAG.liveClass], limit: 100 }] as unknown as NDKFilter[],
