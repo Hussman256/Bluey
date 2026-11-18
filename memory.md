@@ -58,6 +58,12 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-18: Android app (Capacitor) builds in GitHub Actions
+- **Web address moved:** the live site is now `https://blusat.vercel.app`; `1btc.vercel.app` returns 404 (removed, not redirected).
+- **Android app:** Capacitor 8 in `packages/web` (`capacitor.config.ts`, `android/`, app id `xyz.blusat.app`). Same web build. `src/native.ts` has `IS_NATIVE` and `PUBLIC_ORIGIN`: in the app there's no service worker, no NIP-07 or passkey sign-in (passkeys are tied to a web origin), the Android back button works, and shared `/@name` links use `VITE_PUBLIC_URL` (default `https://blusat.vercel.app`). Icon and splash are vector drawables of the Blusat mark (`res/drawable/ic_blusat_*`). Android 7.0–7.1 still shows the default PNG icon.
+- **No Android SDK or Java on this machine** (and RAM is tight), so `.github/workflows/android.yml` builds a debug APK on every push to `main` or `feat/mobile-rebuild` touching web/shared. First run passed (4.3 MB; checked it contains the app, the Railway URLs and the app id). Not yet run on a real phone.
+- Not done: Play Store (needs a release signing key + a $25 Play developer account), iOS (needs a Mac or a cloud build service), push notifications, Amber (NIP-55) signer.
+
 ### 2026-11-18: renamed to Blusat; entering the Dakar Bitcoin Hack
 - **Decision:** the product is now **Blusat** ("Bluey" clashes with the BBC children's show trademark). Rejected: Bluee (sounds identical), Ocean (OCEAN mining pool), Boo Boo (Yogi Bear character, and it means "mistake"). Names now default to `name@blusat.xyz` (`NAME_DOMAIN` / `VITE_NAME_DOMAIN`). `blusat.xyz` looked free but is **not bought yet**, so NIP-05 checks and Lightning addresses on it only work once it points at the Vercel app.
 - Only user-visible text changed. Internal `bluey` identifiers stay on purpose (see CLAUDE.md).
