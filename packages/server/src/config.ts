@@ -22,7 +22,7 @@ export const config = {
   wotIntervalMs: Number(process.env.WOT_INTERVAL_MS ?? 10 * 60 * 1000),
 
   /** Domain users claim names on (name@domain for NIP-05 and Lightning addresses). */
-  nameDomain: process.env.NAME_DOMAIN ?? 'bluey.xyz',
+  nameDomain: process.env.NAME_DOMAIN ?? 'blusat.xyz',
 
   /**
    * Key that signs automatic completion badges (NIP-58). From EXAMINER_SECRET_KEY

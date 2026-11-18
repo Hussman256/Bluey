@@ -9,7 +9,7 @@
 
 export const config = { runtime: 'edge' };
 
-const INDEX_URL = process.env.INDEX_HTTP_URL || 'https://index.bluey.xyz';
+const INDEX_URL = process.env.INDEX_HTTP_URL || 'https://bluey-index-production.up.railway.app';
 const TAGLINE = 'Every Ship, vouch and badge is a signed Nostr event anyone can check.';
 
 interface Card {

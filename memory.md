@@ -59,7 +59,7 @@ A running record of where the project stands, what was decided, and what happene
 ## Checkpoint log
 
 ### 2026-11-18: renamed to Blusat; entering the Dakar Bitcoin Hack
-- **Decision:** the product is now **Blusat** ("Bluey" clashes with the BBC children's show trademark). Rejected: Bluee (sounds identical), Ocean (OCEAN mining pool), Boo Boo (Yogi Bear character, and it means "mistake"). Domain to register: `blusats.com` (looked free); not bought yet. `NAME_DOMAIN` / `VITE_NAME_DOMAIN` still default to `bluey.xyz`, which isn't ours.
+- **Decision:** the product is now **Blusat** ("Bluey" clashes with the BBC children's show trademark). Rejected: Bluee (sounds identical), Ocean (OCEAN mining pool), Boo Boo (Yogi Bear character, and it means "mistake"). Names now default to `name@blusat.xyz` (`NAME_DOMAIN` / `VITE_NAME_DOMAIN`). `blusat.xyz` looked free but is **not bought yet**, so NIP-05 checks and Lightning addresses on it only work once it points at the Vercel app.
 - Only user-visible text changed. Internal `bluey` identifiers stay on purpose (see CLAUDE.md).
 - **Hackathon:** Dakar Bitcoin Hack by BTrust (dakar-bitcoin-hack-2026.devpost.com). Deadline 20 Nov 2026 (search says 8pm UTC; confirm). Needs a presentation, a public repo, and a testable MVP. Judged on usefulness/social impact, security by design, UX/UI, MVP, pitch. Pitch learning first. Say plainly that the project began 2 Sep, before the 26 Oct start.
 - Feed spam fix (single long machine token) is live.

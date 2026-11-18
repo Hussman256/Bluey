@@ -8,8 +8,8 @@ import { INDEX_URL } from './config';
  */
 export const INDEX_HTTP = INDEX_URL.replace(/^ws/, 'http').replace(/\/$/, '');
 
-/** Domain names are claimed on (VITE_NAME_DOMAIN, default bluey.xyz). */
-export const NAME_DOMAIN = (import.meta.env.VITE_NAME_DOMAIN as string | undefined) || 'bluey.xyz';
+/** Domain names are claimed on (VITE_NAME_DOMAIN, default blusat.xyz). */
+export const NAME_DOMAIN = (import.meta.env.VITE_NAME_DOMAIN as string | undefined) || 'blusat.xyz';
 
 const b64 = (s: string) => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 
