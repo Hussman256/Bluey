@@ -36,6 +36,16 @@ export function isSpamContent(content: string): boolean {
   // machine payload dumps: one enormous unbroken token (base64 blobs, serialized
   // state) or a mesh/broadcast bot envelope
   if (/\S{220,}/.test(c)) return true;
+  // a note that is one long machine token and nothing else (e.g. the
+  // `sp_<hex>.<n>.<BASE32>.drift.gits.net` beacon flood, shorter base64
+  // blobs). Things people do post on their own are let through: links, npubs
+  // and other NIP-19 codes, invoices, cashu tokens, on-chain addresses.
+  if (
+    /^[A-Za-z0-9._+/=-]{60,}$/.test(c) &&
+    !/^(?:npub1|nprofile1|note1|nevent1|naddr1|lnbc|lntb|lnurl|cashu|bc1)/i.test(c)
+  ) {
+    return true;
+  }
   if (/^\[broadcast:|"maxHop"\s*:|"ar_profile"|"msg_uuid"/i.test(c)) return true;
 
   // bot roster / "hex salad" dumps: `channel:__roster` + walls of raw pubkeys
