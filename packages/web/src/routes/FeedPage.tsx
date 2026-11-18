@@ -200,7 +200,7 @@ export function FeedPage() {
             </svg>
           </Link>
         </div>
-        <div className="flex items-center gap-1.5 overflow-x-auto px-4 pb-2.5">
+        <div className="flex items-center gap-1.5 no-scrollbar overflow-x-auto px-4 pb-2.5">
           {allFeeds.map((f) => (
             <button
               key={f.id}

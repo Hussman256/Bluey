@@ -3,6 +3,7 @@ import { useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BootcampRow, ContinueCard } from '../components/learn';
+import { EmptyState } from '../components/primitives';
 import { TOPIC_LABEL } from '../nostr/bootcamps';
 import { useApprovedTutors } from '../nostr/tutors';
 import { useBootcampList } from '../nostr/useBootcamps';
@@ -58,7 +59,7 @@ export function BootcampsPage() {
         </div>
       )}
 
-      <div role="group" aria-label="Topics" className="flex gap-2 overflow-x-auto px-4 pb-1">
+      <div role="group" aria-label="Topics" className="flex gap-2 no-scrollbar overflow-x-auto px-4 pb-1">
         {[null, ...BOOTCAMP_TOPICS].map((t) => (
           <button
             key={t ?? 'all'}
@@ -88,9 +89,17 @@ export function BootcampsPage() {
           <p className="py-8 text-center font-mono text-xs text-ink-faint">loading…</p>
         )}
         {!loading && !tutors.loading && catalogue.length === 0 && (
-          <p className="py-8 text-center text-sm text-ink-soft">
-            {topic ? `No ${TOPIC_LABEL[topic]} bootcamps yet.` : 'No bootcamps yet.'}
-          </p>
+          <EmptyState
+            icon={
+              <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z" strokeLinejoin="round" />
+              </svg>
+            }
+            title={topic ? `No ${TOPIC_LABEL[topic]} bootcamps yet` : 'The first bootcamp starts here'}
+          >
+            Short courses on Bitcoin, Lightning and Nostr, taught by people in the community. Finish one and earn a
+            badge anyone can verify.
+          </EmptyState>
         )}
         {catalogue.map((b) => (
           <BootcampRow

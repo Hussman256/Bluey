@@ -29,7 +29,7 @@ export function OnAirStrip() {
       <h2 className="px-4 font-mono text-xs font-semibold uppercase tracking-[0.08em] text-ink-faint">
         {yours ? 'On air in your clubs' : 'On air now'}
       </h2>
-      <div className="flex gap-2.5 overflow-x-auto px-4 pb-1">
+      <div className="flex gap-2.5 no-scrollbar overflow-x-auto px-4 pb-1">
         {rooms.map(({ live: l, bootcamp }) => (
           <Link
             key={`${l.pubkey}:${l.id}`}

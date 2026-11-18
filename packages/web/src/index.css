@@ -68,6 +68,13 @@
     background: var(--color-brand);
     color: #ffffff;
   }
+  /* horizontal chip rows scroll by swipe; no grey bar under them */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
   :focus-visible {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;

@@ -1,6 +1,7 @@
 import { useFollows, useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { EmptyState } from '../components/primitives';
 import { naddrOf, type LiveClass } from '../nostr/bootcamps';
 import type { ClubMeta } from '../nostr/clubs';
 import { useBootcampList, useLiveNow } from '../nostr/useBootcamps';
@@ -187,9 +188,23 @@ export function ClubsPage() {
           <p className="py-8 text-center font-mono text-xs text-ink-faint">loading clubs…</p>
         )}
         {!loading && others.length === 0 && (
-          <p className="py-8 text-center text-sm text-ink-soft">
-            {q ? 'No clubs match that.' : clubs.length ? "You're in every club. Start a new one." : 'No clubs yet. Start the first one.'}
-          </p>
+          q || clubs.length ? (
+            <p className="py-8 text-center text-sm text-ink-soft">
+              {q ? 'No clubs match that.' : "You're in every club. Start a new one."}
+            </p>
+          ) : (
+            <EmptyState
+              icon={
+                <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7M22 21v-1a6 6 0 0 0-4-5.6" strokeLinecap="round" />
+                </svg>
+              }
+              title="Start the first club"
+            >
+              Clubs are free group chats for your city, your meetup or a topic you love. Start one with Start a club,
+              then invite your friends.
+            </EmptyState>
+          )
         )}
         {others.slice(0, 30).map(({ club: c, members, known }) => (
           <div key={c.id} className="flex items-center gap-3 rounded-[18px] border border-line bg-surface p-3">
