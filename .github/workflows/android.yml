@@ -1,0 +1,60 @@
+# Builds the Blusat Android app (Capacitor) and attaches an installable APK
+# to the run. Download it from the run's "Artifacts" section.
+name: Android APK
+
+on:
+  push:
+    branches: [main, feat/mobile-rebuild]
+    paths:
+      - 'packages/web/**'
+      - 'packages/shared/**'
+      - 'package-lock.json'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # public service addresses baked into the app (not secrets); override
+      # with repository variables of the same name
+      VITE_INDEX_URL: ${{ vars.VITE_INDEX_URL || 'wss://bluey-index-production.up.railway.app' }}
+      VITE_CLUBS_RELAY: ${{ vars.VITE_CLUBS_RELAY || 'wss://bluey-relay-production.up.railway.app' }}
+      VITE_PUBLIC_URL: ${{ vars.VITE_PUBLIC_URL || 'https://blusat.vercel.app' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Install
+        run: npm ci
+
+      - name: Build the web app and copy it into Android
+        working-directory: packages/web
+        run: npm run android:sync
+
+      - name: Build the APK
+        working-directory: packages/web/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blusat-debug-apk
+          path: packages/web/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

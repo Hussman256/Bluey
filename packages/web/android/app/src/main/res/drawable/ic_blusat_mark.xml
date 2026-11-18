@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Blusat mark on its own: cobalt speech bubble, white lightning bolt. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    <path
+        android:fillColor="#1F4FE0"
+        android:pathData="M7,3h18a5,5 0,0 1,5 5v12a5,5 0,0 1,-5 5H14l-7,5v-5a5,5 0,0 1,-5 -5V8a5,5 0,0 1,5 -5z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18,7l-7,9h5l-2,6 7,-9h-5z" />
+</vector>

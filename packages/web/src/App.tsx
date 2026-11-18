@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { Mark } from './components/primitives';
 import { PwaPrompt } from './components/PwaPrompt';
+import { IS_NATIVE } from './native';
 import { LS } from './nostr/config';
 import { useRelayListSync } from './nostr/relayList';
 import { LoginScreen } from './session/LoginScreen';
@@ -112,7 +113,7 @@ export function App() {
     return (
       <>
         <LoginScreen />
-        <PwaPrompt />
+        {!IS_NATIVE && <PwaPrompt />}
       </>
     );
 
@@ -127,7 +128,7 @@ export function App() {
 
   return (
     <Layout>
-      <PwaPrompt />
+      {!IS_NATIVE && <PwaPrompt />}
       <ErrorBoundary key={location.pathname}>
         <Suspense
           fallback={

@@ -1,3 +1,4 @@
+import { PUBLIC_ORIGIN } from '../native';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { NAME_DOMAIN } from '../nostr/accountApi';
@@ -27,7 +28,7 @@ export function PublicPageLink({ pubkey, nip05 }: { pubkey: string; nip05?: stri
       <button
         type="button"
         onClick={async () => {
-          await navigator.clipboard?.writeText(`${window.location.origin}${path}`);
+          await navigator.clipboard?.writeText(`${PUBLIC_ORIGIN}${path}`);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         }}

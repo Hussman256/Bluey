@@ -15,6 +15,7 @@ import {
   passkeysAvailable,
   signInWithPasskey,
 } from '../nostr/passkey';
+import { IS_NATIVE } from '../native';
 
 type Mode = 'choose' | 'more' | 'paste' | 'created';
 
@@ -211,12 +212,14 @@ export function LoginScreen() {
           {mode === 'more' && (
             <div className="flex flex-col gap-2.5">
               <h2 className="mb-1 font-display text-xl font-extrabold">More ways to sign in</h2>
-              <Option
-                title={busy === 'extension' ? 'Waiting for extension…' : 'Browser extension'}
-                hint="Alby, nos2x or another NIP-07 signer"
-                onClick={withExtension}
-                disabled={busy !== null}
-              />
+              {!IS_NATIVE && (
+                <Option
+                  title={busy === 'extension' ? 'Waiting for extension…' : 'Browser extension'}
+                  hint="Alby, nos2x or another NIP-07 signer"
+                  onClick={withExtension}
+                  disabled={busy !== null}
+                />
+              )}
               <Option
                 title="Remote signer or secret key"
                 hint="A bunker:// link, or paste an nsec"

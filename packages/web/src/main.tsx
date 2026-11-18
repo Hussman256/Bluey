@@ -5,8 +5,11 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
+import { setupNativeBackButton } from './native';
 import { loadRelayList, RELAYS_OVERRIDDEN } from './nostr/config';
 import { WalletProvider } from './wallet/WalletProvider';
+
+void setupNativeBackButton();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

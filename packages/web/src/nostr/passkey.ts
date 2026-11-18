@@ -1,5 +1,6 @@
 import NDK, { NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { getKeyBackup, putKeyBackup } from './accountApi';
+import { IS_NATIVE } from '../native';
 import { LS } from './config';
 
 /**
@@ -27,8 +28,9 @@ export class PasskeyUnsupportedError extends Error {
   }
 }
 
+// not in the Android app: passkeys are tied to a web address, and the app has none
 export const passkeysAvailable = () =>
-  typeof window !== 'undefined' && window.isSecureContext && 'PublicKeyCredential' in window;
+  !IS_NATIVE && typeof window !== 'undefined' && window.isSecureContext && 'PublicKeyCredential' in window;
 
 const b64url = (b: ArrayBuffer | Uint8Array) =>
   btoa(String.fromCharCode(...new Uint8Array(b instanceof Uint8Array ? b : new Uint8Array(b))))

@@ -1,5 +1,6 @@
 import NDK, { NDKUser } from '@nostr-dev-kit/ndk';
 import { INDEX_HTTP, NAME_DOMAIN } from './accountApi';
+import { PUBLIC_ORIGIN } from '../native';
 import { pubkeyFrom } from './ids';
 
 /**
@@ -30,5 +31,5 @@ export async function resolveHandle(ndk: NDK, raw: string): Promise<string | nul
   return (await NDKUser.fromNip05(`${name}@${NAME_DOMAIN}`, ndk).catch(() => undefined))?.pubkey ?? null;
 }
 
-/** Public page URL for a Blusat name, e.g. https://blusat.xyz/@ada */
-export const publicPageUrl = (name: string) => `${window.location.origin}/@${name}`;
+/** Public page URL for a Blusat name, e.g. https://blusat.vercel.app/@ada (also from the app). */
+export const publicPageUrl = (name: string) => `${PUBLIC_ORIGIN}/@${name}`;

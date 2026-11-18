@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Blusat mark (speech bubble + lightning bolt) for the adaptive launcher icon.
+     108dp canvas; the 32-unit logo is scaled to 56dp and centred inside the safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="26"
+        android:translateY="26"
+        android:scaleX="1.75"
+        android:scaleY="1.75">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M7,3h18a5,5 0,0 1,5 5v12a5,5 0,0 1,-5 5H14l-7,5v-5a5,5 0,0 1,-5 -5V8a5,5 0,0 1,5 -5z" />
+        <path
+            android:fillColor="#1F4FE0"
+            android:pathData="M18,7l-7,9h5l-2,6 7,-9h-5z" />
+    </group>
+</vector>
