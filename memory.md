@@ -38,8 +38,8 @@ A running record of where the project stands, what was decided, and what happene
 - [ ] Later: SQLite → Postgres when one node isn't enough.
 
 ### Suggested next order
-0. **Blocker:** persistent hosting for the index (key backups + names now live there)
-1. Persistent backend hosting (Render free tier ephemeral DB resolution)
+0. ~~Persistent backend hosting~~ (Railway with volumes, 2026-11-18)
+1. Delete the Render services; decide on the name domain (`bluey.xyz`?)
 2. ~~Direct messages~~ (built and committed 2026-11-12, 6705326)
 3. Test the remaining publishing flows (Ships, vouches, bootcamps, quizzes, clubs) using `VITE_RELAYS`
 4. Try passkeys on a real device
@@ -57,6 +57,13 @@ A running record of where the project stands, what was decided, and what happene
 ---
 
 ## Checkpoint log
+
+### 2026-11-18: backends live on Railway; branch merged to main
+- **Railway project** (Hobby plan) runs `bluey-index` and `bluey-relay` from this repo, each with a volume at `/data`. Addresses: `https://bluey-index-production.up.railway.app` and `https://bluey-relay-production.up.railway.app`. Both `/health` checks pass, and the index kept its data across a restart.
+- **Gotcha:** Railway ignored the config-file path at first and built with Railpack ("No start command detected"). Fixed by setting `RAILWAY_DOCKERFILE_PATH` (`packages/server/Dockerfile` / `packages/relay/Dockerfile`) as a variable on each service. Both services first deployed from `feat/mobile-rebuild`; switch them to `main`.
+- **Vercel:** project renamed `1btc` → `bluey` (still served at `1btc.vercel.app`). Production builds from `main`, which is why the live app still showed the old interface. `VITE_INDEX_URL`, `VITE_CLUBS_RELAY` and `INDEX_HTTP_URL` now point at Railway. `vercel.json` `/.well-known/*` rewrites now go to the Railway index (`index.bluey.xyz` resolved to a parking page).
+- `feat/mobile-rebuild` fast-forwarded into `main` and pushed.
+- **Open:** is `bluey.xyz` ours? (`NAME_DOMAIN` defaults to it.) The index rejects about as many events as it ingests (e.g. 355 vs 332); check whether that's the spam filter or failed signature checks. Render services still to be deleted once the new deploy is confirmed.
 
 ### 2026-11-13: chose Railway for the backends; deploy guide written
 - **Decision:** the index and clubs relay move from Render's free tier to Railway (Hobby plan), each with a volume at `/data`. Compared with Render paid, Fly.io and a VPS: Railway is the best value for low effort now. A VPS stays the plan once there are real users (the compose setup still works).

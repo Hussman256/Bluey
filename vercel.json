@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/.well-known/nostr.json",
-      "destination": "https://index.bluey.xyz/.well-known/nostr.json"
+      "destination": "https://bluey-index-production.up.railway.app/.well-known/nostr.json"
     },
     {
       "source": "/.well-known/lnurlp/:name",
-      "destination": "https://index.bluey.xyz/.well-known/lnurlp/:name"
+      "destination": "https://bluey-index-production.up.railway.app/.well-known/lnurlp/:name"
     },
     {
       "source": "/@:handle",
