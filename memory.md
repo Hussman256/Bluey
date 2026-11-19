@@ -58,6 +58,13 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-19 (later): sign-in and onboarding fixes from the second phone test (commit 243ec64)
+- **Login:** two big buttons, "Create your account" and "I already have an account". On the phone the second one opens "Welcome back", which takes a recovery key (nsec, password field; a bunker:// link also works). There's a big back arrow, and the bunker/nsec wording is gone from the first screens.
+- **Suggestions bug:** `IndexClient.request` used to reject when the socket was still connecting, so onboarding's `suggest` always failed on a fresh app. It now waits up to 4s for the socket to open. The live index does return trusted accounts.
+- **Photo step:** instant local preview; `shrinkImage()` (in `useMediaUpload.ts`) shrinks photos before the Blossom upload; errors now show on screen. The real cause of the failed upload is not confirmed yet.
+- **Onboarding steps:** the clubs step is skipped when no open clubs exist. The name step is hidden until `VITE_NAMES_LIVE=true`, because `blusat.xyz` isn't bought yet and any name claimed now wouldn't resolve.
+- The user shared a screenshot that shows a test account's nsec. They were told to delete it and treat that account as burned.
+
 ### 2026-11-19: Phone polish after the first device test (commit 35c9d9f, feat/mobile-rebuild)
 - First APK on a real phone (Android, 3-button nav): content ran under the status bar and the screens showed developer text. The user wants a clean look, closer to Primal.
 - **Safe areas:** `index.css` defines `--sat`/`--sab` from Capacitor's injected `--safe-area-inset-*` (falling back to `env()`); body pads the top, a fixed strip covers the status bar, and `.sticky.top-0` sticks below it. Use `var(--sab)` for bottom padding, never bare `env()`.
