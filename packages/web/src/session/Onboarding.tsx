@@ -3,7 +3,7 @@ import { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser, useProfileValue } from '@nostr-dev-kit/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { NameClaim } from '../components/NameClaim';
-import { Mark, Spinner } from '../components/primitives';
+import { fallbackGradient, Mark, Spinner } from '../components/primitives';
 import { TOPIC_LABEL } from '../nostr/bootcamps';
 import { LS } from '../nostr/config';
 import { shortNpub } from '../nostr/ids';
@@ -12,7 +12,7 @@ import { KIND } from '../nostr/kinds';
 import { hasPasskeyFor, syncPasskeyBackups } from '../nostr/passkey';
 import { publishProfile, useRawProfile, type RawProfile } from '../nostr/profile';
 import { useClubActions, useClubList, useClubRosters } from '../nostr/useClubs';
-import { useMediaUpload } from '../nostr/useMediaUpload';
+import { shrinkImage, useMediaUpload } from '../nostr/useMediaUpload';
 
 type Step = 'profile' | 'interests' | 'people' | 'clubs' | 'name' | 'backup';
 
@@ -37,26 +37,25 @@ function Person({ pubkey, on, toggle }: { pubkey: string; on: boolean; toggle: (
         type="button"
         aria-pressed={on}
         onClick={toggle}
-        className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3 py-2.5 text-left"
+        className="flex w-full items-center gap-3 border-b border-line py-3 text-left"
       >
         {p?.picture ? (
-          <img src={p.picture} alt="" className="h-11 w-11 shrink-0 rounded-full bg-sunk object-cover" />
+          <img src={p.picture} alt="" className="h-12 w-12 shrink-0 rounded-full bg-sunk object-cover" />
         ) : (
-          <span className="h-11 w-11 shrink-0 rounded-full bg-brand-soft" aria-hidden="true" />
+          <span className="h-12 w-12 shrink-0 rounded-full" style={{ background: fallbackGradient(pubkey) }} aria-hidden="true" />
         )}
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-[15px] font-semibold">{p?.displayName || p?.name || shortNpub(pubkey)}</span>
-          <span className="line-clamp-1 text-xs text-ink-faint">{p?.about ?? ''}</span>
+          {p?.nip05 && <span className="truncate text-xs text-ink-faint">{p.nip05.replace(/^_@/, '')}</span>}
+          {p?.about && <span className="line-clamp-2 text-[13px] leading-snug text-ink-soft">{p.about}</span>}
         </span>
         <span
-          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-brand bg-brand text-white' : 'border-line-strong'}`}
+          className={`min-h-9 shrink-0 rounded-full px-4 text-sm font-semibold leading-9 ${
+            on ? 'border border-line-strong text-ink' : 'bg-ink text-white'
+          }`}
           aria-hidden="true"
         >
-          {on && (
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M6 12l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
+          {on ? 'Following' : 'Follow'}
         </span>
       </button>
     </li>
@@ -68,14 +67,26 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const { ndk } = useNDK();
   const me = useNDKCurrentUser();
   const raw = useRawProfile(me?.pubkey);
-  const { upload, busy: uploading } = useMediaUpload();
+  const { upload, busy: uploading, error: uploadError } = useMediaUpload();
+  const [preview, setPreview] = useState('');
   const { clubs } = useClubList();
   const rosters = useClubRosters();
   const clubActions = useClubActions();
   const picRef = useRef<HTMLInputElement>(null);
 
   const isPasskey = !!me && ndk?.signer instanceof NDKPrivateKeySigner && hasPasskeyFor(me.pubkey);
-  const steps: Step[] = ['profile', 'interests', 'people', 'clubs', 'name', ...(isPasskey ? (['backup'] as const) : [])];
+  // Steps with nothing to offer are left out: clubs when none exist yet, and the
+  // name step until the name domain is live (set VITE_NAMES_LIVE=true once
+  // blusat.xyz serves /.well-known/nostr.json and lnurlp).
+  const namesLive = import.meta.env.VITE_NAMES_LIVE === 'true';
+  const steps: Step[] = [
+    'profile',
+    'interests',
+    'people',
+    ...(clubs.some((c) => c.open) ? (['clubs'] as const) : []),
+    ...(namesLive ? (['name'] as const) : []),
+    ...(isPasskey ? (['backup'] as const) : []),
+  ];
 
   const [step, setStep] = useState<Step>('profile');
   const [displayName, setDisplayName] = useState('');
@@ -195,7 +206,23 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 aria-label="Add a photo"
                 className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-[26px] border-[1.5px] border-dashed border-line-strong bg-surface text-xs text-ink-soft"
               >
-                {picture ? <img src={picture} alt="" className="h-full w-full object-cover" /> : uploading ? '…' : 'Photo'}
+                {preview || picture ? (
+                  <span className="relative h-full w-full">
+                    <img src={preview || picture} alt="" className="h-full w-full object-cover" />
+                    {uploading && (
+                      <span className="absolute inset-0 grid place-items-center bg-white/50">
+                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-line border-t-brand" />
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="flex flex-col items-center gap-1">
+                    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" strokeLinejoin="round" />
+                    </svg>
+                    Photo
+                  </span>
+                )}
               </button>
               <input
                 ref={picRef}
@@ -205,11 +232,16 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
                   e.target.value = '';
-                  if (f) setPicture((await upload(f)) ?? '');
+                  if (!f) return;
+                  setPreview(URL.createObjectURL(f)); // show it straight away
+                  const url = await upload(await shrinkImage(f, 512));
+                  if (url) setPicture(url);
+                  else setPreview('');
                 }}
               />
               <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" aria-label="Your name" className={field} />
             </div>
+            {uploadError && <p className="-mt-2 text-sm text-danger">{uploadError}</p>}
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-semibold">A line about you</span>
               <textarea
@@ -258,7 +290,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 Suggestions aren't available right now. You can find people from Discover later.
               </p>
             )}
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col">
               {people?.map((pk) => (
                 <Person key={pk} pubkey={pk} on={follow.has(pk)} toggle={() => setFollow(toggle(follow, pk))} />
               ))}
@@ -356,7 +388,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
       {step !== 'name' && (
         <button
           type="button"
-          disabled={busy || (step === 'profile' && !displayName.trim()) || (step === 'backup' && backup === 'saving')}
+          disabled={busy || (step === 'profile' && (!displayName.trim() || uploading)) || (step === 'backup' && backup === 'saving')}
           onClick={() => {
             if (step === 'profile') {
               void saveThen(async () => {

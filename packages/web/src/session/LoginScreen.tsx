@@ -66,6 +66,7 @@ export function LoginScreen() {
   const [createdNsec, setCreatedNsec] = useState('');
   const [pendingSigner, setPendingSigner] = useState<NDKSigner | null>(null);
   const [ack, setAck] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   async function finish(signer: NDKSigner, isNew = false) {
     await signer.blockUntilReady();
@@ -118,7 +119,7 @@ export function LoginScreen() {
       } else if (s.startsWith('nsec1') || /^[0-9a-f]{64}$/i.test(s)) {
         await finish(new NDKPrivateKeySigner(s));
       } else {
-        throw new Error('Expected an nsec or a bunker:// link');
+        throw new Error("That doesn't look like a recovery key. It should start with nsec1.");
       }
     });
 
@@ -135,9 +136,34 @@ export function LoginScreen() {
       if (pendingSigner && ack) await finish(pendingSigner, true);
     });
 
+  const back = (to: Mode) => (
+    <button
+      type="button"
+      onClick={() => {
+        setMode(to);
+        setErr(null);
+      }}
+      aria-label="Back"
+      className="-ml-2.5 mb-2 grid h-12 w-12 place-items-center rounded-full text-ink active:bg-sunk"
+    >
+      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
+        <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+
+  const primary =
+    'min-h-[56px] w-full rounded-2xl bg-brand text-base font-semibold text-white transition active:opacity-90 disabled:opacity-40';
+  const secondary =
+    'min-h-[56px] w-full rounded-2xl border border-line-strong bg-surface text-base font-semibold transition active:bg-sunk disabled:opacity-40';
+
   return (
     <div className="flex min-h-[calc(100dvh-var(--sat))] flex-col pb-[var(--sab)] lg:flex-row">
-      <div className="flex flex-col justify-center gap-6 px-6 pb-6 pt-12 lg:w-[560px] lg:shrink-0 lg:border-r lg:border-line lg:px-16 lg:py-0">
+      <div
+        className={`flex-col justify-center gap-6 px-6 pb-6 pt-12 lg:flex lg:w-[560px] lg:shrink-0 lg:border-r lg:border-line lg:px-16 lg:py-0 ${
+          mode === 'choose' ? 'flex' : 'hidden'
+        }`}
+      >
         <Mark size={44} />
         <h1 className="font-display text-[34px] font-extrabold leading-[1.05] tracking-tight text-balance lg:text-[2.9rem]">
           Learn, build and get paid in Bitcoin.
@@ -160,147 +186,144 @@ export function LoginScreen() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-start justify-center px-6 pb-12 pt-4 lg:items-center lg:pt-12">
+      <div
+        className={`flex flex-1 justify-center px-6 pb-10 lg:items-center lg:pt-12 ${
+          mode === 'choose' ? 'items-end pt-4' : 'items-start pt-3'
+        }`}
+      >
         <div className="w-full max-w-sm">
           {mode === 'choose' && (
             <div className="flex flex-col gap-3">
-              {canPasskey ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={createWithPasskey}
-                    disabled={busy !== null}
-                    className="min-h-[56px] rounded-2xl bg-brand text-base font-semibold text-white transition hover:opacity-95 disabled:opacity-60"
-                  >
-                    {busy === 'create' ? 'Creating your account…' : 'Create your account'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={passkeySignIn}
-                    disabled={busy !== null}
-                    className="min-h-[56px] rounded-2xl border border-line-strong bg-surface text-base font-semibold transition hover:border-ink-faint disabled:opacity-60"
-                  >
-                    {busy === 'signin' ? 'Waiting for your passkey…' : 'Sign in with a passkey'}
-                  </button>
-                  <p className="text-center text-xs leading-relaxed text-ink-faint">
-                    Uses Face ID, your fingerprint or your phone's PIN. No passwords, nothing to write down.
-                  </p>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={createKey}
-                  className="min-h-[56px] rounded-2xl bg-brand text-base font-semibold text-white"
-                >
-                  Create your account
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={canPasskey ? createWithPasskey : createKey}
+                disabled={busy !== null}
+                className={primary}
+              >
+                {busy === 'create' ? 'Creating your account…' : 'Create your account'}
+              </button>
               <button
                 type="button"
                 onClick={() => {
-                  setMode('more');
                   setErr(null);
+                  if (canPasskey) void passkeySignIn();
+                  else setMode(IS_NATIVE ? 'paste' : 'more');
                 }}
-                className="mt-1 self-center text-sm font-semibold text-brand hover:underline"
+                disabled={busy !== null}
+                className={secondary}
               >
-                More ways to sign in
+                {busy === 'signin' ? 'Waiting for your passkey…' : 'I already have an account'}
               </button>
+              {(canPasskey || !IS_NATIVE) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('more');
+                    setErr(null);
+                  }}
+                  className="mt-1 min-h-10 self-center text-sm font-semibold text-ink-soft"
+                >
+                  Other ways to sign in
+                </button>
+              )}
               {err && <p className="text-center text-sm text-danger">{err}</p>}
             </div>
           )}
 
           {mode === 'more' && (
             <div className="flex flex-col gap-2.5">
-              <h2 className="mb-1 font-display text-xl font-extrabold">More ways to sign in</h2>
-              {!IS_NATIVE && (
-                <Option
-                  title={busy === 'extension' ? 'Waiting for extension…' : 'Browser extension'}
-                  hint="Alby, nos2x or another NIP-07 signer"
-                  onClick={withExtension}
-                  disabled={busy !== null}
-                />
-              )}
+              {back('choose')}
+              <h2 className="mb-2 font-display text-[28px] font-extrabold leading-tight">Other ways to sign in</h2>
               <Option
-                title="Remote signer or secret key"
-                hint="A bunker:// link, or paste an nsec"
+                title="Use your recovery key"
+                hint="The key you saved when you made your account"
                 onClick={() => {
                   setMode('paste');
                   setErr(null);
                 }}
               />
-              <Option
-                title="Create an account with a recovery key"
-                hint="For devices without passkeys. You save the key yourself."
-                onClick={createKey}
-              />
-              <button type="button" onClick={() => setMode('choose')} className="mt-1 self-start text-xs text-ink-faint hover:text-ink-soft">
-                ← Back
-              </button>
+              {!IS_NATIVE && (
+                <Option
+                  title={busy === 'extension' ? 'Waiting for extension…' : 'Browser extension'}
+                  hint="Alby, nos2x or another Nostr extension"
+                  onClick={withExtension}
+                  disabled={busy !== null}
+                />
+              )}
+              {canPasskey && (
+                <Option
+                  title="Create an account with a recovery key"
+                  hint="For devices without passkeys. You save the key yourself."
+                  onClick={createKey}
+                />
+              )}
               {err && <p className="text-sm text-danger">{err}</p>}
             </div>
           )}
 
           {mode === 'paste' && (
-            <div className="flex flex-col gap-2.5">
-              <h2 className="font-display text-xl font-extrabold">Remote signer or key</h2>
-              <textarea
+            <form
+              className="flex flex-col gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void withPasted();
+              }}
+            >
+              {back(IS_NATIVE && !canPasskey ? 'choose' : 'more')}
+              <h2 className="font-display text-[28px] font-extrabold leading-tight">Welcome back</h2>
+              <p className="-mt-1 text-[15px] leading-relaxed text-ink-soft">
+                Paste the recovery key you saved when you made your account. It starts with <strong>nsec1</strong>.
+              </p>
+              <input
+                type="password"
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
-                rows={3}
-                placeholder="bunker://…  or  nsec1…"
-                aria-label="Bunker link or secret key"
-                className="resize-none rounded-xl border border-line-strong bg-surface px-3.5 py-3 font-mono text-xs outline-none focus:border-brand"
+                placeholder="nsec1…"
+                aria-label="Recovery key"
+                autoComplete="current-password"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className="min-h-[56px] rounded-2xl border border-line-strong bg-surface px-4 text-[15px] outline-none focus:border-brand"
               />
-              <button
-                type="button"
-                onClick={withPasted}
-                disabled={busy !== null || !secret.trim()}
-                className="min-h-12 rounded-xl bg-slab text-sm font-semibold text-white disabled:opacity-50"
-              >
+              {err && <p className="text-sm text-danger">{err}</p>}
+              <button type="submit" disabled={busy !== null || !secret.trim()} className={primary}>
                 {busy === 'paste' ? 'Signing in…' : 'Sign in'}
               </button>
-              <button type="button" onClick={() => setMode('more')} className="self-start text-xs text-ink-faint hover:text-ink-soft">
-                ← Back
-              </button>
-              {err && <p className="text-sm text-danger">{err}</p>}
-              <p className="text-xs leading-relaxed text-ink-faint">
-                A <code className="text-brand-ink">bunker://</code> link keeps the key on your signer and is the safer
-                choice. A pasted nsec is stored in this browser.
+              <p className="text-center text-xs leading-relaxed text-ink-faint">
+                Your key stays on this phone. Using a signer app? Paste its bunker:// link here instead.
               </p>
-            </div>
+            </form>
           )}
 
           {mode === 'created' && (
             <div className="flex flex-col gap-3">
-              <h2 className="font-display text-xl font-extrabold">Save your recovery key</h2>
+              {back('choose')}
+              <h2 className="font-display text-[28px] font-extrabold leading-tight">Save your recovery key</h2>
               {notice && <p className="rounded-xl bg-zap-soft px-3.5 py-2.5 text-xs text-zap-ink">{notice}</p>}
-              <p className="text-sm text-ink-soft">
-                This key is the only way back into your account. Blusat can't reset it. Save it in a password manager now.
+              <p className="-mt-1 text-[15px] leading-relaxed text-ink-soft">
+                It's the only way back into your account, and Blusat can't reset it. Keep it in a password manager and
+                never share it or screenshot it.
               </p>
-              <div className="rounded-xl border border-brand/40 bg-brand-soft px-3.5 py-3 font-mono text-xs break-all">
+              <div className="rounded-2xl bg-sunk px-4 py-3.5 font-mono text-[13px] leading-relaxed break-all select-all">
                 {createdNsec}
               </div>
               <button
                 type="button"
-                onClick={() => navigator.clipboard?.writeText(createdNsec)}
-                className="self-start rounded-lg border border-line-strong px-3 py-1.5 text-xs font-semibold hover:border-brand hover:text-brand-ink"
+                onClick={async () => {
+                  await navigator.clipboard?.writeText(createdNsec);
+                  setCopied(true);
+                }}
+                className={secondary}
               >
-                Copy
+                {copied ? 'Copied' : 'Copy key'}
               </button>
-              <label className="flex items-start gap-2.5 text-xs text-ink-soft">
-                <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} className="mt-0.5 accent-brand" />
+              <label className="flex min-h-11 items-center gap-3 text-sm text-ink-soft">
+                <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} className="h-5 w-5 accent-brand" />
                 I've saved my recovery key somewhere safe.
               </label>
-              <button
-                type="button"
-                onClick={confirmCreated}
-                disabled={!ack || busy !== null}
-                className="min-h-12 rounded-xl bg-brand text-sm font-semibold text-white disabled:opacity-50"
-              >
+              <button type="button" onClick={confirmCreated} disabled={!ack || busy !== null} className={primary}>
                 {busy === 'created' ? 'Starting…' : 'Continue'}
-              </button>
-              <button type="button" onClick={() => setMode('choose')} className="self-start text-xs text-ink-faint hover:text-ink-soft">
-                ← Back
               </button>
               {err && <p className="text-sm text-danger">{err}</p>}
             </div>

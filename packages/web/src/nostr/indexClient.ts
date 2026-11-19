@@ -89,7 +89,25 @@ export class IndexClient {
     this.pending.clear();
   }
 
-  request(method: RequestMethod, params: Request['params'], timeoutMs = 8000): Promise<Frame> {
+  /** Resolves once the socket is open, or false after `ms` (a fresh client is still connecting). */
+  private waitOpen(ms: number): Promise<boolean> {
+    if (this.connected) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const t = setTimeout(() => {
+        off();
+        resolve(false);
+      }, ms);
+      const off = this.onStatus((up) => {
+        if (!up) return;
+        clearTimeout(t);
+        queueMicrotask(() => off());
+        resolve(true);
+      });
+    });
+  }
+
+  async request(method: RequestMethod, params: Request['params'], timeoutMs = 8000): Promise<Frame> {
+    if (!(await this.waitOpen(4000))) throw new Error('index offline');
     return new Promise((resolve, reject) => {
       if (!this.connected) {
         reject(new Error('index offline'));
