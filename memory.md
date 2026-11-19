@@ -58,6 +58,14 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-19: Phone polish after the first device test (commit 35c9d9f, feat/mobile-rebuild)
+- First APK on a real phone (Android, 3-button nav): content ran under the status bar and the screens showed developer text. The user wants a clean look, closer to Primal.
+- **Safe areas:** `index.css` defines `--sat`/`--sab` from Capacitor's injected `--safe-area-inset-*` (falling back to `env()`); body pads the top, a fixed strip covers the status bar, and `.sticky.top-0` sticks below it. Use `var(--sab)` for bottom padding, never bare `env()`.
+- **Look:** white ground (`--color-bg: #fff`); plain header icons; underline feed tabs; dock with pill highlight plus a floating round + button; list rows instead of boxed cards.
+- **No debug text:** new `Spinner`, `Quiet` and `NoteSkeleton` primitives. The feed source line ("Blusat index", "listening…") is gone. An empty Following feed shows a follow-people empty state.
+- **Public page link** now shows the address it copies (`blusat.vercel.app/@…`), not `blusat.xyz`, which isn't bought yet.
+- **Still to do:** login and sign-up flow (the user asked to do this later); test on the phone again; nothing merged to `main` yet.
+
 ### 2026-11-18: Android app (Capacitor) builds in GitHub Actions
 - **Web address moved:** the live site is now `https://blusat.vercel.app`; `1btc.vercel.app` returns 404 (removed, not redirected).
 - **Android app:** Capacitor 8 in `packages/web` (`capacitor.config.ts`, `android/`, app id `xyz.blusat.app`). Same web build. `src/native.ts` has `IS_NATIVE` and `PUBLIC_ORIGIN`: in the app there's no service worker, no NIP-07 or passkey sign-in (passkeys are tied to a web origin), the Android back button works, and shared `/@name` links use `VITE_PUBLIC_URL` (default `https://blusat.vercel.app`). Icon and splash are vector drawables of the Blusat mark (`res/drawable/ic_blusat_*`). Android 7.0–7.1 still shows the default PNG icon.
