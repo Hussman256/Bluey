@@ -103,7 +103,7 @@ export function EditProfile({ pubkey, onClose }: { pubkey: string; onClose: () =
       onMouseDown={() => !busy && onClose()}
     >
       <div
-        className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-line bg-bg p-5 shadow-xl sm:rounded-2xl"
+        className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-line bg-bg p-5 pb-[calc(1.25rem+var(--sab))] shadow-xl sm:rounded-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 className="mb-4 font-display text-lg font-extrabold">Edit profile</h2>

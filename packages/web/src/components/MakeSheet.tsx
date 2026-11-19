@@ -73,7 +73,7 @@ export function MakeSheet({ onClose }: { onClose: () => void }) {
         role="dialog"
         aria-modal="true"
         aria-label={composing ? 'New post' : 'Make something'}
-        className="relative m-2.5 flex w-full max-w-md flex-col gap-3.5 rounded-[28px] bg-surface p-[18px] outline-none"
+        className="relative m-2.5 mb-[calc(0.625rem+var(--sab))] flex w-full max-w-md flex-col gap-3.5 rounded-[28px] bg-surface p-[18px] outline-none"
       >
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl font-extrabold">{composing ? 'New post' : 'Make something'}</h2>

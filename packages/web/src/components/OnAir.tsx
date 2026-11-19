@@ -52,16 +52,17 @@ export function OnAirStrip() {
 /** Link card to the weekly builders board. */
 export function BoardCard() {
   return (
-    <Link to="/board" className="mx-3 my-2 flex items-center gap-3 rounded-2xl bg-brand-soft px-3.5 py-3">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-brand" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-        <path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <span className="flex-1 text-sm">
-        <strong>This week's builders</strong>
-        <br />
-        <span className="text-ink-soft">Ranked by vouched Ships and bootcamps finished</span>
+    <Link to="/board" className="flex items-center gap-3 border-b border-line px-4 py-3 active:bg-sunk">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-soft text-brand" aria-hidden="true">
+        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.9">
+          <path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </span>
-      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] text-brand" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="text-[15px] font-semibold">This week's builders</span>
+        <span className="truncate text-[13px] text-ink-faint">Ranked by vouched Ships and finished bootcamps</span>
+      </span>
+      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] text-ink-faint" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </Link>

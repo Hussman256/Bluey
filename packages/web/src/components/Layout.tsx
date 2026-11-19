@@ -81,7 +81,7 @@ export function Layout({ children }: { children: ReactNode }) {
   useClubsRelaySet(); // connect the clubs relay on app load, not just on /clubs
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-[calc(100dvh-var(--sat))] flex-col">
       {/* chain ticker */}
       <div className="hidden h-8 shrink-0 items-center gap-6 bg-slab px-5 font-mono text-[10px] tracking-[0.02em] text-slab-ink sm:flex">
         <span className="font-medium text-white">
@@ -173,7 +173,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </aside>
 
         {/* main */}
-        <main className="min-w-0 flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:border-r sm:border-line sm:pb-0">
+        <main className="min-w-0 flex-1 pb-[calc(4.5rem+var(--sab))] sm:border-r sm:border-line sm:pb-0">
           {children}
         </main>
 
@@ -181,9 +181,20 @@ export function Layout({ children }: { children: ReactNode }) {
       </div>
 
       {/* phone dock */}
+      {me && (
+        <button
+          type="button"
+          onClick={() => setMaking(true)}
+          aria-label="Make something"
+          className="fixed bottom-[calc(5rem+var(--sab))] right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-brand text-white shadow-[0_6px_20px_rgba(31,79,224,0.35)] active:scale-95 sm:hidden"
+        >
+          <Icon d={ICON.plus} size={26} strong />
+        </button>
+      )}
+
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-1 border-t border-line bg-surface px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 flex items-stretch border-t border-line bg-surface/95 pb-[var(--sab)] backdrop-blur sm:hidden"
       >
         {dock.map((n) => (
           <NavLink
@@ -191,25 +202,23 @@ export function Layout({ children }: { children: ReactNode }) {
             to={n.to}
             end={n.end}
             className={({ isActive }) =>
-              `flex min-h-[52px] flex-1 flex-col items-center justify-center gap-[3px] text-[11px] ${
-                isActive ? 'font-semibold text-brand' : 'font-medium text-ink-faint'
+              `flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[11px] transition ${
+                isActive ? 'font-semibold text-ink' : 'font-medium text-ink-faint'
               }`
             }
           >
-            <Icon d={n.icon} size={24} />
-            {n.label}
+            {({ isActive }) => (
+              <>
+                <span
+                  className={`grid h-8 w-14 place-items-center rounded-full transition ${isActive ? 'bg-sunk' : ''}`}
+                >
+                  <Icon d={n.icon} size={22} strong={isActive} />
+                </span>
+                {n.label}
+              </>
+            )}
           </NavLink>
         ))}
-        {me && (
-          <button
-            type="button"
-            onClick={() => setMaking(true)}
-            aria-label="Make something"
-            className="ml-1 grid h-[52px] w-14 shrink-0 place-items-center rounded-2xl bg-brand text-white"
-          >
-            <Icon d={ICON.plus} size={26} strong />
-          </button>
-        )}
       </nav>
 
       {making && <MakeSheet onClose={() => setMaking(false)} />}

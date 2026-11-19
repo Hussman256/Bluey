@@ -50,7 +50,7 @@ export function ClubPage() {
   if (!id) return null;
 
   return (
-    <div className="flex h-dvh flex-col sm:h-auto">
+    <div className="flex h-[calc(100dvh-var(--sat)-4.5rem-var(--sab))] flex-col sm:h-auto">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-bg/90 px-4 py-3 backdrop-blur">
         <Link to="/clubs" className="text-ink-faint hover:text-ink" aria-label="All clubs">
           ←
@@ -106,8 +106,8 @@ export function ClubPage() {
         <>
           <div className="flex-1 overflow-y-auto">
             {chat.length === 0 && (
-              <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">
-                no messages yet — say hello
+              <p className="px-4 py-10 text-center text-sm text-ink-faint">
+                No messages yet. Say hello!
               </p>
             )}
             <ul className="flex flex-col gap-0.5 py-2">

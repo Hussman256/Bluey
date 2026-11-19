@@ -244,7 +244,7 @@ export function QuizEditor({ lesson, bootcamp, bootcampTitle }: { lesson: Addr; 
           Close
         </button>
       </div>
-      {!questions && <p className="font-mono text-xs text-ink-faint">loading…</p>}
+      {!questions && <p className="text-sm text-ink-faint">Loading…</p>}
       {questions?.map((q, i) => (
         <div key={i} className="flex flex-col gap-2 rounded-2xl bg-bg p-3">
           <input

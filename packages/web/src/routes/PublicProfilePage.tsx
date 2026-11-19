@@ -143,7 +143,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
       </header>
 
       <main className="mx-auto flex max-w-3xl flex-col gap-8 px-4 pb-16 pt-8">
-        {pubkey === undefined && <p className="py-16 text-center font-mono text-xs text-ink-faint">finding @{handle}…</p>}
+        {pubkey === undefined && <p className="py-16 text-center text-sm text-ink-faint">finding @{handle}…</p>}
         {pubkey === null && (
           <div className="py-16 text-center">
             <h1 className="font-display text-2xl font-extrabold">No one here yet</h1>
@@ -170,7 +170,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
                   {name}
                   {tutors.isApproved(pubkey) && <VerifiedMark size={24} />}
                 </h1>
-                <p className="font-mono text-xs text-ink-faint">{address ?? `${npubOf(pubkey).slice(0, 16)}…`}</p>
+                <p className="text-sm text-ink-faint">{address ?? `${npubOf(pubkey).slice(0, 16)}…`}</p>
               </div>
               {profile?.about && <p className="max-w-xl whitespace-pre-wrap text-[15px] leading-relaxed">{profile.about}</p>}
               <div className="flex flex-wrap gap-2">

@@ -128,8 +128,8 @@ export function FollowListPage({ list }: { list: 'following' | 'followers' }) {
             ))}
           </ul>
           {people.length === 0 && (
-            <p className="px-6 py-12 text-center font-mono text-xs text-ink-faint">
-              {loading ? 'loading…' : list === 'following' ? 'Not following anyone yet.' : 'No followers found yet.'}
+            <p className="px-6 py-12 text-center text-sm text-ink-faint">
+              {loading ? 'Loading…' : list === 'following' ? 'Not following anyone yet.' : 'No followers found yet.'}
             </p>
           )}
           {people.length > shown && (

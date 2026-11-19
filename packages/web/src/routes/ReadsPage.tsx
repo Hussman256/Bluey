@@ -87,8 +87,8 @@ export function ReadsPage() {
           );
         })}
         {articles.length === 0 && (
-          <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">
-            no articles yet
+          <p className="px-4 py-10 text-center text-sm text-ink-faint">
+            No articles yet.
           </p>
         )}
       </div>

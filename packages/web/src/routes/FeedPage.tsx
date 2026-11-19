@@ -6,7 +6,7 @@ import { Composer } from '../components/Composer';
 import { LoadMore } from '../components/LoadMore';
 import { NoteCard } from '../components/NoteCard';
 import { BoardCard, OnAirStrip } from '../components/OnAir';
-import { Mark } from '../components/primitives';
+import { EmptyState, Mark, NoteSkeleton, Quiet } from '../components/primitives';
 import { LS } from '../nostr/config';
 import { useDeletedIds } from '../nostr/deletions';
 import { EngagementScope } from '../nostr/engagement';
@@ -65,6 +65,14 @@ export function FeedPage() {
   }
 
   const builtin = feed.kind === 'builtin' ? feed.id : null;
+
+  // show placeholder rows for a moment before deciding a feed is really empty
+  const [waitedFor, setWaitedFor] = useState<string | null>(null);
+  useEffect(() => {
+    const t = setTimeout(() => setWaitedFor(feed.id), 4000);
+    return () => clearTimeout(t);
+  }, [feed.id]);
+  const waited = waitedFor === feed.id;
 
   // ----- built-in: following / discover via index (relay fallback) -----
   const idx = useIndexFeed({
@@ -166,50 +174,39 @@ export function FeedPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
-        <div className="flex items-center gap-2.5 px-4 pb-2 pt-3.5 sm:px-5">
-          <span className="sm:hidden">
-            <Mark size={30} />
+      <header className="sticky top-0 z-10 border-b border-line bg-bg/95 backdrop-blur">
+        <div className="flex items-center gap-1 px-4 pb-1 pt-3 sm:px-5">
+          <span className="mr-1.5 sm:hidden">
+            <Mark size={28} />
           </span>
-          <h1 className="flex-1 font-display text-2xl font-extrabold tracking-tight sm:text-xl">Feed</h1>
-          <Link
-            to="/search"
-            aria-label="Search"
-            className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface sm:hidden"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" strokeLinecap="round" />
-            </svg>
-          </Link>
-          <Link
-            to="/messages"
-            aria-label="Messages"
-            className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface sm:hidden"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
-          <Link
-            to="/notifications"
-            aria-label="Alerts"
-            className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface sm:hidden"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
+          <h1 className="flex-1 font-display text-[22px] font-extrabold tracking-tight sm:text-xl">Feed</h1>
+          {[
+            { to: '/search', label: 'Search', d: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4' },
+            { to: '/messages', label: 'Messages', d: 'M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z' },
+            { to: '/notifications', label: 'Alerts', d: 'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4' },
+          ].map((b) => (
+            <Link
+              key={b.to}
+              to={b.to}
+              aria-label={b.label}
+              className="grid h-10 w-10 place-items-center rounded-full text-ink active:bg-sunk sm:hidden"
+            >
+              <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <path d={b.d} strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          ))}
         </div>
-        <div className="flex items-center gap-1.5 no-scrollbar overflow-x-auto px-4 pb-2.5">
+        <div className="flex items-center gap-5 no-scrollbar overflow-x-auto px-4 sm:px-5">
           {allFeeds.map((f) => (
             <button
               key={f.id}
               type="button"
               onClick={() => pick(f.id)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-[13px] font-semibold transition ${
+              className={`-mb-px shrink-0 border-b-2 py-2.5 text-[15px] font-semibold transition ${
                 f.id === feed.id
-                  ? 'bg-slab text-white'
-                  : 'text-ink-faint hover:bg-surface hover:text-ink'
+                  ? 'border-brand text-ink'
+                  : 'border-transparent text-ink-faint hover:text-ink'
               }`}
             >
               {f.name}
@@ -233,7 +230,9 @@ export function FeedPage() {
           <button
             type="button"
             onClick={() => setAddOpen((v) => !v)}
-            className="shrink-0 rounded-full border border-line-strong px-2.5 py-1.5 text-sm font-semibold text-ink-faint hover:border-brand hover:text-brand-ink"
+            aria-label="Add a feed"
+            title="Add a feed"
+            className="hidden shrink-0 py-2.5 text-[15px] font-semibold text-ink-faint hover:text-brand-ink sm:block"
           >
             +
           </button>
@@ -277,24 +276,6 @@ export function FeedPage() {
 
       {(builtin === 'following' || builtin === 'ships') && <BoardCard />}
 
-      <p className="px-4 py-2 text-center font-mono text-[11px] text-ink-faint">
-        {feed.kind === 'dvm'
-          ? dvm.status === 'requesting'
-            ? 'asking the DVM…'
-            : dvm.status === 'error'
-              ? 'the DVM didn’t answer'
-              : `${feed.name} · via NIP-90`
-          : builtin === 'discover' && idx.fromIndex
-            ? 'Blusat index · web-of-trust ranked'
-            : builtin === 'ships'
-              ? 'proof of work'
-              : builtin === 'latest'
-                ? 'everything, newest first'
-                : idx.fromIndex
-                  ? 'Blusat index'
-                  : 'direct from relays'}
-      </p>
-
       <EngagementScope ids={engagementIds}>
         {visible.map((e) => (
           <NoteCard key={e.id} event={e} />
@@ -303,28 +284,49 @@ export function FeedPage() {
 
       {older.enabled && visible.length > 0 && <LoadMore {...older} />}
 
-      {visible.length === 0 && (
-        <div className="px-6 py-12 text-center">
-          {feed.kind === 'dvm' && dvm.status === 'error' ? (
-            <p className="font-mono text-xs text-ink-faint">no results</p>
-          ) : builtin === 'discover' && !idx.fromIndex && wot.size === 0 ? (
-            <p className="text-sm text-ink-soft">
-              Discover ranks by web of trust — it fills in once you follow a few people, or
-              when the Blusat index is reachable.{' '}
-              <button
-                type="button"
-                onClick={() => pick('latest')}
-                className="font-semibold text-brand-ink hover:underline"
-              >
-                Browse Latest
-              </button>{' '}
-              meanwhile.
-            </p>
-          ) : (
-            <p className="font-mono text-xs text-ink-faint">listening…</p>
-          )}
-        </div>
-      )}
+      {visible.length === 0 &&
+        (builtin === 'following' && me && follows.size === 0 && waited ? (
+          <EmptyState
+            icon={
+              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a6 6 0 0 1 12 0M19 8v6M16 11h6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            }
+            title="Your feed is waiting"
+            action={
+              <>
+                <button
+                  type="button"
+                  onClick={() => pick('discover')}
+                  className="min-h-11 rounded-full bg-brand px-5 text-sm font-semibold text-white"
+                >
+                  See who's posting
+                </button>
+                <Link
+                  to="/search"
+                  className="grid min-h-11 place-items-center rounded-full border border-line-strong px-5 text-sm font-semibold"
+                >
+                  Find people
+                </Link>
+              </>
+            }
+          >
+            Follow a few people and their posts show up here.
+          </EmptyState>
+        ) : feed.kind === 'dvm' && dvm.status === 'error' ? (
+          <Quiet>This feed didn't answer. Try again later.</Quiet>
+        ) : builtin === 'discover' && !idx.fromIndex && wot.size === 0 && waited ? (
+          <Quiet>
+            Discover fills in once you follow a few people.{' '}
+            <button type="button" onClick={() => pick('latest')} className="font-semibold text-brand-ink">
+              Browse Latest
+            </button>
+          </Quiet>
+        ) : waited ? (
+          <Quiet>Nothing here yet. Check back soon.</Quiet>
+        ) : (
+          <NoteSkeleton />
+        ))}
     </div>
   );
 }

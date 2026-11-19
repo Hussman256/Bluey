@@ -379,7 +379,7 @@ function RepostCard({ event }: { event: NDKEvent }) {
       {note ? (
         <PlainNote event={note} bare />
       ) : (
-        <p className="px-4 py-4 font-mono text-xs text-ink-faint">reposted note unavailable</p>
+        <p className="px-4 py-4 text-sm text-ink-faint">This repost is no longer available.</p>
       )}
     </div>
   );

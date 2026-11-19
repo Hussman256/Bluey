@@ -1,7 +1,7 @@
 import { useFollows, useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { EmptyState } from '../components/primitives';
+import { EmptyState, Spinner } from '../components/primitives';
 import { naddrOf, type LiveClass } from '../nostr/bootcamps';
 import type { ClubMeta } from '../nostr/clubs';
 import { useBootcampList, useLiveNow } from '../nostr/useBootcamps';
@@ -90,20 +90,20 @@ export function ClubsPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-6">
-      <header className="flex flex-col gap-3 px-4 pt-4">
-        <div className="flex items-center gap-2.5">
-          <h1 className="flex-1 font-display text-[30px] font-extrabold">Clubs</h1>
+      <header className="flex flex-col gap-3 px-4 pt-3">
+        <div className="flex min-h-10 items-center gap-2.5">
+          <h1 className="flex-1 font-display text-[22px] font-extrabold tracking-tight">Clubs</h1>
           {me && (
             <button
               type="button"
               onClick={() => setCreating((v) => !v)}
-              className="flex min-h-11 items-center gap-1.5 rounded-2xl bg-slab px-3.5 text-sm font-semibold text-white"
+              className="flex min-h-9 items-center gap-1 rounded-full bg-brand-soft px-3.5 text-sm font-semibold text-brand-ink"
             >
-              {creating ? 'Cancel' : '+ Start a club'}
+              {creating ? 'Cancel' : '+ New club'}
             </button>
           )}
         </div>
-        <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-3">
+        <label className="flex min-h-11 items-center gap-2 rounded-full bg-sunk px-4">
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] text-ink-faint" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" strokeLinecap="round" />
           </svg>
@@ -146,7 +146,7 @@ export function ClubsPage() {
 
       {yours.length > 0 && (
         <section aria-label="Your clubs" className="mx-3 flex flex-col gap-0.5 rounded-[20px] border border-line bg-surface p-1.5">
-          <h2 className="mx-2 mb-1 mt-1.5 font-mono text-xs font-semibold uppercase tracking-[0.08em] text-ink-faint">Yours</h2>
+          <h2 className="mx-2 mb-1 mt-1.5 text-sm font-semibold text-ink-soft">Yours</h2>
           {yours.map((c) => {
             const live = liveIn.get(c.id);
             return (
@@ -185,7 +185,7 @@ export function ClubsPage() {
       <section aria-label="Find clubs" className="flex flex-col gap-2.5 px-3">
         <h2 className="px-1 font-display text-lg font-bold">{yours.length ? 'Worth joining' : 'Find your people'}</h2>
         {loading && clubs.length === 0 && (
-          <p className="py-8 text-center font-mono text-xs text-ink-faint">loading clubs…</p>
+          <Spinner label="Loading clubs" />
         )}
         {!loading && others.length === 0 && (
           q || clubs.length ? (
@@ -201,13 +201,12 @@ export function ClubsPage() {
               }
               title="Start the first club"
             >
-              Clubs are free group chats for your city, your meetup or a topic you love. Start one with Start a club,
-              then invite your friends.
+              Free group chats for your city, your meetup or a topic you love. Start one, then invite your friends.
             </EmptyState>
           )
         )}
         {others.slice(0, 30).map(({ club: c, members, known }) => (
-          <div key={c.id} className="flex items-center gap-3 rounded-[18px] border border-line bg-surface p-3">
+          <div key={c.id} className="flex items-center gap-3 border-b border-line px-1 py-3 last:border-0">
             <Link to={`/clubs/${c.id}`}>
               <ClubTile club={c} size={44} />
             </Link>
@@ -224,14 +223,14 @@ export function ClubsPage() {
                 type="button"
                 onClick={() => join(c.id)}
                 disabled={busy === c.id}
-                className="min-h-10 rounded-xl border-[1.5px] border-brand px-4 text-sm font-semibold text-brand disabled:opacity-50"
+                className="min-h-9 rounded-full bg-brand px-4 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {busy === c.id ? '…' : 'Join'}
               </button>
             )}
           </div>
         ))}
-        <p className="px-1 text-xs text-ink-faint">Every club is free to join.</p>
+        {others.length > 0 && <p className="px-1 text-xs text-ink-faint">Every club is free to join.</p>}
       </section>
     </div>
   );

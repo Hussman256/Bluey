@@ -108,7 +108,7 @@ export function BootcampPage() {
 
   if (!addr) return <p className="p-8 text-center text-sm text-ink-soft">Unknown bootcamp.</p>;
   if (!bootcamp)
-    return <p className="px-4 py-12 text-center font-mono text-xs text-ink-faint">loading…</p>;
+    return <p className="px-4 py-12 text-center text-sm text-ink-faint">Loading…</p>;
 
   return (
     <div>

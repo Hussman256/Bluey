@@ -356,7 +356,7 @@ export function ShipNewPage() {
         )}
       </div>
 
-      <footer className="sticky bottom-0 flex gap-2.5 border-t border-line bg-surface px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+      <footer className="sticky bottom-0 flex gap-2.5 border-t border-line bg-surface px-4 pb-[max(1.25rem,var(--sab))] pt-3">
         <Link
           to="/"
           className="grid min-h-[52px] place-items-center rounded-2xl border border-line-strong px-5 text-[15px] font-medium"

@@ -87,7 +87,7 @@ export function LiveClassPage() {
 
   if (!addr) return <p className="p-8 text-center text-sm text-ink-soft">Unknown session.</p>;
   if (!live)
-    return <p className="px-4 py-12 text-center font-mono text-xs text-ink-faint">loading…</p>;
+    return <p className="px-4 py-12 text-center text-sm text-ink-faint">Loading…</p>;
 
   return (
     <div>
@@ -171,8 +171,8 @@ export function LiveClassPage() {
         <div className="border-t border-line">
           <div className="max-h-[24rem] overflow-y-auto">
             {chat.length === 0 && (
-              <p className="px-4 py-8 text-center font-mono text-xs text-ink-faint">
-                live chat — say hi
+              <p className="px-4 py-8 text-center text-sm text-ink-faint">
+                Live chat. Say hi!
               </p>
             )}
             <ul className="flex flex-col gap-0.5 py-2">

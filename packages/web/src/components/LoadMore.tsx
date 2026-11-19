@@ -35,9 +35,9 @@ export function LoadMore({
   return (
     <div ref={ref} className="px-4 py-6 text-center">
       {done ? (
-        <p className="font-mono text-xs text-ink-faint">That's everything for now.</p>
+        <p className="text-sm text-ink-faint">That's everything for now.</p>
       ) : loading ? (
-        <p className="font-mono text-xs text-ink-faint">loading older posts…</p>
+        <p className="text-sm text-ink-faint">Loading older posts…</p>
       ) : (
         <button
           type="button"

@@ -51,7 +51,7 @@ export function SearchPage() {
         <p className="px-4 py-10 text-center text-sm text-ink-soft">Type at least 2 characters.</p>
       )}
       {indexUp && query && loading && (
-        <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">searching…</p>
+        <p className="px-4 py-10 text-center text-sm text-ink-faint">Searching…</p>
       )}
       {indexUp && query && fromIndex && data && results.length === 0 && !loading && (
         <p className="px-4 py-10 text-center text-sm text-ink-soft">No matches.</p>

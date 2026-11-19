@@ -27,8 +27,8 @@ function QuoteCard({ id }: { id: string }) {
   const ev = useEvent({ ids: [id] });
   if (!ev) {
     return (
-      <div className="my-1 rounded-xl border border-line px-3 py-2 font-mono text-xs text-ink-faint">
-        loading quoted note…
+      <div className="my-1 rounded-xl border border-line px-3 py-2 text-sm text-ink-faint">
+        Loading…
       </div>
     );
   }

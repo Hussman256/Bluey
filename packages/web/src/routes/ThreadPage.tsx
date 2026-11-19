@@ -42,7 +42,7 @@ export function ThreadPage() {
       </header>
 
       {!root && (
-        <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">loading note…</p>
+        <p className="px-4 py-10 text-center text-sm text-ink-faint">Loading…</p>
       )}
 
       {root && root.kind === KIND.Highlight && <NoteCard event={root} />}

@@ -132,7 +132,7 @@ export function App() {
       <ErrorBoundary key={location.pathname}>
         <Suspense
           fallback={
-            <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">loading…</p>
+            <p className="px-4 py-10 text-center text-sm text-ink-faint">Loading…</p>
           }
         >
           <Routes>

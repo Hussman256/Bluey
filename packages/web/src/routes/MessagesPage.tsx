@@ -225,9 +225,9 @@ export function MessagesPage() {
             ))}
           </ul>
           {list.length === 0 && (
-            <p className="px-6 py-10 text-center font-mono text-xs text-ink-faint">
+            <p className="px-6 py-10 text-center text-sm text-ink-faint">
               {loading
-                ? 'opening your messages…'
+                ? 'Opening your messages…'
                 : tab === 'chats'
                   ? 'no conversations yet. Start one with New, or from someone’s profile.'
                   : 'no requests'}
@@ -295,7 +295,7 @@ export function ConversationPage() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-5.5rem-env(safe-area-inset-bottom))] flex-col sm:h-[calc(100dvh-2rem)]">
+    <div className="flex h-[calc(100dvh-4.5rem-var(--sab)-var(--sat))] flex-col sm:h-[calc(100dvh-2rem)]">
       <header className="flex items-center gap-3 border-b border-line bg-bg px-4 py-3">
         <Link to="/messages" className="text-ink-faint hover:text-ink" aria-label="All messages">
           ←
@@ -315,8 +315,8 @@ export function ConversationPage() {
           <div className="flex-1 overflow-y-auto">
             {messages.length === 0 && (
               <div className="px-6 py-10 text-center">
-                <p className="font-mono text-xs text-ink-faint">
-                  {loading && canMessage ? 'opening your messages…' : 'no messages yet. Say hello.'}
+                <p className="text-sm text-ink-faint">
+                  {loading && canMessage ? 'Opening your messages…' : 'No messages yet. Say hello!'}
                 </p>
                 <p className="mt-3 text-xs text-ink-faint">{PRIVACY}</p>
               </div>

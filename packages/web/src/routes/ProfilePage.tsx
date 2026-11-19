@@ -18,13 +18,14 @@ import { useIndexFollowers } from '../nostr/useIndex';
 import { useShipFeed, useShipVerifications } from '../nostr/useShips';
 import { useWallet } from '../wallet/WalletProvider';
 import { ZapButton } from '../components/ZapButton';
+import { Avatar, fallbackGradient, Quiet } from '../components/primitives';
 
 type Tab = 'notes' | 'replies' | 'badges' | 'ships';
 
 function BadgeGrid({ pubkey }: { pubkey: string }) {
   const badges = useProfileBadges(pubkey);
   if (badges.length === 0)
-    return <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">no badges yet</p>;
+    return <Quiet>Badges from finished bootcamps show up here.</Quiet>;
   return (
     <div className="flex flex-wrap gap-6 px-5 py-6">
       {badges.map((b, i) => (
@@ -145,25 +146,22 @@ export function ProfilePage() {
   return (
     <div>
       {editing && isMe && <EditProfile pubkey={pubkey} onClose={() => setEditing(false)} />}
-      <div className="h-32 w-full bg-sunk">
+      <div
+        className="h-28 w-full"
+        style={profile?.banner ? undefined : { background: fallbackGradient(pubkey), opacity: 0.85 }}
+      >
         {profile?.banner && <img src={profile.banner} alt="" className="h-full w-full object-cover" />}
       </div>
-      <div className="px-5">
+      <div className="px-4">
         <div className="-mt-10 flex items-end justify-between">
-          {profile?.picture ? (
-            <img
-              src={profile.picture}
-              alt=""
-              className="h-20 w-20 rounded-full border-4 border-bg bg-sunk object-cover"
-            />
-          ) : (
-            <div className="h-20 w-20 rounded-full border-4 border-bg bg-brand-soft" />
-          )}
+          <span className="rounded-full border-4 border-bg bg-bg">
+            <Avatar pubkey={pubkey} size={76} />
+          </span>
           {isMe && (
             <div className="mb-1 flex items-center gap-2">
               <Link
                 to="/settings"
-                className="flex min-h-9 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 font-mono text-xs font-semibold text-zap-ink"
+                className="flex min-h-9 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3.5 text-sm font-semibold"
               >
                 <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
                   <path d="M13 2L4 14h7l-1 8 9-12h-7z" className="fill-zap" />
@@ -208,9 +206,8 @@ export function ProfilePage() {
           {profile?.displayName || profile?.name || 'Anonymous'}
           {approvedTutor && <VerifiedMark size={20} />}
         </h1>
-        <p className="mt-0.5 font-mono text-[11px] text-ink-faint">
-          {profile?.nip05 ? `${profile.nip05.replace(/^_@/, '')} · ` : ''}
-          {npubOf(pubkey).slice(0, 15)}…
+        <p className="mt-0.5 truncate text-sm text-ink-faint">
+          {profile?.nip05 ? profile.nip05.replace(/^_@/, '') : `${npubOf(pubkey).slice(0, 14)}…`}
         </p>
         {profile?.about && (
           <p className="mt-2.5 whitespace-pre-wrap text-sm leading-relaxed">{profile.about}</p>
@@ -290,9 +287,15 @@ export function ProfilePage() {
             <NoteCard key={e.id} event={e} />
           ))}
           {shown.length === 0 && (
-            <p className="px-4 py-10 text-center font-mono text-xs text-ink-faint">
-              {tab === 'replies' ? 'no replies yet' : 'no posts yet'}
-            </p>
+            <Quiet>
+              {tab === 'replies'
+                ? isMe
+                  ? "Your replies will show up here."
+                  : 'No replies yet.'
+                : isMe
+                  ? 'Your posts will show up here. Tap + to write your first one.'
+                  : 'No posts yet.'}
+            </Quiet>
           )}
         </EngagementScope>
       )}

@@ -212,7 +212,7 @@ export function TeachPage() {
     <div className="flex flex-col gap-5 pb-8">
       <BackHeader title={canTeach ? 'New bootcamp' : 'Teach on Blusat'} />
       {tutors.loading ? (
-        <p className="py-8 text-center font-mono text-xs text-ink-faint">loading…</p>
+        <p className="py-8 text-center text-sm text-ink-faint">Loading…</p>
       ) : canTeach ? (
         <CreateBootcamp />
       ) : (

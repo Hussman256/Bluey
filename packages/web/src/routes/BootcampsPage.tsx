@@ -3,7 +3,7 @@ import { useNDKCurrentUser } from '@nostr-dev-kit/react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BootcampRow, ContinueCard } from '../components/learn';
-import { EmptyState } from '../components/primitives';
+import { EmptyState, Spinner } from '../components/primitives';
 import { TOPIC_LABEL } from '../nostr/bootcamps';
 import { useApprovedTutors } from '../nostr/tutors';
 import { useBootcampList } from '../nostr/useBootcamps';
@@ -38,12 +38,12 @@ export function BootcampsPage() {
 
   return (
     <div className="flex flex-col gap-4 pb-6">
-      <header className="flex items-center gap-2.5 px-4 pt-4">
-        <h1 className="flex-1 font-display text-[30px] font-extrabold">Learn</h1>
+      <header className="flex items-center gap-2.5 px-4 pt-3">
+        <h1 className="flex-1 font-display text-[22px] font-extrabold tracking-tight">Learn</h1>
         <Link
           to="/search"
           aria-label="Search"
-          className="grid h-11 w-11 place-items-center rounded-2xl border border-line bg-surface"
+          className="grid h-10 w-10 place-items-center rounded-full active:bg-sunk"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" strokeLinecap="round" />
@@ -66,10 +66,8 @@ export function BootcampsPage() {
             type="button"
             aria-pressed={topic === t}
             onClick={() => setTopic(t)}
-            className={`min-h-9 shrink-0 rounded-[10px] px-3.5 text-sm ${
-              topic === t
-                ? 'bg-brand font-semibold text-white'
-                : 'border border-line bg-surface hover:border-line-strong'
+            className={`min-h-9 shrink-0 rounded-full px-4 text-sm font-medium transition ${
+              topic === t ? 'bg-ink font-semibold text-white' : 'bg-sunk text-ink-soft'
             }`}
           >
             {t ? TOPIC_LABEL[t] : 'All'}
@@ -86,7 +84,7 @@ export function BootcampsPage() {
         </div>
 
         {(loading || tutors.loading) && catalogue.length === 0 && (
-          <p className="py-8 text-center font-mono text-xs text-ink-faint">loading…</p>
+          <Spinner label="Loading bootcamps" />
         )}
         {!loading && !tutors.loading && catalogue.length === 0 && (
           <EmptyState
@@ -113,7 +111,7 @@ export function BootcampsPage() {
 
       <Link
         to="/teach"
-        className="mx-3 flex items-center gap-3 rounded-[18px] border-[1.5px] border-dashed border-line-strong px-3.5 py-3.5"
+        className="mx-3 flex items-center gap-3 rounded-2xl border border-line px-3.5 py-3.5 active:bg-sunk"
       >
         <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-brand" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
           <path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z" strokeLinejoin="round" />

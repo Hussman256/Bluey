@@ -3,7 +3,7 @@ import { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser, useProfileValue } from '@nostr-dev-kit/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { NameClaim } from '../components/NameClaim';
-import { Mark } from '../components/primitives';
+import { Mark, Spinner } from '../components/primitives';
 import { TOPIC_LABEL } from '../nostr/bootcamps';
 import { LS } from '../nostr/config';
 import { shortNpub } from '../nostr/ids';
@@ -169,7 +169,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-8 pt-6">
+    <div className="mx-auto flex min-h-[calc(100dvh-var(--sat))] w-full max-w-md flex-col px-5 pb-[calc(1.5rem+var(--sab))] pt-4">
       <div className="flex items-center gap-3">
         <Mark size={30} />
         <ol className="flex flex-1 gap-1.5" aria-label={`Step ${index + 1} of ${steps.length}`}>
@@ -252,7 +252,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
           <>
             <h1 className="font-display text-[28px] font-extrabold leading-tight">People worth following</h1>
             <p className="-mt-2 text-sm text-ink-soft">Trusted builders in what you picked. Tap to change.</p>
-            {people === null && <p className="py-8 text-center font-mono text-xs text-ink-faint">finding people…</p>}
+            {people === null && <Spinner label="Finding people" />}
             {people?.length === 0 && (
               <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-ink-soft">
                 Suggestions aren't available right now. You can find people from Discover later.

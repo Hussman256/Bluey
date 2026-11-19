@@ -10,7 +10,7 @@
   --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --color-bg: #f3f6fa;
+  --color-bg: #ffffff;
   --color-surface: #ffffff;
   --color-sunk: #e9eef5;
   --color-line: #dce3ec;
@@ -44,6 +44,32 @@
 
   --color-good: #0f8a5f;
   --color-danger: #c0392b;
+}
+
+/*
+ * Safe areas. The Android app draws edge to edge: Capacitor injects the
+ * status-bar / nav-bar heights as --safe-area-inset-*; browsers use env().
+ */
+:root {
+  --sat: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --sab: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+body {
+  padding-top: var(--sat);
+}
+/* a solid strip behind the status bar so content scrolls under it cleanly */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--sat);
+  background: var(--color-bg);
+  z-index: 70;
+  pointer-events: none;
+}
+/* sticky headers stop below the status bar, not under it */
+.sticky.top-0 {
+  top: var(--sat);
 }
 
 @layer base {

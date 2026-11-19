@@ -159,7 +159,7 @@ export function HighlightPopover({
           onMouseDown={() => !busy && setSheet(null)}
         >
           <div
-            className="w-full max-w-lg rounded-t-2xl border border-line bg-bg p-4 shadow-xl sm:rounded-2xl"
+            className="w-full max-w-lg rounded-t-2xl border border-line bg-bg p-4 pb-[calc(1rem+var(--sab))] shadow-xl sm:rounded-2xl"
             onMouseDown={(e) => e.stopPropagation()}
           >
             {done ? (

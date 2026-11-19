@@ -75,18 +75,53 @@ export function EmptyState({
   icon,
   title,
   children,
+  action,
 }: {
   icon: React.ReactNode;
   title: string;
   children?: React.ReactNode;
+  action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-[20px] border border-line bg-surface px-6 py-8 text-center">
-      <span className="mb-1 grid h-14 w-14 place-items-center rounded-2xl bg-brand-soft text-brand" aria-hidden="true">
+    <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
+      <span className="mb-1 grid h-14 w-14 place-items-center rounded-full bg-brand-soft text-brand" aria-hidden="true">
         {icon}
       </span>
       <p className="font-display text-lg font-bold">{title}</p>
-      {children && <p className="max-w-[30ch] text-sm text-ink-soft">{children}</p>}
+      {children && <p className="max-w-[32ch] text-[15px] leading-relaxed text-ink-faint">{children}</p>}
+      {action && <div className="mt-3 flex flex-wrap justify-center gap-2">{action}</div>}
+    </div>
+  );
+}
+
+/** A small cobalt spinner, centred, for anything still loading. */
+export function Spinner({ label = 'Loading', className = 'py-10' }: { label?: string; className?: string }) {
+  return (
+    <div role="status" aria-label={label} className={`flex justify-center ${className}`}>
+      <span className="h-6 w-6 animate-spin rounded-full border-[2.5px] border-line border-t-brand" />
+    </div>
+  );
+}
+
+/** A quiet line for empty lists: plain words, no card. */
+export function Quiet({ children }: { children: React.ReactNode }) {
+  return <p className="px-6 py-12 text-center text-[15px] leading-relaxed text-ink-faint">{children}</p>;
+}
+
+/** Grey placeholder rows in the shape of posts, while a feed loads. */
+export function NoteSkeleton({ count = 5 }: { count?: number }) {
+  return (
+    <div aria-hidden="true">
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="flex gap-3 border-b border-line px-4 py-4">
+          <span className="h-11 w-11 shrink-0 animate-pulse rounded-full bg-sunk" />
+          <span className="flex flex-1 flex-col gap-2 pt-1">
+            <span className="h-3 w-1/3 animate-pulse rounded-full bg-sunk" />
+            <span className="h-3 w-full animate-pulse rounded-full bg-sunk" />
+            <span className={`h-3 animate-pulse rounded-full bg-sunk ${i % 2 ? 'w-2/3' : 'w-4/5'}`} />
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

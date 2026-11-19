@@ -136,7 +136,7 @@ export function LoginScreen() {
     });
 
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
+    <div className="flex min-h-[calc(100dvh-var(--sat))] flex-col pb-[var(--sab)] lg:flex-row">
       <div className="flex flex-col justify-center gap-6 px-6 pb-6 pt-12 lg:w-[560px] lg:shrink-0 lg:border-r lg:border-line lg:px-16 lg:py-0">
         <Mark size={44} />
         <h1 className="font-display text-[34px] font-extrabold leading-[1.05] tracking-tight text-balance lg:text-[2.9rem]">
