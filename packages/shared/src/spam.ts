@@ -48,6 +48,15 @@ export function isSpamContent(content: string): boolean {
   }
   if (/^\[broadcast:|"maxHop"\s*:|"ar_profile"|"msg_uuid"/i.test(c)) return true;
 
+  // crypto "airdrop / check eligibility / claim your reward" phishing: the bait
+  // words together with a link carrying a referral code
+  if (
+    /\b(?:airdrop|eligibility|claim (?:your|now|here)|community reward|flash drop|wallet connect bonus)\b/i.test(c) &&
+    /https?:\/\/\S+[?&](?:ref|r|invite|code)=\w+/i.test(c)
+  ) {
+    return true;
+  }
+
   // bot roster / "hex salad" dumps: `channel:__roster` + walls of raw pubkeys
   if (/^channel:__?\w+/i.test(c)) return true;
   const hexHits = (c.match(HEX64) ?? []).length;
