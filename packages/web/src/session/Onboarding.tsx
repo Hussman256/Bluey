@@ -1,4 +1,4 @@
-import { BOOTCAMP_TOPICS, type BootcampTopic } from '@bluey/shared';
+import { BOOTCAMP_TOPICS, FEATURED_PUBKEYS, type BootcampTopic } from '@bluey/shared';
 import { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { useNDK, useNDKCurrentUser, useProfileValue } from '@nostr-dev-kit/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -31,6 +31,8 @@ const CLUB_WORDS: Record<BootcampTopic, string[]> = {
 
 function Person({ pubkey, on, toggle }: { pubkey: string; on: boolean; toggle: () => void }) {
   const p = useProfileValue(pubkey);
+  // a ranked pick with no photo or name is usually a throwaway account
+  if (p && !FEATURED_PUBKEYS.includes(pubkey) && (!p.picture || !(p.displayName || p.name))) return null;
   return (
     <li>
       <button
@@ -136,11 +138,11 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
       .request('suggest', { topics, limit: 24 })
       .then((f) => {
         if (!live) return;
-        const pks = (f.pubkeys ?? []).filter((pk) => pk !== me?.pubkey);
-        setPeople(pks);
-        setFollow(new Set(pks.slice(0, 15)));
+        // well-known accounts first, then the index's ranked picks; nothing pre-ticked
+        const pks = [...new Set([...FEATURED_PUBKEYS, ...(f.pubkeys ?? [])])].filter((pk) => pk !== me?.pubkey);
+        setPeople(pks.slice(0, 30));
       })
-      .catch(() => live && setPeople([]));
+      .catch(() => live && setPeople(FEATURED_PUBKEYS.filter((pk) => pk !== me?.pubkey)));
     return () => {
       live = false;
     };
@@ -283,7 +285,16 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         {step === 'people' && (
           <>
             <h1 className="font-display text-[28px] font-extrabold leading-tight">People worth following</h1>
-            <p className="-mt-2 text-sm text-ink-soft">Trusted builders in what you picked. Tap to change.</p>
+            <p className="-mt-2 text-sm text-ink-soft">Well-known Bitcoin and Nostr voices, plus builders in what you picked.</p>
+            {people && people.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setFollow(follow.size === people.length ? new Set() : new Set(people))}
+                className="-mt-1 self-start text-sm font-semibold text-brand"
+              >
+                {follow.size === people.length ? 'Clear all' : 'Follow all'}
+              </button>
+            )}
             {people === null && <Spinner label="Finding people" />}
             {people?.length === 0 && (
               <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-ink-soft">

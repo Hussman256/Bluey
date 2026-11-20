@@ -1,4 +1,5 @@
 import {
+  FEATURED_PUBKEYS,
   KIND,
   isSpamContent,
   type EngagementCount,
@@ -528,30 +529,39 @@ const TOPIC_WORDS: Record<string, string[]> = {
  */
 export function suggestPubkeys(topics: string[], limit = 24): string[] {
   const words = topics.flatMap((t) => TOPIC_WORDS[t] ?? []).slice(0, 24);
-  const out: string[] = [];
-  if (words.length) {
-    const where = words.map(() => `lower(coalesce(p.about, '') || ' ' || coalesce(p.name, '')) LIKE ?`).join(' OR ');
-    out.push(
-      ...q
-        .all<{ pubkey: string }>(
-          `SELECT w.pubkey FROM wot w JOIN profiles p ON p.pubkey = w.pubkey
-           WHERE p.name IS NOT NULL AND (${where})
-           ORDER BY w.score DESC LIMIT ?`,
-          ...words.map((w) => `%${w}%`),
-          limit,
-        )
-        .map((r) => r.pubkey),
-    );
-  }
-  if (out.length < limit) {
-    for (const r of q.all<{ pubkey: string }>(
-      `SELECT w.pubkey FROM wot w JOIN profiles p ON p.pubkey = w.pubkey
-       WHERE p.name IS NOT NULL ORDER BY w.score DESC LIMIT ?`,
-      limit * 2,
-    )) {
+  // hand-checked well-known accounts lead (shared/featured.ts)
+  const out: string[] = FEATURED_PUBKEYS.slice(0, limit);
+  // Ranked fill: only established-looking profiles. A photo, a NIP-05 address,
+  // a bio and real followers keep throwaway and spam accounts out.
+  const solid = `p.name IS NOT NULL AND coalesce(p.picture, '') <> '' AND coalesce(p.nip05, '') <> ''
+    AND length(coalesce(p.about, '')) >= 8
+    AND (SELECT count(*) FROM follows f WHERE f.followee = p.pubkey) >= 25`;
+  const add = (rows: { pubkey: string }[]) => {
+    for (const r of rows) {
       if (out.length >= limit) break;
       if (!out.includes(r.pubkey)) out.push(r.pubkey);
     }
+  };
+  if (words.length && out.length < limit) {
+    const where = words.map(() => `lower(coalesce(p.about, '') || ' ' || coalesce(p.name, '')) LIKE ?`).join(' OR ');
+    add(
+      q.all<{ pubkey: string }>(
+        `SELECT w.pubkey FROM wot w JOIN profiles p ON p.pubkey = w.pubkey
+         WHERE ${solid} AND (${where})
+         ORDER BY w.score DESC LIMIT ?`,
+        ...words.map((w) => `%${w}%`),
+        limit * 2,
+      ),
+    );
+  }
+  if (out.length < limit) {
+    add(
+      q.all<{ pubkey: string }>(
+        `SELECT w.pubkey FROM wot w JOIN profiles p ON p.pubkey = w.pubkey
+         WHERE ${solid} ORDER BY w.score DESC LIMIT ?`,
+        limit * 3,
+      ),
+    );
   }
   return out;
 }
