@@ -58,6 +58,17 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-20: Discover cleaned up, release v0.1.0, Devpost draft (main = f4f6e8d)
+- **Bug:** Discover took the newest 600 posts network-wide, then filtered for trust, and fell back to `rank(0)`, the raw firehose. That let explicit bot posts through. Candidates now come only from authors with WoT ≥ `DISCOVER_FLOOR` (0.02) over the last 48h, and there's no fallback below the floor.
+- **`shared isSensitive()`:** keeps NIP-36 content warnings, adult tags and words, and ActivityPub-bridged posts (NIP-48 `proxy`) out of Discover and Trending, on both the server and the client. The Following feed is exempt.
+- **Latest tab removed** (it was the unfiltered firehose). The language check now ignores bare bech32 ids, links and addresses, and weighs each CJK character ×3.
+- **Spam filter:** catches airdrop and "check eligibility" phishing posts with referral links.
+- **Live check after deploy:** 60 Discover posts sampled, with 0 scams and 0 bridged posts.
+- **Onboarding:** `shared/featured.ts` holds 14 hand-checked well-known accounts (keys resolved via NIP-05). They're suggested first, and nothing is pre-ticked.
+- **Photo upload:** replaced `@nostr-dev-kit/blossom` with a direct BUD-01 PUT, because the library failed inside the Android WebView.
+- **Release:** GitHub Release v0.1.0 has `Blusat.apk`, and the repo is public. The Devpost draft is a Claude Doc: https://claude.ai/artifact/AdCR1TwmDM4oFqb8rWA9t4
+- **Still open:** publish the bootcamp and clubs, demo video, licence, exact deadline time, app passkeys after buying `blusat.xyz`.
+
 ### 2026-11-19 (later): sign-in and onboarding fixes from the second phone test (commit 243ec64)
 - **Login:** two big buttons, "Create your account" and "I already have an account". On the phone the second one opens "Welcome back", which takes a recovery key (nsec, password field; a bunker:// link also works). There's a big back arrow, and the bunker/nsec wording is gone from the first screens.
 - **Suggestions bug:** `IndexClient.request` used to reject when the socket was still connecting, so onboarding's `suggest` always failed on a fresh app. It now waits up to 4s for the socket to open. The live index does return trusted accounts.
