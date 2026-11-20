@@ -19,7 +19,8 @@ export const BUILTIN_FEEDS: BuiltinFeedRef[] = [
   { kind: 'builtin', id: 'following', name: 'Following' },
   { kind: 'builtin', id: 'discover', name: 'Discover' },
   { kind: 'builtin', id: 'ships', name: 'Ships' },
-  { kind: 'builtin', id: 'latest', name: 'Latest' },
+  // 'Latest' (the unfiltered global firehose) was removed: it showed strangers
+  // explicit bot posts. Discover is the trusted way to see beyond your follows.
 ];
 
 const KEY = LS.dvmFeeds;

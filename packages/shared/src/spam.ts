@@ -78,3 +78,25 @@ export function isSpamContent(content: string): boolean {
 
   return false;
 }
+
+/** Hashtags and words that mark adult content. Matched as whole tags / words. */
+const ADULT_TAGS = new Set([
+  'nsfw', 'porn', 'porno', 'nude', 'nudes', 'nudity', 'xxx', 'sex', 'sexy', 'onlyfans', 'hentai',
+  'boobs', 'tits', 'ass', 'pussy', 'naked', 'lingerie', 'fetish', 'milf', 'cum', 'horny', 'erotic', 'adult',
+]);
+const ADULT_WORDS = /\b(?:nsfw|porn\w*|nudes?|xxx|onlyfans|hentai|pussy|horny|erotic)\b/i;
+
+/**
+ * Whether a post should stay out of feeds that show strangers' posts
+ * (Discover, Trending): marked sensitive (NIP-36), tagged or worded as adult,
+ * or mirrored from another network through a bridge (NIP-48 `proxy` tag).
+ * Following feeds are the viewer's own choice and don't use this.
+ */
+export function isSensitive(tags: string[][], content: string): boolean {
+  for (const t of tags) {
+    if (t[0] === 'content-warning' || t[0] === 'proxy') return true;
+    if (t[0] === 't' && t[1] && ADULT_TAGS.has(t[1].toLowerCase())) return true;
+    if (t[0] === 'L' && t[1]?.toLowerCase() === 'content-warning') return true;
+  }
+  return ADULT_WORDS.test(content);
+}

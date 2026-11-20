@@ -1,6 +1,7 @@
 import {
   FEATURED_PUBKEYS,
   KIND,
+  isSensitive,
   isSpamContent,
   type EngagementCount,
   type FeedParams,
@@ -74,6 +75,25 @@ function trustSet(pubkey: string): Set<string> {
   return set;
 }
 
+/** Lowest web-of-trust score (0..1, relative to the top account) an author needs to reach Discover. */
+const DISCOVER_FLOOR = 0.02;
+
+/**
+ * Whether a post may appear in Discover / Trending, which strangers see: not spam,
+ * not marked sensitive, and not mirrored from another network (Mostr and other
+ * ActivityPub bridges add a NIP-48 `proxy` tag and flood the global feed).
+ */
+function discoverable(r: Row): boolean {
+  if (r.kind === KIND.Text && isSpamContent(r.content)) return false;
+  let tags: string[][] = [];
+  try {
+    tags = JSON.parse(r.tags) as string[][];
+  } catch {
+    /* no tags */
+  }
+  return !isSensitive(tags, r.content);
+}
+
 // ---------- feed ----------
 export function feed(params: FeedParams): NostrEventLike[] {
   const limit = Math.min(params.limit ?? 60, 150);
@@ -132,7 +152,7 @@ export function feed(params: FeedParams): NostrEventLike[] {
         since,
         until,
       )
-      .filter((r) => r.kind !== KIND.Text || !isSpamContent(r.content));
+      .filter((r) => discoverable(r));
 
     const trusted = params.pubkey ? trustSet(params.pubkey) : new Set<string>();
     const now = Date.now() / 1000;
@@ -166,23 +186,29 @@ export function feed(params: FeedParams): NostrEventLike[] {
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
 
-    let ranked = rankTrending(trusted.size < 15 ? 0.05 : 0.01);
-    if (ranked.length < 5) ranked = rankTrending(0);
+    let ranked = rankTrending(trusted.size < 15 ? 0.05 : DISCOVER_FLOOR);
+    if (ranked.length < 5) ranked = rankTrending(DISCOVER_FLOOR);
     return ranked.map((x) => toEvent(x.r));
   }
 
+  // Candidates come only from authors with a real web-of-trust score, over the
+  // last two days. (Taking the newest 600 posts from everyone and filtering
+  // afterwards left too few trusted posts on a busy network, and the old
+  // fallback then showed the raw firehose, explicit bots included.)
   const candidates = q
     .all<Row & { wot: number; eng: number }>(
-      `SELECT e.*, COALESCE(w.score, 0) AS wot,
+      `SELECT e.*, w.score AS wot,
             (SELECT COALESCE(SUM(CASE WHEN kind=${KIND.ZapReceipt} THEN sats ELSE 0 END), 0)
                    + COUNT(*) FROM edges WHERE target_id = e.id) AS eng
      FROM events e
-     LEFT JOIN wot w ON w.pubkey = e.pubkey
-     WHERE e.kind IN (${KIND.Text}, ${KIND.Repost}) AND e.is_reply = 0 AND e.created_at < ?
+     JOIN wot w ON w.pubkey = e.pubkey
+     WHERE e.kind IN (${KIND.Text}, ${KIND.Repost}) AND e.is_reply = 0
+       AND e.created_at < ? AND e.created_at >= ? AND w.score >= ${DISCOVER_FLOOR}
      ORDER BY e.created_at DESC LIMIT 600`,
       until,
+      until - 2 * 86400,
     )
-    .filter((r) => r.kind !== KIND.Text || !isSpamContent(r.content));
+    .filter((r) => discoverable(r));
 
   const trusted = params.pubkey ? trustSet(params.pubkey) : new Set<string>();
   const now = Date.now() / 1000;
@@ -224,8 +250,9 @@ export function feed(params: FeedParams): NostrEventLike[] {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 
-  let ranked = rank(coldStart ? MIN_WOT : 0.02);
-  if (ranked.length < 8) ranked = rank(0); // network genuinely too thin — show what we have
+  let ranked = rank(coldStart ? MIN_WOT : DISCOVER_FLOOR);
+  // a thin network relaxes to the floor, never to untrusted authors
+  if (ranked.length < 8) ranked = rank(DISCOVER_FLOOR);
   return ranked.map((x) => toEvent(x.r));
 }
 

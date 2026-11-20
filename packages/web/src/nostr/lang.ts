@@ -82,18 +82,27 @@ export function inReadableScript(content: string, scripts: Set<Script>): boolean
   const s = content
     .replace(/https?:\/\/\S+/g, ' ')
     .replace(/nostr:\S+/g, ' ')
+    // bare Nostr ids and bare links ("m.cmx.im/@x/123") are Latin noise, not language
+    .replace(/\b(?:npub|nprofile|note|nevent|naddr)1[02-9ac-hj-np-z]{20,}/gi, ' ')
+    .replace(/\S+\.[a-z]{2,}\/\S*/gi, ' ')
+    .replace(/\S+@\S+\.\S+/g, ' ')
     .replace(/[#@]\S+/g, ' ');
   const letters = s.match(/\p{L}/gu);
   if (!letters || letters.length < 4) return true; // too little text to judge
 
+  // One CJK character carries about a word, so it weighs as much as ~3 Latin letters.
   let readable = 0;
+  let total = 0;
   for (const ch of letters) {
-    if (LATIN.test(ch) || GREEK.test(ch)) readable++;
-    else if (scripts.has('cjk') && CJK.test(ch)) readable++;
-    else if (scripts.has('cyrillic') && CYRILLIC.test(ch)) readable++;
-    else if (scripts.has('arabic') && ARABIC.test(ch)) readable++;
+    const cjk = CJK.test(ch);
+    const w = cjk ? 3 : 1;
+    total += w;
+    if (LATIN.test(ch) || GREEK.test(ch)) readable += w;
+    else if (cjk && scripts.has('cjk')) readable += w;
+    else if (scripts.has('cyrillic') && CYRILLIC.test(ch)) readable += w;
+    else if (scripts.has('arabic') && ARABIC.test(ch)) readable += w;
   }
-  return readable / letters.length >= 0.6;
+  return readable / total >= 0.6;
 }
 
 /** Repost content is the embedded event JSON — judge the note it wraps. */

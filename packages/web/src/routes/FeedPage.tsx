@@ -12,6 +12,7 @@ import { useDeletedIds } from '../nostr/deletions';
 import { EngagementScope } from '../nostr/engagement';
 import { BUILTIN_FEEDS, addDvmFeed, loadDvmFeeds, removeDvmFeed, type FeedRef } from '../nostr/feeds';
 import { KIND } from '../nostr/kinds';
+import { isSensitive } from '@bluey/shared';
 import { feedLangMode, inReadableScript, readableScripts, repostInReadableScript } from '../nostr/lang';
 import { isMuted, useMutes } from '../nostr/mutes';
 import { isJunkNote, isReplyNote, subjectId } from '../nostr/notes';
@@ -154,7 +155,14 @@ export function FeedPage() {
 
     const seen = new Set<string>();
     return source
-      .filter((e) => !isJunkNote(e) && !isMuted(e, mutes) && langOk(e))
+      .filter(
+        (e) =>
+          !isJunkNote(e) &&
+          !isMuted(e, mutes) &&
+          langOk(e) &&
+          // strangers' posts: no adult, sensitive or bridged content
+          (builtin === 'following' || !isSensitive(e.tags, e.content)),
+      )
       .slice()
       .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
       .filter((e) => {
@@ -316,12 +324,7 @@ export function FeedPage() {
         ) : feed.kind === 'dvm' && dvm.status === 'error' ? (
           <Quiet>This feed didn't answer. Try again later.</Quiet>
         ) : builtin === 'discover' && !idx.fromIndex && wot.size === 0 && waited ? (
-          <Quiet>
-            Discover fills in once you follow a few people.{' '}
-            <button type="button" onClick={() => pick('latest')} className="font-semibold text-brand-ink">
-              Browse Latest
-            </button>
-          </Quiet>
+          <Quiet>Discover fills in once you follow a few people. Try again in a moment.</Quiet>
         ) : waited ? (
           <Quiet>Nothing here yet. Check back soon.</Quiet>
         ) : (
