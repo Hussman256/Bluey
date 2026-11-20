@@ -67,6 +67,7 @@ export function LoginScreen() {
   const [pendingSigner, setPendingSigner] = useState<NDKSigner | null>(null);
   const [ack, setAck] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [revealKey, setRevealKey] = useState(false);
 
   async function finish(signer: NDKSigner, isNew = false) {
     await signer.blockUntilReady();
@@ -305,8 +306,20 @@ export function LoginScreen() {
                 It's the only way back into your account, and Blusat can't reset it. Keep it in a password manager and
                 never share it or screenshot it.
               </p>
-              <div className="rounded-2xl bg-sunk px-4 py-3.5 font-mono text-[13px] leading-relaxed break-all select-all">
-                {createdNsec}
+              {/* Hidden by default so it can't be read over a shoulder or caught in a screen recording. */}
+              <div className="flex items-center gap-3 rounded-2xl bg-sunk px-4 py-3.5">
+                <div
+                  className={`min-w-0 flex-1 font-mono text-[13px] leading-relaxed break-all ${revealKey ? 'select-all' : 'select-none'}`}
+                >
+                  {revealKey ? createdNsec : `nsec1${'•'.repeat(24)}`}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRevealKey((v) => !v)}
+                  className="shrink-0 text-sm font-semibold text-brand"
+                >
+                  {revealKey ? 'Hide' : 'Show'}
+                </button>
               </div>
               <button
                 type="button"

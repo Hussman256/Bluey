@@ -58,6 +58,12 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-20 (evening): relay key rotated; first bootcamp and clubs live
+- `RELAY_SECRET_KEY` on Railway was replaced. The relay now signs as `6c852b3f…`; the key leaked in git history (`2727d5f5…`) is retired.
+- Published as HUSSEIN (`hussein@blusat.xyz`): the "Bitcoin from zero" bootcamp with lessons 1–2 and their quizzes (3 questions each, pass mark 60%, so 2 of 3), its cohort club, "Blusat help desk" and "Lightning builders". Lessons 3–4 in `content/bitcoin-from-zero.md` aren't published yet.
+- v0.1.0's APK replaced with the `f4f6e8d` build, and the tag moved to match.
+- Devpost gallery screenshots are in `C:\Users\pc\Pictures\Blusat-devpost`.
+
 ### 2026-11-20 (later): repo cleaned up for judges; Devpost form filled in (commit 7f9e235)
 - **Added:** an MIT `LICENSE`. **Rewrote:** `README.md`, which now opens with the live app, the APK and what to try, and replaces the stale "Planned" section with "What's next".
 - **Devpost:** "About the project", Built with and Try it out are filled in from the Claude Doc; the timeline disclosure was rewritten from the git history.
