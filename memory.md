@@ -58,6 +58,11 @@ A running record of where the project stands, what was decided, and what happene
 
 ## Checkpoint log
 
+### 2026-11-20 (later): repo cleaned up for judges; Devpost form filled in (commit 7f9e235)
+- **Added:** an MIT `LICENSE`. **Rewrote:** `README.md`, which now opens with the live app, the APK and what to try, and replaces the stale "Planned" section with "What's next".
+- **Devpost:** "About the project", Built with and Try it out are filled in from the Claude Doc; the timeline disclosure was rewritten from the git history.
+- **Still open:** demo video (required on Devpost), publish the bootcamp and clubs, and rotate `RELAY_SECRET_KEY` on Railway, because the old `relay.key` is in the public history. No real clubs exist yet, so rotating now orphans nothing.
+
 ### 2026-11-20: Discover cleaned up, release v0.1.0, Devpost draft (main = f4f6e8d)
 - **Bug:** Discover took the newest 600 posts network-wide, then filtered for trust, and fell back to `rank(0)`, the raw firehose. That let explicit bot posts through. Candidates now come only from authors with WoT ≥ `DISCOVER_FLOOR` (0.02) over the last 48h, and there's no fallback below the floor.
 - **`shared isSensitive()`:** keeps NIP-36 content warnings, adult tags and words, and ActivityPub-bridged posts (NIP-48 `proxy`) out of Discover and Trending, on both the server and the client. The Following feed is exempt.
